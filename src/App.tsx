@@ -1,7 +1,7 @@
 import { theme } from "./config/theme";
 import { useEffect, useState } from "react";
 import "./styles/globals.css";
-import { Emulator, fromText, generateSeedPhrase, Lucid, SignedMessage } from "@lucid-evolution/lucid";
+import { Blockfrost, Emulator, fromText, generateSeedPhrase, Lucid, SignedMessage, WalletApi } from "@lucid-evolution/lucid";
 import React from "react";
 
 async function init_get_wallet_address(): Promise<[string, string]> {
@@ -77,7 +77,7 @@ function App() {
 
   const [ceremonyConcluded, setCeremonyConcluded] = useState<boolean>(false);
   const [ceremonyTxId, setCeremonyTxId] = useState<string | null>(null);
-  const [ceremonyFailure, setCeremonyFailure] = useState<{reason: string, msg: string} | null>(null);
+  const [ceremonyFailure, setCeremonyFailure] = useState<{ reason: string, msg: string } | null>(null);
 
   const [faucetSent, setFaucetSent] = useState<boolean>(false);
   const [faucetTxHash, setFaucetTxHash] = useState<string | null>(null);
@@ -90,10 +90,16 @@ function App() {
   const [walletSelectList, setWalletSelectList] = useState<string[]>([]);
   const [walletError, setError] = useState<string | null>(null);
 
+  // Add new state for preview network wallet
+  const [previewWallet, setPreviewWallet] = useState<any>(null);
+  const [previewWalletApi, setPreviewWalletApi] = useState<any>(null);
+  const [previewLucid, setPreviewLucid] = useState<any>(null);
+  const [previewAddress, setPreviewAddress] = useState<string | null>(null);
+
   // Effect to get available wallets
   useEffect(() => {
     if (selectedNetwork !== 'preview') return;
-    
+
     if (typeof (window as any).cardano === 'undefined') {
       return setError("No Cardano wallet found");
     }
@@ -102,6 +108,43 @@ function App() {
     setWalletSelectList(labels);
     setError(null);
   }, [selectedNetwork]);
+
+  // Function to select wallet
+  const selectWallet = async (walletName: string) => {
+    try {
+      const choice = (window as any).cardano[walletName];
+      setPreviewWallet(choice);
+    } catch (error) {
+      console.error("Error selecting wallet:", error);
+      setError(`Failed to select ${walletName}`);
+    }
+  };
+
+  // Effect to initialize Lucid with selected wallet
+  useEffect(() => {
+    const loadLucid = async () => {
+      try {
+        const _lucid = await Lucid(
+          new Blockfrost("https://cardano-preview.blockfrost.io/api/v0", process.env.REACT_APP_BLOCKFROST_API_KEY,),
+          "Preprod");
+        const api: WalletApi = await previewWallet.enable();
+        setPreviewWalletApi(api);
+        _lucid.selectWallet.fromAPI(api);
+        setPreviewLucid(_lucid);
+
+        // Get wallet address
+        // const address = await api.getUsedAddresses();
+        const address = await _lucid.wallet().address();
+        setPreviewAddress(address); // Using first address
+      } catch (error) {
+        console.error("Error loading Lucid:", error);
+        setError("Failed to initialize wallet");
+      }
+    };
+
+    if (!previewWallet) return;
+    loadLucid();
+  }, [previewWallet]);
 
   // Handler for websocket messages
   const handleWsMessage = async (event: MessageEvent) => {
@@ -236,12 +279,12 @@ function App() {
     >
       <main style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
         {/* Network Selection */}
-        <div style={{ 
-          color: "white", 
-          border: "1px solid white", 
-          padding: "1rem", 
+        <div style={{
+          color: "white",
+          border: "1px solid white",
+          padding: "1rem",
           marginBottom: "2rem",
-          textAlign: "center" 
+          textAlign: "center"
         }}>
           <h2 style={{ marginBottom: "1rem" }}>Select Network</h2>
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
@@ -275,10 +318,10 @@ function App() {
         </div>
 
         {!selectedNetwork && (
-          <div style={{ 
-            color: "white", 
-            textAlign: "center", 
-            marginTop: "2rem" 
+          <div style={{
+            color: "white",
+            textAlign: "center",
+            marginTop: "2rem"
           }}>
             <h3>Please select a network to continue</h3>
           </div>
@@ -286,10 +329,10 @@ function App() {
 
         {selectedNetwork === 'preview' && (
           <div style={{ color: "white", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            <div style={{ 
-              border: "2px solid #ffaa00", 
-              borderRadius: "8px", 
-              padding: "1.5rem", 
+            <div style={{
+              border: "2px solid #ffaa00",
+              borderRadius: "8px",
+              padding: "1.5rem",
               backgroundColor: "rgba(255, 170, 0, 0.1)",
               textAlign: "center"
             }}>
@@ -317,10 +360,10 @@ function App() {
                 {walletSelectList.map(wallet => (
                   <button
                     key={wallet}
-                    onClick={() => alert(`User selected ${wallet} wallet`)}
+                    onClick={() => selectWallet(wallet)}
                     style={{
                       padding: "1rem",
-                      backgroundColor: "transparent",
+                      backgroundColor: previewWallet && (window as any).cardano[wallet] === previewWallet ? "#00aaff" : "transparent",
                       color: "white",
                       border: "1px solid white",
                       borderRadius: "4px",
@@ -331,6 +374,18 @@ function App() {
                     {wallet}
                   </button>
                 ))}
+              </div>
+            )}
+
+            {previewAddress && (
+              <div style={{
+                border: "2px solid #00aaff",
+                borderRadius: "8px",
+                padding: "1.5rem",
+                backgroundColor: "rgba(0, 170, 255, 0.1)"
+              }}>
+                <h4 style={{ margin: "0 0 1rem 0", color: "#00aaff" }}>Wallet Info</h4>
+                <p>Address: {previewAddress}</p>
               </div>
             )}
           </div>
@@ -446,7 +501,7 @@ function App() {
                 <p>The ceremony has concluded with the transaction {ceremonyTxId}.</p>
               </div>
             )}
-            
+
             { /* when receive funds from faucet show something (including tx hash) to the user */
               faucetSent && (
                 <div style={{ color: "white", border: "2px solid #00aaff", borderRadius: "8px", padding: "1.5rem", marginTop: "1.5rem", backgroundColor: "rgba(0, 0, 0, 0.3)" }}>
@@ -459,13 +514,13 @@ function App() {
 
             {/* show ceremony failure message */}
             {ceremonyFailure && (
-              <div style={{ 
-                color: "white", 
-                border: "2px solid #ff4444", 
-                borderRadius: "8px", 
-                padding: "1.5rem", 
-                marginTop: "1.5rem", 
-                backgroundColor: "rgba(255, 0, 0, 0.1)" 
+              <div style={{
+                color: "white",
+                border: "2px solid #ff4444",
+                borderRadius: "8px",
+                padding: "1.5rem",
+                marginTop: "1.5rem",
+                backgroundColor: "rgba(255, 0, 0, 0.1)"
               }}>
                 <h3 style={{ margin: "0 0 1rem 0", color: "#ff4444" }}>⚠️ Ceremony Failed</h3>
                 <p><strong>Reason:</strong> {ceremonyFailure.reason}</p>
