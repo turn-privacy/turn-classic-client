@@ -85,6 +85,24 @@ function App() {
   // Connect to local server with websocket
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [participantQueue, setParticipantQueue] = useState<any[]>([]);
+
+  // Add state for wallet list
+  const [walletSelectList, setWalletSelectList] = useState<string[]>([]);
+  const [walletError, setError] = useState<string | null>(null);
+
+  // Effect to get available wallets
+  useEffect(() => {
+    if (selectedNetwork !== 'preview') return;
+    
+    if (typeof (window as any).cardano === 'undefined') {
+      return setError("No Cardano wallet found");
+    }
+
+    const labels = Object.keys((window as any).cardano);
+    setWalletSelectList(labels);
+    setError(null);
+  }, [selectedNetwork]);
+
   // Handler for websocket messages
   const handleWsMessage = async (event: MessageEvent) => {
     console.log("Message from server:", event.data);
@@ -267,17 +285,54 @@ function App() {
         )}
 
         {selectedNetwork === 'preview' && (
-          <div style={{ 
-            color: "white", 
-            border: "2px solid #ffaa00", 
-            borderRadius: "8px", 
-            padding: "1.5rem", 
-            marginTop: "1.5rem", 
-            backgroundColor: "rgba(255, 170, 0, 0.1)",
-            textAlign: "center"
-          }}>
-            <h3 style={{ margin: "0 0 1rem 0", color: "#ffaa00" }}>🚧 Under Construction 🚧</h3>
-            <p>Preview network support is coming soon!</p>
+          <div style={{ color: "white", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            <div style={{ 
+              border: "2px solid #ffaa00", 
+              borderRadius: "8px", 
+              padding: "1.5rem", 
+              backgroundColor: "rgba(255, 170, 0, 0.1)",
+              textAlign: "center"
+            }}>
+              <h3 style={{ margin: "0 0 1rem 0", color: "#ffaa00" }}>Preview Network</h3>
+              <p>Select a wallet to connect</p>
+            </div>
+
+            {walletError ? (
+              <div style={{
+                border: "2px solid #ff4444",
+                borderRadius: "8px",
+                padding: "1.5rem",
+                backgroundColor: "rgba(255, 0, 0, 0.1)",
+                textAlign: "center"
+              }}>
+                <p style={{ color: "#ff4444" }}>{walletError}</p>
+              </div>
+            ) : (
+              <div style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "1rem",
+                padding: "1rem"
+              }}>
+                {walletSelectList.map(wallet => (
+                  <button
+                    key={wallet}
+                    onClick={() => alert(`User selected ${wallet} wallet`)}
+                    style={{
+                      padding: "1rem",
+                      backgroundColor: "transparent",
+                      color: "white",
+                      border: "1px solid white",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    {wallet}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
