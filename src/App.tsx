@@ -96,6 +96,9 @@ function App() {
   const [previewLucid, setPreviewLucid] = useState<any>(null);
   const [previewAddress, setPreviewAddress] = useState<string | null>(null);
 
+  // Add new state for wallet balance
+  const [walletBalance, setWalletBalance] = useState<{ lovelace: bigint } | null>(null);
+
   // Effect to get available wallets
   useEffect(() => {
     if (selectedNetwork !== 'preview') return;
@@ -133,9 +136,18 @@ function App() {
         setPreviewLucid(_lucid);
 
         // Get wallet address
-        // const address = await api.getUsedAddresses();
         const address = await _lucid.wallet().address();
-        setPreviewAddress(address); // Using first address
+        setPreviewAddress(address);
+
+        // Get wallet balance
+        const utxos = await _lucid.wallet().getUtxos();
+        const balance = utxos.reduce(
+          (acc, utxo) => ({
+            lovelace: acc.lovelace + utxo.assets.lovelace
+          }),
+          { lovelace: BigInt(0) }
+        );
+        setWalletBalance(balance);
       } catch (error) {
         console.error("Error loading Lucid:", error);
         setError("Failed to initialize wallet");
@@ -386,6 +398,9 @@ function App() {
               }}>
                 <h4 style={{ margin: "0 0 1rem 0", color: "#00aaff" }}>Wallet Info</h4>
                 <p>Address: {previewAddress}</p>
+                {walletBalance && (
+                  <p>Balance: {Number(walletBalance.lovelace) / 1_000_000} ₳</p>
+                )}
               </div>
             )}
           </div>

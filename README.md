@@ -1,5 +1,7 @@
 # Turn Classic Client
 
+## TODO
+- [ ] remove blockfrost api key from dotenv
 
 
 <br/>
