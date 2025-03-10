@@ -148,6 +148,23 @@ function App() {
           { lovelace: BigInt(0) }
         );
         setWalletBalance(balance);
+
+        // Generate recipient wallet
+        const [recAddress, recSeedPhrase] = await init_get_wallet_address();
+        setRecipientAddress(recAddress);
+        setRecipientSeedPhrase(recSeedPhrase);
+
+        // Connect to WebSocket when wallet is connected
+        const ws = new WebSocket("ws://localhost:8081");
+        ws.onopen = () => {
+          console.log("Connected to server");
+        };
+        ws.onmessage = handleWsMessage;
+        setSocket(ws);
+
+        return () => {
+          ws.close();
+        };
       } catch (error) {
         console.error("Error loading Lucid:", error);
         setError("Failed to initialize wallet");
@@ -390,18 +407,71 @@ function App() {
             )}
 
             {previewAddress && (
-              <div style={{
-                border: "2px solid #00aaff",
-                borderRadius: "8px",
-                padding: "1.5rem",
-                backgroundColor: "rgba(0, 170, 255, 0.1)"
-              }}>
-                <h4 style={{ margin: "0 0 1rem 0", color: "#00aaff" }}>Wallet Info</h4>
-                <p>Address: {previewAddress}</p>
-                {walletBalance && (
-                  <p>Balance: {Number(walletBalance.lovelace) / 1_000_000} ₳</p>
-                )}
-              </div>
+              <>
+                <div style={{
+                  border: "2px solid #00aaff",
+                  borderRadius: "8px",
+                  padding: "1.5rem",
+                  backgroundColor: "rgba(0, 170, 255, 0.1)",
+                  marginBottom: "1rem"
+                }}>
+                  <h4 style={{ margin: "0 0 1rem 0", color: "#00aaff" }}>Wallet Info</h4>
+                  <p>Address: {previewAddress}</p>
+                  {walletBalance && (
+                    <p>Balance: {Number(walletBalance.lovelace) / 1_000_000} ₳</p>
+                  )}
+                  <button
+                    style={{
+                      marginTop: "1rem",
+                      padding: "0.75rem 1.5rem",
+                      backgroundColor: "#00aaff",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer"
+                    }}
+                    onClick={() => {
+                      if (socket && previewAddress) {
+                        socket.send(JSON.stringify({ type: "faucet", address: previewAddress }));
+                      } else {
+                        console.log("No socket or wallet address");
+                        console.log(socket);
+                        console.log(previewAddress);
+                      }
+                    }}
+                  >
+                    Request Funds
+                  </button>
+                  {faucetSent && (
+                    <div style={{
+                      marginTop: "1rem",
+                      padding: "0.75rem",
+                      backgroundColor: "rgba(0, 255, 0, 0.1)",
+                      borderRadius: "4px",
+                      border: "1px solid #00ff00"
+                    }}>
+                      <p style={{ margin: 0, color: "#00ff00" }}>
+                        Funds sent! Transaction: {faucetTxHash}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Recipient Wallet Info */}
+                <div style={{
+                  border: "2px solid #00aaff",
+                  borderRadius: "8px",
+                  padding: "1.5rem",
+                  backgroundColor: "rgba(0, 170, 255, 0.1)"
+                }}>
+                  <h4 style={{ margin: "0 0 1rem 0", color: "#00aaff" }}>
+                    <span role="img" aria-label="recipient" style={{ marginRight: "0.5rem" }}>🌆</span>
+                    Recipient Wallet Info
+                  </h4>
+                  <p>Address: {recipientAddress}</p>
+                  <p>Seed Phrase: {recipientSeedPhrase}</p>
+                </div>
+              </>
             )}
           </div>
         )}
