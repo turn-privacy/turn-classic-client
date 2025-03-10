@@ -32,27 +32,27 @@ const signup = async (recipientAddress: string, senderSeed: string, ws: WebSocke
   }));
 }
 
-// New function to sign transaction and send witness back
-const signTransaction = async (txData: any, senderSeed: string, ws: WebSocket) => {
+// Modify the signTransaction function to work with both Preview and Local networks
+const signTransaction = async (txData: any, senderSeed: string | null, ws: WebSocket, previewLucid: any = null) => {
   console.log("Signing transaction:", txData);
   try {
-    const lucid = await Lucid(new Emulator([]), "Preview");
-    lucid.selectWallet.fromSeed(senderSeed);
-    const address = await lucid.wallet().address();
-    console.log("Signing transaction from address:", address);
-
-    // Sign the transaction (assuming txData contains what you need)
-    // Note: You may need to adjust this based on exact transaction format
-
-    // const witness = await lucid.wallet().signTx(txData.tx);
-    const witness = await lucid.fromTx(txData.tx).partialSign.withWallet();
+    let witness;
+    if (previewLucid) {
+      // For Preview network, use the connected wallet
+      witness = await previewLucid.fromTx(txData.tx).partialSign.withWallet();
+    } else {
+      // For Local network, use the seed phrase
+      const lucid = await Lucid(new Emulator([]), "Preview");
+      lucid.selectWallet.fromSeed(senderSeed!);
+      witness = await lucid.fromTx(txData.tx).partialSign.withWallet();
+    }
 
     // Send the witness back to the server
     ws.send(JSON.stringify({
       type: "submit_signature",
       data: {
         witness,
-        address: address
+        address: previewLucid ? await previewLucid.wallet().address() : null
       }
     }));
 
@@ -276,29 +276,6 @@ function App() {
     };
   }, [selectedNetwork]);
 
-  // Handler for signing transaction
-  const handleSignTransaction = async () => {
-    if (!socket || !walletSeedPhrase || !pendingTransaction) {
-      console.error("Missing required data for signing");
-      return;
-    }
-
-    setIsSigning(true);
-    try {
-      const success = await signTransaction(pendingTransaction, walletSeedPhrase, socket);
-      if (success) {
-        setSignStatus("Sending signature to server...");
-      } else {
-        setSignStatus("Failed to sign transaction. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error in signing process:", error);
-      setSignStatus("An error occurred during signing.");
-    } finally {
-      setIsSigning(false);
-    }
-  };
-
   return (
     <div
       style={{
@@ -420,28 +397,121 @@ function App() {
                   {walletBalance && (
                     <p>Balance: {Number(walletBalance.lovelace) / 1_000_000} ₳</p>
                   )}
-                  <button
-                    style={{
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                    <button
+                      style={{
+                        padding: "0.75rem 1.5rem",
+                        backgroundColor: "#00aaff",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer"
+                      }}
+                      onClick={() => {
+                        if (socket && previewAddress) {
+                          socket.send(JSON.stringify({ type: "faucet", address: previewAddress }));
+                        } else {
+                          console.log("No socket or wallet address");
+                          console.log(socket);
+                          console.log(previewAddress);
+                        }
+                      }}
+                    >
+                      Request Funds
+                    </button>
+
+                    <button
+                      style={{
+                        padding: "0.75rem 1.5rem",
+                        backgroundColor: "#00aaff",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer"
+                      }}
+                      onClick={() => {
+                        if (socket && previewAddress && recipientAddress && previewLucid) {
+                          const payload = fromText(JSON.stringify({
+                            recipient: recipientAddress,
+                            extraMsg: "this is another field"
+                          }));
+                          
+                          previewLucid.wallet().signMessage(previewAddress, payload)
+                            .then((signedMessage: SignedMessage) => {
+                              socket.send(JSON.stringify({
+                                type: "signup",
+                                address: previewAddress,
+                                signedMessage,
+                                payload
+                              }));
+                            })
+                            .catch((error: Error) => {
+                              console.error("Error signing signup message:", error);
+                              setError("Failed to sign signup message");
+                            });
+                        } else {
+                          console.log("Missing required data for signup");
+                          console.log({ socket, previewAddress, recipientAddress, previewLucid });
+                        }
+                      }}
+                    >
+                      Signup for Ceremony
+                    </button>
+                  </div>
+
+                  {/* Transaction signing section */}
+                  {pendingTransaction && (
+                    <div style={{
                       marginTop: "1rem",
-                      padding: "0.75rem 1.5rem",
-                      backgroundColor: "#00aaff",
-                      color: "white",
-                      border: "none",
+                      padding: "1rem",
+                      backgroundColor: "rgba(0, 170, 255, 0.05)",
                       borderRadius: "4px",
-                      cursor: "pointer"
-                    }}
-                    onClick={() => {
-                      if (socket && previewAddress) {
-                        socket.send(JSON.stringify({ type: "faucet", address: previewAddress }));
-                      } else {
-                        console.log("No socket or wallet address");
-                        console.log(socket);
-                        console.log(previewAddress);
-                      }
-                    }}
-                  >
-                    Request Funds
-                  </button>
+                      border: "1px solid #00aaff"
+                    }}>
+                      <h4 style={{ margin: "0 0 1rem 0", color: "#00aaff" }}>Transaction Ready</h4>
+                      <button
+                        style={{
+                          padding: "0.75rem 1.5rem",
+                          backgroundColor: isSigning ? "#666" : "#00aaff",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: isSigning ? "not-allowed" : "pointer",
+                          opacity: isSigning ? 0.7 : 1
+                        }}
+                        onClick={async () => {
+                          if (socket && previewLucid && !isSigning) {
+                            setIsSigning(true);
+                            try {
+                              const success = await signTransaction(pendingTransaction, null, socket, previewLucid);
+                              if (success) {
+                                setSignStatus("Sending signature to server...");
+                              } else {
+                                setSignStatus("Failed to sign transaction. Please try again.");
+                              }
+                            } catch (error) {
+                              console.error("Error in signing process:", error);
+                              setSignStatus("An error occurred during signing.");
+                            } finally {
+                              setIsSigning(false);
+                            }
+                          }
+                        }}
+                        disabled={isSigning}
+                      >
+                        {isSigning ? "Signing..." : "Sign Transaction"}
+                      </button>
+                      {signStatus && (
+                        <p style={{ 
+                          marginTop: "0.5rem",
+                          color: signStatus.includes("Failed") ? "#ff4444" : "#00ff00"
+                        }}>
+                          {signStatus}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   {faucetSent && (
                     <div style={{
                       marginTop: "1rem",
@@ -560,7 +630,13 @@ function App() {
                     cursor: isSigning ? "not-allowed" : "pointer",
                     opacity: isSigning ? 0.7 : 1
                   }}
-                  onClick={handleSignTransaction}
+                  onClick={() => {
+                    if (socket && walletSeedPhrase && pendingTransaction) {
+                      signTransaction(pendingTransaction, walletSeedPhrase, socket, previewLucid);
+                    } else {
+                      console.error("Missing required data for signing");
+                    }
+                  }}
                   disabled={isSigning}
                 >
                   {isSigning ? "Signing..." : "Sign Transaction"}
