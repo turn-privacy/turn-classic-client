@@ -1,7 +1,7 @@
 import { theme } from "./config/theme";
 import { useEffect, useState } from "react";
 import "./styles/globals.css";
-import { Blockfrost, Emulator, fromText, generateSeedPhrase, Lucid, SignedMessage, WalletApi } from "@lucid-evolution/lucid";
+import { Blockfrost, Emulator, fromText, generateSeedPhrase, Lucid, SignedMessage, UTxO, WalletApi } from "@lucid-evolution/lucid";
 import React from "react";
 
 async function init_get_wallet_address(): Promise<[string, string]> {
@@ -540,6 +540,48 @@ function App() {
                   </h4>
                   <p>Address: {recipientAddress}</p>
                   <p>Seed Phrase: {recipientSeedPhrase}</p>
+                  
+                  <button
+                    style={{
+                      padding: "0.75rem 1.5rem",
+                      backgroundColor: "#00aaff",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      marginTop: "1rem"
+                    }}
+                    onClick={async () => {
+                      if (recipientSeedPhrase && previewLucid) {
+                        // Switch to recipient wallet
+                        previewLucid.selectWallet.fromSeed(recipientSeedPhrase);
+                        
+                        try {
+                          const tx = await previewLucid
+                            .newTx()
+                            .pay.ToAddress(
+                              "addr_test1qryvgass5dsrf2kxl3vgfz76uhp83kv5lagzcp29tcana68ca5aqa6swlq6llfamln09tal7n5kvt4275ckwedpt4v7q48uhex",
+                              { lovelace: (await previewLucid.wallet().getUtxos().then((utxos: UTxO[]) => 
+                                utxos.reduce((acc: bigint, utxo: UTxO) => acc + utxo.assets.lovelace, BigInt(0)))) - BigInt(2_000_000)
+                              }
+                            )
+                            .complete();
+                          
+                          const signedTx = await tx.sign.withWallet().complete();
+                          const txHash = await signedTx.submit();
+                          
+                          console.log("Sent all ADA from recipient wallet. Tx:", txHash);
+                        } catch (error) {
+                          console.error("Failed to send ADA:", error);
+                        } finally {
+                          // Switch back to original wallet
+                          previewLucid.selectWallet.fromAPI(previewWalletApi);
+                        }
+                      }
+                    }}
+                  >
+                    Recycle tADA
+                  </button>
                 </div>
               </>
             )}
