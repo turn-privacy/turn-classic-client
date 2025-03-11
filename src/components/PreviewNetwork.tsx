@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Card } from "./Card";
 import { styles } from "../styles";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -7,7 +6,7 @@ import { setWalletError } from "../store/errorSlice";
 import { setPreviewWallet } from "../store/networkSlice";
 import { setRecipientType } from "../store/recipientSlice";
 import { Button } from "./Button";
-import { fromText } from "@lucid-evolution/lucid";
+import { handlePreviewSignup } from "../store/thunks/signupThunks";
 
 // Add missing styles
 const componentStyles = {
@@ -68,34 +67,6 @@ export function PreviewNetwork({
         }
     };
 
-    const handleSignup = async (targetRecipient: string) => {
-        if (!socket || !previewAddress || !previewWallet || !previewLucid) {
-            console.error("Missing required data for signup");
-            return;
-        }
-
-        try {
-            // Create payload with recipient address
-            const payload = fromText(JSON.stringify({
-                recipient: targetRecipient,
-                extraMsg: "this is another field"
-            }));
-
-            // Sign the payload using the connected wallet
-            const signedMessage = await previewLucid.wallet().signMessage(previewAddress, payload);
-
-            // Send signup request
-            socket.send(JSON.stringify({
-                type: "signup",
-                address: previewAddress,
-                signedMessage,
-                payload
-            }));
-        } catch (error) {
-            console.error("Error during signup:", error);
-        }
-    };
-
     const onSign = async () => {
         if (!socket || !pendingTransaction || !previewLucid || !previewWalletApi) {
             dispatch(setWalletError("Missing required data for signing"));
@@ -108,9 +79,7 @@ export function PreviewNetwork({
         console.log(`onSign: ${JSON.stringify(pendingTransaction, null, 2)}`)
 
         try {
-            // const signedTx = await previewWalletApi.signTx(pendingTransaction);
             const witness = await previewLucid.fromTx(pendingTransaction).partialSign.withWallet();
-            // partial sign 
 
             socket.send(JSON.stringify({
                 type: "submit_signature",
@@ -152,7 +121,7 @@ export function PreviewNetwork({
                         <p>Address: {previewAddress}</p>
                         <p>Balance: {walletBalance ? Number(walletBalance.lovelace) / 1000000 : 0} ADA</p>
                         <Button
-                            onClick={() => recipientAddress && handleSignup(recipientAddress)}
+                            onClick={() => recipientAddress && dispatch(handlePreviewSignup(recipientAddress))}
                             disabled={!recipientAddress}
                         >
                             Sign Up
@@ -192,7 +161,7 @@ export function PreviewNetwork({
                                 style={componentStyles.input}
                             />
                             <Button
-                                onClick={() => manualRecipientAddress && handleSignup(manualRecipientAddress)}
+                                onClick={() => manualRecipientAddress && dispatch(handlePreviewSignup(manualRecipientAddress))}
                                 disabled={!manualRecipientAddress}
                             >
                                 Sign Up Manual Address
