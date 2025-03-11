@@ -6,9 +6,10 @@ import { signTransaction } from "../functions";
 import { fromText, SignedMessage, UTxO } from "@lucid-evolution/lucid";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setRecipientType } from "../store/recipientSlice";
+import { setIsSigning, setSignStatus } from "../store/transactionSlice";
+import { setWalletError } from "../store/errorSlice";
 
 export interface PreviewNetworkProps {
-    walletError: string | null;
     walletSelectList: string[];
     previewWallet: any;
     previewAddress: string | null;
@@ -16,23 +17,15 @@ export interface PreviewNetworkProps {
     recipientAddress: string | null;
     recipientSeedPhrase: string | null;
     pendingTransaction: any;
-    isSigning: boolean;
-    signStatus: string | null;
     socket: WebSocket | null;
-    faucetSent: boolean;
-    faucetTxHash: string | null;
     previewLucid: any;
     previewWalletApi: any;
     onSelectWallet: (walletName: string) => void;
-    setError: (error: string | null) => void;
-    setIsSigning: (signing: boolean) => void;
-    setSignStatus: (status: string | null) => void;
     setManualRecipientAddress: (address: string) => void;
     manualRecipientAddress: string | null;
 }
 
 export const PreviewNetwork: React.FC<PreviewNetworkProps> = ({
-    walletError,
     walletSelectList,
     previewWallet,
     previewAddress,
@@ -40,22 +33,19 @@ export const PreviewNetwork: React.FC<PreviewNetworkProps> = ({
     recipientAddress,
     recipientSeedPhrase,
     pendingTransaction,
-    isSigning,
-    signStatus,
     socket,
-    faucetSent,
-    faucetTxHash,
     previewLucid,
     previewWalletApi,
     onSelectWallet,
-    setError,
-    setIsSigning,
-    setSignStatus,
     setManualRecipientAddress,
     manualRecipientAddress,
 }) => {
     const dispatch = useAppDispatch();
     const recipientType = useAppSelector(state => state.recipient.recipientType);
+    const isSigning = useAppSelector(state => state.transaction.isSigning);
+    const signStatus = useAppSelector(state => state.transaction.signStatus);
+    const walletError = useAppSelector(state => state.error.walletError);
+    const { faucetSent, faucetTxHash } = useAppSelector(state => state.faucet);
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
@@ -113,7 +103,7 @@ export const PreviewNetwork: React.FC<PreviewNetworkProps> = ({
                                     })
                                     .catch((error: Error) => {
                                         console.error("Error signing signup message:", error);
-                                        setError("Failed to sign signup message");
+                                        dispatch(setWalletError("Failed to sign signup message"));
                                     });
                             }
                         }}
@@ -126,19 +116,19 @@ export const PreviewNetwork: React.FC<PreviewNetworkProps> = ({
                         signStatus={signStatus}
                         onSign={async () => {
                             if (socket && previewLucid && !isSigning) {
-                                setIsSigning(true);
+                                dispatch(setIsSigning(true));
                                 try {
                                     const success = await signTransaction(pendingTransaction, null, socket, previewLucid);
                                     if (success) {
-                                        setSignStatus("Sending signature to server...");
+                                        dispatch(setSignStatus("Sending signature to server..."));
                                     } else {
-                                        setSignStatus("Failed to sign transaction. Please try again.");
+                                        dispatch(setSignStatus("Failed to sign transaction. Please try again."));
                                     }
                                 } catch (error) {
                                     console.error("Error in signing process:", error);
-                                    setSignStatus("An error occurred during signing.");
+                                    dispatch(setSignStatus("An error occurred during signing."));
                                 } finally {
-                                    setIsSigning(false);
+                                    dispatch(setIsSigning(false));
                                 }
                             }
                         }}

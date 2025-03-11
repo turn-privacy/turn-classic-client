@@ -45,11 +45,7 @@ export interface LocalNetworkProps {
   recipientAddress: string | null;
   recipientSeedPhrase: string | null;
   pendingTransaction: any;
-  isSigning: boolean;
-  signStatus: string | null;
   socket: WebSocket | null;
-  faucetSent: boolean;
-  faucetTxHash: string | null;
   previewLucid: any;
 }
 

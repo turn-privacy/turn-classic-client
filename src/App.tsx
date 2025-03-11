@@ -10,24 +10,23 @@ import { NetworkSelector } from "./components/NetworkSelector";
 import { CeremonyStatus } from "./components/CeremonyStatus";
 import { LocalNetwork } from "./components/LocalNetwork";
 import { PreviewNetwork } from "./components/PreviewNetwork";
+import { useAppDispatch } from "./store/hooks";
+import { faucetSuccess } from "./store/faucetSlice";
+import { setWalletError, clearWalletError } from "./store/errorSlice";
+import { setSignStatus, setIsSigning } from "./store/transactionSlice";
 
 function App() {
+  const dispatch = useAppDispatch();
   const [selectedNetwork, setSelectedNetwork] = useState<'local' | 'preview' | null>(null);
   const [walletSeedPhrase, setWalletSeedPhrase] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [recipientAddress, setRecipientAddress] = useState<string | null>(null);
   const [recipientSeedPhrase, setRecipientSeedPhrase] = useState<string | null>(null);
-  // New state for transaction data
   const [pendingTransaction, setPendingTransaction] = useState<any | null>(null);
-  const [isSigning, setIsSigning] = useState<boolean>(false);
-  const [signStatus, setSignStatus] = useState<string | null>(null);
 
   const [ceremonyConcluded, setCeremonyConcluded] = useState<boolean>(false);
   const [ceremonyTxId, setCeremonyTxId] = useState<string | null>(null);
   const [ceremonyFailure, setCeremonyFailure] = useState<{ reason: string, msg: string } | null>(null);
-
-  const [faucetSent, setFaucetSent] = useState<boolean>(false);
-  const [faucetTxHash, setFaucetTxHash] = useState<string | null>(null);
 
   // Connect to local server with websocket
   const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -35,7 +34,6 @@ function App() {
 
   // Add state for wallet list
   const [walletSelectList, setWalletSelectList] = useState<string[]>([]);
-  const [walletError, setError] = useState<string | null>(null);
 
   // Add new state for preview network wallet
   const [previewWallet, setPreviewWallet] = useState<any>(null);
@@ -52,13 +50,14 @@ function App() {
     if (selectedNetwork !== 'preview') return;
 
     if (typeof (window as any).cardano === 'undefined') {
-      return setError("No Cardano wallet found");
+      dispatch(setWalletError("No Cardano wallet found"));
+      return;
     }
 
     const labels = Object.keys((window as any).cardano);
     setWalletSelectList(labels);
-    setError(null);
-  }, [selectedNetwork]);
+    dispatch(clearWalletError());
+  }, [selectedNetwork, dispatch]);
 
   // Function to select wallet
   const selectWallet = async (walletName: string) => {
@@ -67,7 +66,7 @@ function App() {
       setPreviewWallet(choice);
     } catch (error) {
       console.error("Error selecting wallet:", error);
-      setError(`Failed to select ${walletName}`);
+      dispatch(setWalletError(`Failed to select ${walletName}`));
     }
   };
 
@@ -115,13 +114,13 @@ function App() {
         };
       } catch (error) {
         console.error("Error loading Lucid:", error);
-        setError("Failed to initialize wallet");
+        dispatch(setWalletError("Failed to initialize wallet"));
       }
     };
 
     if (!previewWallet) return;
     loadLucid();
-  }, [previewWallet]);
+  }, [previewWallet, dispatch]);
 
   // Handler for websocket messages
   const handleWsMessage = async (event: MessageEvent) => {
@@ -149,22 +148,20 @@ function App() {
         console.log("Transaction ready:", msg.data);
         // Store the transaction data in state to show in UI
         setPendingTransaction(msg.data);
-        setSignStatus(null);
         // Clear any previous ceremony failure
         setCeremonyFailure(null);
         break;
       case "faucet_sent":
         console.log("%cYour account has been funded:", "color: lime", msg.data);
-        setFaucetSent(true);
-        setFaucetTxHash(msg.data);
+        dispatch(faucetSuccess(msg.data));
         break;
       case "signature_ack":
         console.log("%cSignature acknowledged:", "color: hotpink", msg.data);
-        setSignStatus("Transaction signed successfully!");
+        dispatch(setSignStatus("Transaction signed successfully!"));
         // Clear the pending transaction after successful signing
         setTimeout(() => {
           setPendingTransaction(null);
-          setSignStatus(null);
+          dispatch(setSignStatus(null));
         }, 3000);
         break;
       case "ceremonyConcluded":
@@ -180,8 +177,8 @@ function App() {
         console.log("%c" + msg.data.msg, "color: yellow");
         // Reset transaction state since it's no longer valid
         setPendingTransaction(null);
-        setSignStatus(null);
-        setIsSigning(false);
+        dispatch(setSignStatus(null));
+        dispatch(setIsSigning(false));
         // Reset ceremony state
         setCeremonyConcluded(false);
         setCeremonyTxId(null);
@@ -240,7 +237,6 @@ function App() {
 
         {selectedNetwork === 'preview' && (
           <PreviewNetwork
-            walletError={walletError}
             walletSelectList={walletSelectList}
             previewWallet={previewWallet}
             previewAddress={previewAddress}
@@ -248,17 +244,10 @@ function App() {
             recipientAddress={recipientAddress}
             recipientSeedPhrase={recipientSeedPhrase}
             pendingTransaction={pendingTransaction}
-            isSigning={isSigning}
-            signStatus={signStatus}
             socket={socket}
-            faucetSent={faucetSent}
-            faucetTxHash={faucetTxHash}
             previewLucid={previewLucid}
             previewWalletApi={previewWalletApi}
             onSelectWallet={selectWallet}
-            setError={setError}
-            setIsSigning={setIsSigning}
-            setSignStatus={setSignStatus}
             setManualRecipientAddress={setManualRecipientAddress}
             manualRecipientAddress={manualRecipientAddress}
           />
@@ -271,12 +260,9 @@ function App() {
             recipientAddress={recipientAddress}
             recipientSeedPhrase={recipientSeedPhrase}
             pendingTransaction={pendingTransaction}
-            isSigning={isSigning}
-            signStatus={signStatus}
             socket={socket}
-            faucetSent={faucetSent}
-            faucetTxHash={faucetTxHash}
             previewLucid={previewLucid}
+            
           />
         )}
 
