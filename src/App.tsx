@@ -2,7 +2,83 @@ import { theme } from "./config/theme";
 import { useEffect, useState } from "react";
 import "./styles/globals.css";
 import { Blockfrost, Emulator, fromText, generateSeedPhrase, Lucid, SignedMessage, UTxO, WalletApi } from "@lucid-evolution/lucid";
-import React from "react";
+import React, { ReactNode } from "react";
+
+// Common styles
+const styles = {
+  container: {
+    minHeight: "100vh",
+    background: theme.gradients.background,
+  },
+  main: {
+    padding: "2rem",
+    maxWidth: "1200px",
+    margin: "0 auto"
+  },
+  card: {
+    color: "white",
+    border: "2px solid #00aaff",
+    borderRadius: "8px",
+    padding: "1.5rem",
+    backgroundColor: "rgba(0, 170, 255, 0.1)",
+    marginBottom: "1rem"
+  },
+  errorCard: {
+    border: "2px solid #ff4444",
+    backgroundColor: "rgba(255, 0, 0, 0.1)",
+  },
+  button: {
+    padding: "0.75rem 1.5rem",
+    backgroundColor: "#00aaff",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer"
+  },
+  disabledButton: {
+    backgroundColor: "#666",
+    cursor: "not-allowed",
+    opacity: 0.7
+  }
+};
+
+// Component interfaces
+interface CardProps {
+  title?: string;
+  children: ReactNode;
+  error?: boolean;
+  style?: React.CSSProperties;
+}
+
+interface ButtonProps {
+  onClick: () => void;
+  disabled?: boolean;
+  children: ReactNode;
+  style?: React.CSSProperties;
+}
+
+interface WalletInfoProps {
+  address: string;
+  seedPhrase: string;
+  emoji: string;
+  onRequestFunds?: () => void;
+  onSignup?: () => void;
+  socket?: WebSocket | null;
+  balance?: { lovelace: bigint } | null;
+  faucetInfo?: {
+    sent: boolean;
+    txHash: string | null;
+  };
+  onRecycleTada?: () => void;
+  showRecycle?: boolean;
+}
+
+interface TransactionSigningUIProps {
+  pendingTransaction: any;
+  isSigning: boolean;
+  signStatus: string | null;
+  onSign: () => void;
+}
 
 async function init_get_wallet_address(): Promise<[string, string]> {
   const emulator = new Emulator([]);
@@ -62,6 +138,417 @@ const signTransaction = async (txData: any, senderSeed: string | null, ws: WebSo
     return false;
   }
 }
+
+// Add these two new components just before the App component:
+
+interface LocalNetworkProps {
+  walletAddress: string | null;
+  walletSeedPhrase: string | null;
+  recipientAddress: string | null;
+  recipientSeedPhrase: string | null;
+  pendingTransaction: any;
+  isSigning: boolean;
+  signStatus: string | null;
+  socket: WebSocket | null;
+  faucetSent: boolean;
+  faucetTxHash: string | null;
+  previewLucid: any;
+}
+
+const LocalNetwork: React.FC<LocalNetworkProps> = ({
+  walletAddress,
+  walletSeedPhrase,
+  recipientAddress,
+  recipientSeedPhrase,
+  pendingTransaction,
+  isSigning,
+  signStatus,
+  socket,
+  faucetSent,
+  faucetTxHash,
+  previewLucid
+}) => {
+  return (
+    <>
+      <WalletInfo
+        address={walletAddress || ""}
+        seedPhrase={walletSeedPhrase || ""}
+        emoji="🏠"
+        faucetInfo={{
+          sent: faucetSent,
+          txHash: faucetTxHash
+        }}
+        onRequestFunds={() => {
+          if (socket && walletAddress) {
+            socket.send(JSON.stringify({ type: "faucet", address: walletAddress }));
+          }
+        }}
+        onSignup={() => {
+          if (socket && walletAddress && walletSeedPhrase && recipientAddress && recipientSeedPhrase) {
+            signup(recipientAddress, walletSeedPhrase, socket);
+          }
+        }}
+        socket={socket}
+      />
+
+      <WalletInfo
+        address={recipientAddress || ""}
+        seedPhrase={recipientSeedPhrase || ""}
+        emoji="🌆"
+      />
+
+      <TransactionSigningUI
+        pendingTransaction={pendingTransaction}
+        isSigning={isSigning}
+        signStatus={signStatus}
+        onSign={() => {
+          if (socket && walletSeedPhrase && pendingTransaction) {
+            signTransaction(pendingTransaction, walletSeedPhrase, socket, previewLucid);
+          }
+        }}
+      />
+    </>
+  );
+};
+
+interface PreviewNetworkProps {
+  walletError: string | null;
+  walletSelectList: string[];
+  previewWallet: any;
+  previewAddress: string | null;
+  walletBalance: { lovelace: bigint } | null;
+  recipientAddress: string | null;
+  recipientSeedPhrase: string | null;
+  pendingTransaction: any;
+  isSigning: boolean;
+  signStatus: string | null;
+  socket: WebSocket | null;
+  faucetSent: boolean;
+  faucetTxHash: string | null;
+  previewLucid: any;
+  previewWalletApi: any;
+  onSelectWallet: (walletName: string) => void;
+  setError: (error: string | null) => void;
+  setIsSigning: (signing: boolean) => void;
+  setSignStatus: (status: string | null) => void;
+}
+
+const PreviewNetwork: React.FC<PreviewNetworkProps> = ({
+  walletError,
+  walletSelectList,
+  previewWallet,
+  previewAddress,
+  walletBalance,
+  recipientAddress,
+  recipientSeedPhrase,
+  pendingTransaction,
+  isSigning,
+  signStatus,
+  socket,
+  faucetSent,
+  faucetTxHash,
+  previewLucid,
+  previewWalletApi,
+  onSelectWallet,
+  setError,
+  setIsSigning,
+  setSignStatus
+}) => {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+      {walletError ? (
+        <Card title="Error" error>
+          <p>{walletError}</p>
+        </Card>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1rem" }}>
+          {walletSelectList.map(wallet => (
+            <Button
+              key={wallet}
+              onClick={() => onSelectWallet(wallet)}
+              style={{
+                backgroundColor: previewWallet && (window as any).cardano[wallet] === previewWallet ? "#00aaff" : "transparent"
+              }}
+            >
+              {wallet}
+            </Button>
+          ))}
+        </div>
+      )}
+
+      {previewAddress && (
+        <>
+          <WalletInfo
+            address={previewAddress}
+            seedPhrase=""
+            emoji="💳"
+            balance={walletBalance}
+            faucetInfo={{
+              sent: faucetSent,
+              txHash: faucetTxHash
+            }}
+            onRequestFunds={() => {
+              if (socket && previewAddress) {
+                socket.send(JSON.stringify({ type: "faucet", address: previewAddress }));
+              }
+            }}
+            onSignup={() => {
+              if (socket && previewAddress && recipientAddress && previewLucid) {
+                const payload = fromText(JSON.stringify({
+                  recipient: recipientAddress,
+                  extraMsg: "this is another field"
+                }));
+                
+                previewLucid.wallet().signMessage(previewAddress, payload)
+                  .then((signedMessage: SignedMessage) => {
+                    socket.send(JSON.stringify({
+                      type: "signup",
+                      address: previewAddress,
+                      signedMessage,
+                      payload
+                    }));
+                  })
+                  .catch((error: Error) => {
+                    console.error("Error signing signup message:", error);
+                    setError("Failed to sign signup message");
+                  });
+              }
+            }}
+            socket={socket}
+          />
+
+          <TransactionSigningUI
+            pendingTransaction={pendingTransaction}
+            isSigning={isSigning}
+            signStatus={signStatus}
+            onSign={async () => {
+              if (socket && previewLucid && !isSigning) {
+                setIsSigning(true);
+                try {
+                  const success = await signTransaction(pendingTransaction, null, socket, previewLucid);
+                  if (success) {
+                    setSignStatus("Sending signature to server...");
+                  } else {
+                    setSignStatus("Failed to sign transaction. Please try again.");
+                  }
+                } catch (error) {
+                  console.error("Error in signing process:", error);
+                  setSignStatus("An error occurred during signing.");
+                } finally {
+                  setIsSigning(false);
+                }
+              }
+            }}
+          />
+
+          <WalletInfo
+            address={recipientAddress || ""}
+            seedPhrase={recipientSeedPhrase || ""}
+            emoji="🌆"
+            showRecycle={true}
+            onRecycleTada={async () => {
+              if (recipientSeedPhrase && previewLucid) {
+                // Switch to recipient wallet
+                previewLucid.selectWallet.fromSeed(recipientSeedPhrase);
+                try {
+                  const tx = await previewLucid
+                    .newTx()
+                    .pay.ToAddress(
+                      "addr_test1qryvgass5dsrf2kxl3vgfz76uhp83kv5lagzcp29tcana68ca5aqa6swlq6llfamln09tal7n5kvt4275ckwedpt4v7q48uhex",
+                      { lovelace: (await previewLucid.wallet().getUtxos().then((utxos: UTxO[]) => 
+                        utxos.reduce((acc: bigint, utxo: UTxO) => acc + utxo.assets.lovelace, BigInt(0)))) - BigInt(2_000_000)
+                      }
+                    )
+                    .complete();
+                  const signedTx = await tx.sign.withWallet().complete();
+                  const txHash = await signedTx.submit();
+                  console.log("Sent all ADA from recipient wallet. Tx:", txHash);
+                } catch (error) {
+                  console.error("Failed to send ADA:", error);
+                } finally {
+                  // Switch back to original wallet
+                  previewLucid.selectWallet.fromAPI(previewWalletApi);
+                }
+              }
+            }}
+          />
+        </>
+      )}
+    </div>
+  );
+};
+
+// Reusable Components
+const Card: React.FC<CardProps> = ({ title, children, error, style = {} }) => (
+  <div style={{ ...styles.card, ...(error ? styles.errorCard : {}), ...style }}>
+    {title && <h4 style={{ margin: "0 0 1rem 0", color: error ? "#ff4444" : "#00aaff" }}>{title}</h4>}
+    {children}
+  </div>
+);
+
+const Button: React.FC<ButtonProps> = ({ onClick, disabled, children, style = {} }) => (
+  <button
+    style={{
+      ...styles.button,
+      ...(disabled ? styles.disabledButton : {}),
+      ...style
+    }}
+    onClick={onClick}
+    disabled={disabled}
+  >
+    {children}
+  </button>
+);
+
+const WalletInfo: React.FC<WalletInfoProps> = ({ 
+  address, 
+  seedPhrase, 
+  emoji, 
+  onRequestFunds, 
+  onSignup, 
+  socket,
+  balance,
+  faucetInfo,
+  onRecycleTada,
+  showRecycle
+}) => (
+  <Card>
+    <span role="img" aria-label="wallet">{emoji}</span>
+    <p>Address: {address}</p>
+    <p>Seed Phrase: {seedPhrase}</p>
+    {balance && (
+      <p>Balance: {Number(balance.lovelace) / 1_000_000} ₳</p>
+    )}
+    {onRequestFunds && onSignup && (
+      <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+        <Button
+          onClick={onRequestFunds}
+        >
+          Request Funds
+        </Button>
+        <Button onClick={onSignup}>Signup for Ceremony</Button>
+      </div>
+    )}
+    {showRecycle && onRecycleTada && (
+      <Button
+        onClick={onRecycleTada}
+        style={{ marginTop: '1rem' }}
+      >
+        Recycle tADA
+      </Button>
+    )}
+    {faucetInfo?.sent && (
+      <div style={{
+        marginTop: "1rem",
+        padding: "0.75rem",
+        backgroundColor: "rgba(0, 255, 0, 0.1)",
+        borderRadius: "4px",
+        border: "1px solid #00ff00"
+      }}>
+        <p style={{ margin: 0, color: "#00ff00" }}>
+          Funds sent! Transaction: {faucetInfo.txHash}
+        </p>
+      </div>
+    )}
+  </Card>
+);
+
+const TransactionSigningUI: React.FC<TransactionSigningUIProps> = ({ pendingTransaction, isSigning, signStatus, onSign }) => (
+  pendingTransaction && (
+    <Card title="Transaction Ready to Sign">
+      <div style={{ marginBottom: "1rem" }}>
+        <p><strong>Transaction Details:</strong></p>
+        <pre style={{
+          overflowX: "auto",
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          padding: "0.5rem",
+          borderRadius: "4px"
+        }}>
+          {JSON.stringify(pendingTransaction, null, 2)}
+        </pre>
+      </div>
+
+      <Button
+        onClick={onSign}
+        disabled={isSigning}
+      >
+        {isSigning ? "Signing..." : "Sign Transaction"}
+      </Button>
+
+      {signStatus && (
+        <div style={{
+          marginTop: "1rem",
+          padding: "0.5rem",
+          backgroundColor: signStatus.includes("success") ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)",
+          borderRadius: "4px"
+        }}>
+          {signStatus}
+        </div>
+      )}
+    </Card>
+  )
+);
+
+// Add these components after the TransactionSigningUI component and before the App component:
+
+interface NetworkSelectorProps {
+  selectedNetwork: 'local' | 'preview' | null;
+  setSelectedNetwork: (network: 'local' | 'preview' | null) => void;
+}
+
+const NetworkSelector: React.FC<NetworkSelectorProps> = ({ selectedNetwork, setSelectedNetwork }) => (
+  <Card title="Select Network" style={{ textAlign: "center" }}>
+    <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+      <Button
+        onClick={() => setSelectedNetwork('local')}
+        style={{ backgroundColor: selectedNetwork === 'local' ? "#00aaff" : "transparent" }}
+      >
+        Local Testnet
+      </Button>
+      <Button
+        onClick={() => setSelectedNetwork('preview')}
+        style={{ backgroundColor: selectedNetwork === 'preview' ? "#00aaff" : "transparent" }}
+      >
+        Preview
+      </Button>
+    </div>
+  </Card>
+);
+
+interface CeremonyStatusProps {
+  ceremonyConcluded: boolean;
+  ceremonyTxId: string | null;
+  ceremonyFailure: { reason: string, msg: string } | null;
+  participantQueue: any[];
+}
+
+const CeremonyStatus: React.FC<CeremonyStatusProps> = ({
+  ceremonyConcluded,
+  ceremonyTxId,
+  ceremonyFailure,
+  participantQueue
+}) => (
+  <>
+    {ceremonyConcluded && (
+      <Card title="🎉🎉🎉 Ceremony Concluded 🎉🎉🎉">
+        <p>The ceremony has concluded with the transaction {ceremonyTxId}.</p>
+      </Card>
+    )}
+
+    {ceremonyFailure && (
+      <Card title="⚠️ Ceremony Failed" error>
+        <p><strong>Reason:</strong> {ceremonyFailure.reason}</p>
+        <p>{ceremonyFailure.msg}</p>
+      </Card>
+    )}
+
+    {participantQueue.length > 0 && (
+      <Card title="Participant Queue">
+        <p>The participant queue is {participantQueue.length} participants long.</p>
+      </Card>
+    )}
+  </>
+);
 
 function App() {
   const [selectedNetwork, setSelectedNetwork] = useState<'local' | 'preview' | null>(null);
@@ -277,469 +764,65 @@ function App() {
   }, [selectedNetwork]);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: theme.gradients.background,
-      }}
-    >
-      <main style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
-        {/* Network Selection */}
-        <div style={{
-          color: "white",
-          border: "1px solid white",
-          padding: "1rem",
-          marginBottom: "2rem",
-          textAlign: "center"
-        }}>
-          <h2 style={{ marginBottom: "1rem" }}>Select Network</h2>
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
-            <button
-              style={{
-                padding: "0.75rem 1.5rem",
-                backgroundColor: selectedNetwork === 'local' ? "#00aaff" : "transparent",
-                color: "white",
-                border: "1px solid white",
-                borderRadius: "4px",
-                cursor: "pointer"
-              }}
-              onClick={() => setSelectedNetwork('local')}
-            >
-              Local Testnet
-            </button>
-            <button
-              style={{
-                padding: "0.75rem 1.5rem",
-                backgroundColor: selectedNetwork === 'preview' ? "#00aaff" : "transparent",
-                color: "white",
-                border: "1px solid white",
-                borderRadius: "4px",
-                cursor: "pointer"
-              }}
-              onClick={() => setSelectedNetwork('preview')}
-            >
-              Preview
-            </button>
-          </div>
-        </div>
+    <div style={styles.container}>
+      <main style={styles.main}>
+        <NetworkSelector
+          selectedNetwork={selectedNetwork}
+          setSelectedNetwork={setSelectedNetwork}
+        />
 
         {!selectedNetwork && (
-          <div style={{
-            color: "white",
-            textAlign: "center",
-            marginTop: "2rem"
-          }}>
+          <Card style={{ textAlign: "center" }}>
             <h3>Please select a network to continue</h3>
-          </div>
+          </Card>
         )}
 
         {selectedNetwork === 'preview' && (
-          <div style={{ color: "white", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            <div style={{
-              border: "2px solid #ffaa00",
-              borderRadius: "8px",
-              padding: "1.5rem",
-              backgroundColor: "rgba(255, 170, 0, 0.1)",
-              textAlign: "center"
-            }}>
-              <h3 style={{ margin: "0 0 1rem 0", color: "#ffaa00" }}>Preview Network</h3>
-              <p>Select a wallet to connect</p>
-            </div>
-
-            {walletError ? (
-              <div style={{
-                border: "2px solid #ff4444",
-                borderRadius: "8px",
-                padding: "1.5rem",
-                backgroundColor: "rgba(255, 0, 0, 0.1)",
-                textAlign: "center"
-              }}>
-                <p style={{ color: "#ff4444" }}>{walletError}</p>
-              </div>
-            ) : (
-              <div style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "1rem",
-                padding: "1rem"
-              }}>
-                {walletSelectList.map(wallet => (
-                  <button
-                    key={wallet}
-                    onClick={() => selectWallet(wallet)}
-                    style={{
-                      padding: "1rem",
-                      backgroundColor: previewWallet && (window as any).cardano[wallet] === previewWallet ? "#00aaff" : "transparent",
-                      color: "white",
-                      border: "1px solid white",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease"
-                    }}
-                  >
-                    {wallet}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {previewAddress && (
-              <>
-                <div style={{
-                  border: "2px solid #00aaff",
-                  borderRadius: "8px",
-                  padding: "1.5rem",
-                  backgroundColor: "rgba(0, 170, 255, 0.1)",
-                  marginBottom: "1rem"
-                }}>
-                  <h4 style={{ margin: "0 0 1rem 0", color: "#00aaff" }}>Wallet Info</h4>
-                  <p>Address: {previewAddress}</p>
-                  {walletBalance && (
-                    <p>Balance: {Number(walletBalance.lovelace) / 1_000_000} ₳</p>
-                  )}
-                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                    <button
-                      style={{
-                        padding: "0.75rem 1.5rem",
-                        backgroundColor: "#00aaff",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer"
-                      }}
-                      onClick={() => {
-                        if (socket && previewAddress) {
-                          socket.send(JSON.stringify({ type: "faucet", address: previewAddress }));
-                        } else {
-                          console.log("No socket or wallet address");
-                          console.log(socket);
-                          console.log(previewAddress);
-                        }
-                      }}
-                    >
-                      Request Funds
-                    </button>
-
-                    <button
-                      style={{
-                        padding: "0.75rem 1.5rem",
-                        backgroundColor: "#00aaff",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer"
-                      }}
-                      onClick={() => {
-                        if (socket && previewAddress && recipientAddress && previewLucid) {
-                          const payload = fromText(JSON.stringify({
-                            recipient: recipientAddress,
-                            extraMsg: "this is another field"
-                          }));
-                          
-                          previewLucid.wallet().signMessage(previewAddress, payload)
-                            .then((signedMessage: SignedMessage) => {
-                              socket.send(JSON.stringify({
-                                type: "signup",
-                                address: previewAddress,
-                                signedMessage,
-                                payload
-                              }));
-                            })
-                            .catch((error: Error) => {
-                              console.error("Error signing signup message:", error);
-                              setError("Failed to sign signup message");
-                            });
-                        } else {
-                          console.log("Missing required data for signup");
-                          console.log({ socket, previewAddress, recipientAddress, previewLucid });
-                        }
-                      }}
-                    >
-                      Signup for Ceremony
-                    </button>
-                  </div>
-
-                  {/* Transaction signing section */}
-                  {pendingTransaction && (
-                    <div style={{
-                      marginTop: "1rem",
-                      padding: "1rem",
-                      backgroundColor: "rgba(0, 170, 255, 0.05)",
-                      borderRadius: "4px",
-                      border: "1px solid #00aaff"
-                    }}>
-                      <h4 style={{ margin: "0 0 1rem 0", color: "#00aaff" }}>Transaction Ready</h4>
-                      <button
-                        style={{
-                          padding: "0.75rem 1.5rem",
-                          backgroundColor: isSigning ? "#666" : "#00aaff",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: isSigning ? "not-allowed" : "pointer",
-                          opacity: isSigning ? 0.7 : 1
-                        }}
-                        onClick={async () => {
-                          if (socket && previewLucid && !isSigning) {
-                            setIsSigning(true);
-                            try {
-                              const success = await signTransaction(pendingTransaction, null, socket, previewLucid);
-                              if (success) {
-                                setSignStatus("Sending signature to server...");
-                              } else {
-                                setSignStatus("Failed to sign transaction. Please try again.");
-                              }
-                            } catch (error) {
-                              console.error("Error in signing process:", error);
-                              setSignStatus("An error occurred during signing.");
-                            } finally {
-                              setIsSigning(false);
-                            }
-                          }
-                        }}
-                        disabled={isSigning}
-                      >
-                        {isSigning ? "Signing..." : "Sign Transaction"}
-                      </button>
-                      {signStatus && (
-                        <p style={{ 
-                          marginTop: "0.5rem",
-                          color: signStatus.includes("Failed") ? "#ff4444" : "#00ff00"
-                        }}>
-                          {signStatus}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {faucetSent && (
-                    <div style={{
-                      marginTop: "1rem",
-                      padding: "0.75rem",
-                      backgroundColor: "rgba(0, 255, 0, 0.1)",
-                      borderRadius: "4px",
-                      border: "1px solid #00ff00"
-                    }}>
-                      <p style={{ margin: 0, color: "#00ff00" }}>
-                        Funds sent! Transaction: {faucetTxHash}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Recipient Wallet Info */}
-                <div style={{
-                  border: "2px solid #00aaff",
-                  borderRadius: "8px",
-                  padding: "1.5rem",
-                  backgroundColor: "rgba(0, 170, 255, 0.1)"
-                }}>
-                  <h4 style={{ margin: "0 0 1rem 0", color: "#00aaff" }}>
-                    <span role="img" aria-label="recipient" style={{ marginRight: "0.5rem" }}>🌆</span>
-                    Recipient Wallet Info
-                  </h4>
-                  <p>Address: {recipientAddress}</p>
-                  <p>Seed Phrase: {recipientSeedPhrase}</p>
-                  
-                  <button
-                    style={{
-                      padding: "0.75rem 1.5rem",
-                      backgroundColor: "#00aaff",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                      marginTop: "1rem"
-                    }}
-                    onClick={async () => {
-                      if (recipientSeedPhrase && previewLucid) {
-                        // Switch to recipient wallet
-                        previewLucid.selectWallet.fromSeed(recipientSeedPhrase);
-                        
-                        try {
-                          const tx = await previewLucid
-                            .newTx()
-                            .pay.ToAddress(
-                              "addr_test1qryvgass5dsrf2kxl3vgfz76uhp83kv5lagzcp29tcana68ca5aqa6swlq6llfamln09tal7n5kvt4275ckwedpt4v7q48uhex",
-                              { lovelace: (await previewLucid.wallet().getUtxos().then((utxos: UTxO[]) => 
-                                utxos.reduce((acc: bigint, utxo: UTxO) => acc + utxo.assets.lovelace, BigInt(0)))) - BigInt(2_000_000)
-                              }
-                            )
-                            .complete();
-                          
-                          const signedTx = await tx.sign.withWallet().complete();
-                          const txHash = await signedTx.submit();
-                          
-                          console.log("Sent all ADA from recipient wallet. Tx:", txHash);
-                        } catch (error) {
-                          console.error("Failed to send ADA:", error);
-                        } finally {
-                          // Switch back to original wallet
-                          previewLucid.selectWallet.fromAPI(previewWalletApi);
-                        }
-                      }
-                    }}
-                  >
-                    Recycle tADA
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+          <PreviewNetwork
+            walletError={walletError}
+            walletSelectList={walletSelectList}
+            previewWallet={previewWallet}
+            previewAddress={previewAddress}
+            walletBalance={walletBalance}
+            recipientAddress={recipientAddress}
+            recipientSeedPhrase={recipientSeedPhrase}
+            pendingTransaction={pendingTransaction}
+            isSigning={isSigning}
+            signStatus={signStatus}
+            socket={socket}
+            faucetSent={faucetSent}
+            faucetTxHash={faucetTxHash}
+            previewLucid={previewLucid}
+            previewWalletApi={previewWalletApi}
+            onSelectWallet={selectWallet}
+            setError={setError}
+            setIsSigning={setIsSigning}
+            setSignStatus={setSignStatus}
+          />
         )}
 
         {selectedNetwork === 'local' && (
-          <>
-            <div style={{ color: "white", border: "1px solid white", padding: "1rem", marginBottom: "1rem" }}>
-              {/* emoji to indicate home */}
-              <span role="img" aria-label="home">🏠</span>
-              <p>Address: {walletAddress}</p>
-              <p>Seed Phrase: {walletSeedPhrase}</p>
-            </div>
-
-            {/* show recipient details in new style with border */}
-            <div style={{ color: "white", border: "1px solid white", padding: "1rem", marginBottom: "1rem" }}>
-              <span role="img" aria-label="recipient">
-                🌆
-              </span>
-              <p>Recipient Address: {recipientAddress}</p>
-              <p>Recipient Seed Phrase: {recipientSeedPhrase}</p>
-            </div>
-
-            <div style={{ marginBottom: "1rem" }}>
-              <button
-                style={{ marginRight: "1rem", padding: "0.5rem 1rem" }}
-                onClick={() => {
-                  if (socket && walletAddress) {
-                    socket.send(JSON.stringify({ type: "faucet", address: walletAddress }));
-                  } else {
-                    console.log("No socket or wallet address");
-                    console.log(socket);
-                    console.log(walletAddress);
-                  }
-                }}
-              >
-                Request Funds
-              </button>
-
-              <button
-                style={{ padding: "0.5rem 1rem" }}
-                onClick={() => {
-                  if (socket && walletAddress && walletSeedPhrase && recipientAddress && recipientSeedPhrase) {
-                    signup(recipientAddress, walletSeedPhrase, socket);
-                  } else {
-                    console.log("No socket or wallet address");
-                    console.log(socket);
-                    console.log(walletAddress);
-                  }
-                }}
-              >
-                Signup for Ceremony
-              </button>
-            </div>
-
-            {/* Transaction signing UI - only shown when a transaction is ready */}
-            {pendingTransaction && (
-              <div style={{
-                color: "white",
-                border: "2px solid #00aaff",
-                borderRadius: "8px",
-                padding: "1.5rem",
-                marginTop: "1.5rem",
-                backgroundColor: "rgba(0, 0, 0, 0.3)"
-              }}>
-                <h3 style={{ margin: "0 0 1rem 0", color: "#00aaff" }}>Transaction Ready to Sign</h3>
-
-                <div style={{ marginBottom: "1rem" }}>
-                  <p><strong>Transaction Details:</strong></p>
-                  <pre style={{
-                    overflowX: "auto",
-                    backgroundColor: "rgba(0, 0, 0, 0.5)",
-                    padding: "0.5rem",
-                    borderRadius: "4px"
-                  }}>
-                    {JSON.stringify(pendingTransaction, null, 2)}
-                  </pre>
-                </div>
-
-                <button
-                  style={{
-                    padding: "0.75rem 1.5rem",
-                    backgroundColor: "#00aaff",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: isSigning ? "not-allowed" : "pointer",
-                    opacity: isSigning ? 0.7 : 1
-                  }}
-                  onClick={() => {
-                    if (socket && walletSeedPhrase && pendingTransaction) {
-                      signTransaction(pendingTransaction, walletSeedPhrase, socket, previewLucid);
-                    } else {
-                      console.error("Missing required data for signing");
-                    }
-                  }}
-                  disabled={isSigning}
-                >
-                  {isSigning ? "Signing..." : "Sign Transaction"}
-                </button>
-
-                {signStatus && (
-                  <div style={{
-                    marginTop: "1rem",
-                    padding: "0.5rem",
-                    backgroundColor: signStatus.includes("success") ? "rgba(0, 255, 0, 0.2)" : "rgba(255, 0, 0, 0.2)",
-                    borderRadius: "4px"
-                  }}>
-                    {signStatus}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* when we receive indication that the ceremony is concluded, show a message */}
-            {ceremonyConcluded && (
-              <div style={{ color: "white", border: "2px solid #00aaff", borderRadius: "8px", padding: "1.5rem", marginTop: "1.5rem", backgroundColor: "rgba(0, 0, 0, 0.3)" }}>
-                <h3 style={{ margin: "0 0 1rem 0", color: "#00aaff" }}>🎉🎉🎉 Ceremony Concluded 🎉🎉🎉</h3>
-                <p>The ceremony has concluded with the transaction {ceremonyTxId}.</p>
-              </div>
-            )}
-
-            { /* when receive funds from faucet show something (including tx hash) to the user */
-              faucetSent && (
-                <div style={{ color: "white", border: "2px solid #00aaff", borderRadius: "8px", padding: "1.5rem", marginTop: "1.5rem", backgroundColor: "rgba(0, 0, 0, 0.3)" }}>
-                  <h3 style={{ margin: "0 0 1rem 0", color: "#00aaff" }}>Faucet Sent</h3>
-                  <p>The faucet has sent funds to the address {walletAddress}.</p>
-                  <p>Transaction Hash: {faucetTxHash}</p>
-                </div>
-              )
-            }
-
-            {/* show ceremony failure message */}
-            {ceremonyFailure && (
-              <div style={{
-                color: "white",
-                border: "2px solid #ff4444",
-                borderRadius: "8px",
-                padding: "1.5rem",
-                marginTop: "1.5rem",
-                backgroundColor: "rgba(255, 0, 0, 0.1)"
-              }}>
-                <h3 style={{ margin: "0 0 1rem 0", color: "#ff4444" }}>⚠️ Ceremony Failed</h3>
-                <p><strong>Reason:</strong> {ceremonyFailure.reason}</p>
-                <p>{ceremonyFailure.msg}</p>
-              </div>
-            )}
-
-            {/* show participant queue */}
-            {participantQueue.length > 0 && (
-              <div style={{ color: "white", border: "2px solid #00aaff", borderRadius: "8px", padding: "1.5rem", marginTop: "1.5rem", backgroundColor: "rgba(0, 0, 0, 0.3)" }}>
-                <h3 style={{ margin: "0 0 1rem 0", color: "#00aaff" }}>Participant Queue</h3>
-                <p>The participant queue is {participantQueue.length} participants long.</p>
-              </div>
-            )}
-          </>
+          <LocalNetwork
+            walletAddress={walletAddress}
+            walletSeedPhrase={walletSeedPhrase}
+            recipientAddress={recipientAddress}
+            recipientSeedPhrase={recipientSeedPhrase}
+            pendingTransaction={pendingTransaction}
+            isSigning={isSigning}
+            signStatus={signStatus}
+            socket={socket}
+            faucetSent={faucetSent}
+            faucetTxHash={faucetTxHash}
+            previewLucid={previewLucid}
+          />
         )}
+
+        <CeremonyStatus
+          ceremonyConcluded={ceremonyConcluded}
+          ceremonyTxId={ceremonyTxId}
+          ceremonyFailure={ceremonyFailure}
+          participantQueue={participantQueue}
+        />
       </main>
     </div>
   );
