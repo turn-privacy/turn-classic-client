@@ -53,24 +53,3 @@ export interface LocalNetworkProps {
   previewLucid: any;
 }
 
-export interface PreviewNetworkProps {
-  walletError: string | null;
-  walletSelectList: string[];
-  previewWallet: any;
-  previewAddress: string | null;
-  walletBalance: { lovelace: bigint } | null;
-  recipientAddress: string | null;
-  recipientSeedPhrase: string | null;
-  pendingTransaction: any;
-  isSigning: boolean;
-  signStatus: string | null;
-  socket: WebSocket | null;
-  faucetSent: boolean;
-  faucetTxHash: string | null;
-  previewLucid: any;
-  previewWalletApi: any;
-  onSelectWallet: (walletName: string) => void;
-  setError: (error: string | null) => void;
-  setIsSigning: (signing: boolean) => void;
-  setSignStatus: (status: string | null) => void;
-}

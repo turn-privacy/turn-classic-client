@@ -17,7 +17,6 @@ function App() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [recipientAddress, setRecipientAddress] = useState<string | null>(null);
   const [recipientSeedPhrase, setRecipientSeedPhrase] = useState<string | null>(null);
-
   // New state for transaction data
   const [pendingTransaction, setPendingTransaction] = useState<any | null>(null);
   const [isSigning, setIsSigning] = useState<boolean>(false);
@@ -46,6 +45,7 @@ function App() {
 
   // Add new state for wallet balance
   const [walletBalance, setWalletBalance] = useState<{ lovelace: bigint } | null>(null);
+  const [manualRecipientAddress, setManualRecipientAddress] = useState<string | null>(null);
 
   // Effect to get available wallets
   useEffect(() => {
@@ -259,6 +259,8 @@ function App() {
             setError={setError}
             setIsSigning={setIsSigning}
             setSignStatus={setSignStatus}
+            setManualRecipientAddress={setManualRecipientAddress}
+            manualRecipientAddress={manualRecipientAddress}
           />
         )}
 

@@ -2,6 +2,7 @@
 
 ## TODO
 - [ ] remove blockfrost api key from dotenv
+- [ ] reformate component system to do less passing values (it will help to make the PreviewNetwork component more hierarchical)
 
 
 <br/>
