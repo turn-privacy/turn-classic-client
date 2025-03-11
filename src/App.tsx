@@ -14,6 +14,12 @@ import { useAppDispatch } from "./store/hooks";
 import { faucetSuccess } from "./store/faucetSlice";
 import { setWalletError, clearWalletError } from "./store/errorSlice";
 import { setSignStatus, setIsSigning } from "./store/transactionSlice";
+import {
+    setParticipantQueue,
+    ceremonyConcludedSuccess,
+    ceremonyFailedReset,
+    setCeremonyFailure
+} from "./store/ceremonySlice";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -24,24 +30,12 @@ function App() {
   const [recipientSeedPhrase, setRecipientSeedPhrase] = useState<string | null>(null);
   const [pendingTransaction, setPendingTransaction] = useState<any | null>(null);
 
-  const [ceremonyConcluded, setCeremonyConcluded] = useState<boolean>(false);
-  const [ceremonyTxId, setCeremonyTxId] = useState<string | null>(null);
-  const [ceremonyFailure, setCeremonyFailure] = useState<{ reason: string, msg: string } | null>(null);
-
-  // Connect to local server with websocket
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [participantQueue, setParticipantQueue] = useState<any[]>([]);
-
-  // Add state for wallet list
   const [walletSelectList, setWalletSelectList] = useState<string[]>([]);
-
-  // Add new state for preview network wallet
   const [previewWallet, setPreviewWallet] = useState<any>(null);
   const [previewWalletApi, setPreviewWalletApi] = useState<any>(null);
   const [previewLucid, setPreviewLucid] = useState<any>(null);
   const [previewAddress, setPreviewAddress] = useState<string | null>(null);
-
-  // Add new state for wallet balance
   const [walletBalance, setWalletBalance] = useState<{ lovelace: bigint } | null>(null);
   const [manualRecipientAddress, setManualRecipientAddress] = useState<string | null>(null);
 
@@ -132,7 +126,7 @@ function App() {
     switch (msg.type) {
       case "Marco!":
         console.log("sending heartbeat (Polo!)");
-        socket.send(JSON.stringify({ type: "Polo!" })); // heart beat
+        socket.send(JSON.stringify({ type: "Polo!" }));
         break;
       case "failed_signup":
         console.log("%cFailed to sign up:", "color: red", msg.data);
@@ -142,14 +136,12 @@ function App() {
         break;
       case "show_participant_queue":
         console.log("%cParticipant queue:", "color: teal", msg.data);
-        setParticipantQueue(msg.data);
+        dispatch(setParticipantQueue(msg.data));
         break;
       case "transactionReady":
         console.log("Transaction ready:", msg.data);
-        // Store the transaction data in state to show in UI
         setPendingTransaction(msg.data);
-        // Clear any previous ceremony failure
-        setCeremonyFailure(null);
+        dispatch(setCeremonyFailure(null));
         break;
       case "faucet_sent":
         console.log("%cYour account has been funded:", "color: lime", msg.data);
@@ -158,7 +150,6 @@ function App() {
       case "signature_ack":
         console.log("%cSignature acknowledged:", "color: hotpink", msg.data);
         dispatch(setSignStatus("Transaction signed successfully!"));
-        // Clear the pending transaction after successful signing
         setTimeout(() => {
           setPendingTransaction(null);
           dispatch(setSignStatus(null));
@@ -166,24 +157,15 @@ function App() {
         break;
       case "ceremonyConcluded":
         console.log(`%cCeremony concluded with transaction ${msg.data.tx}`, "color: purple", msg.data.msg);
-        setCeremonyConcluded(true);
-        setCeremonyTxId(msg.data.tx);
-        setParticipantQueue([]);
-        // Clear any previous ceremony failure
-        setCeremonyFailure(null);
+        dispatch(ceremonyConcludedSuccess(msg.data));
         break;
       case "ceremonyFailed":
         console.log("%cCeremony failed:", "color: red", msg.data.reason);
         console.log("%c" + msg.data.msg, "color: yellow");
-        // Reset transaction state since it's no longer valid
         setPendingTransaction(null);
         dispatch(setSignStatus(null));
         dispatch(setIsSigning(false));
-        // Reset ceremony state
-        setCeremonyConcluded(false);
-        setCeremonyTxId(null);
-        // Set ceremony failure details
-        setCeremonyFailure(msg.data);
+        dispatch(ceremonyFailedReset(msg.data));
         break;
       default:
         console.log("Unknown server message:", msg);
@@ -262,16 +244,10 @@ function App() {
             pendingTransaction={pendingTransaction}
             socket={socket}
             previewLucid={previewLucid}
-            
           />
         )}
 
-        <CeremonyStatus
-          ceremonyConcluded={ceremonyConcluded}
-          ceremonyTxId={ceremonyTxId}
-          ceremonyFailure={ceremonyFailure}
-          participantQueue={participantQueue}
-        />
+        <CeremonyStatus />
       </main>
     </div>
   );

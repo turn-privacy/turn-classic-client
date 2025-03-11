@@ -1,37 +1,38 @@
 import { Card } from "./Card";
+import { useAppSelector } from "../store/hooks";
 
+export const CeremonyStatus: React.FC = () => {
+    const {
+        ceremonyConcluded,
+        ceremonyTxId,
+        ceremonyFailure,
+        participantQueue
+    } = useAppSelector(state => state.ceremony);
 
-export interface CeremonyStatusProps {
-  ceremonyConcluded: boolean;
-  ceremonyTxId: string | null;
-  ceremonyFailure: { reason: string, msg: string } | null;
-  participantQueue: any[];
-}
+    return (
+        <>
+            {ceremonyFailure && (
+                <Card title="Ceremony Failed" error>
+                    <p>Reason: {ceremonyFailure.reason}</p>
+                    <p>Message: {ceremonyFailure.msg}</p>
+                </Card>
+            )}
 
-export const CeremonyStatus: React.FC<CeremonyStatusProps> = ({
-  ceremonyConcluded,
-  ceremonyTxId,
-  ceremonyFailure,
-  participantQueue
-}) => (
-  <>
-    {ceremonyConcluded && (
-      <Card title="🎉🎉🎉 Ceremony Concluded 🎉🎉🎉">
-        <p>The ceremony has concluded with the transaction {ceremonyTxId}.</p>
-      </Card>
-    )}
+            {ceremonyConcluded && ceremonyTxId && (
+                <Card title="Ceremony Concluded">
+                    <p>Transaction ID: {ceremonyTxId}</p>
+                </Card>
+            )}
 
-    {ceremonyFailure && (
-      <Card title="⚠️ Ceremony Failed" error>
-        <p><strong>Reason:</strong> {ceremonyFailure.reason}</p>
-        <p>{ceremonyFailure.msg}</p>
-      </Card>
-    )}
-
-    {participantQueue.length > 0 && (
-      <Card title="Participant Queue">
-        <p>The participant queue is {participantQueue.length} participants long.</p>
-      </Card>
-    )}
-  </>
-);  
+            {participantQueue.length > 0 && (
+                <Card title="Participant Queue">
+                    <ul>
+                        {participantQueue.map((participant, index) => (
+                            <li key={index}>{participant}</li>
+                        ))}
+                    </ul>
+                </Card>
+            )}
+        </>
+    );
+};  
