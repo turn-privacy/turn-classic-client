@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "./styles/globals.css";
 import { Blockfrost, Lucid, WalletApi } from "@lucid-evolution/lucid";
 import { styles } from "./styles";
@@ -35,6 +35,7 @@ import {
     setManualRecipientAddress,
     setSocket
 } from "./store/walletSlice";
+import { Button } from "./components/Button";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -55,6 +56,10 @@ function App() {
   const localRecipientSeedPhrase = useAppSelector(state => state.wallet.localRecipientSeedPhrase);
   const manualRecipientAddress = useAppSelector(state => state.wallet.manualRecipientAddress);
   const socket = useAppSelector(state => state.wallet.socket);
+
+  const [blacklist, setBlacklist] = useState<any[]>([]);
+  const [showBlacklistModal, setShowBlacklistModal] = useState(false);
+  const [blacklistData, setBlacklistData] = useState<any>(null);
 
   // Effect to get available wallets
   useEffect(() => {
@@ -171,6 +176,10 @@ function App() {
         dispatch(resetTransactionState());
         dispatch(ceremonyFailedReset(msg.data));
         break;
+      case "blacklist_contents":
+        setBlacklistData(msg);
+        setShowBlacklistModal(true);
+        break;
       default:
         console.log("Unknown server message:", msg);
         break;
@@ -239,6 +248,46 @@ function App() {
         )}
 
         <CeremonyStatus />
+
+        <div style={{ margin: '20px' }}>
+          <Button onClick={() => socket?.send(JSON.stringify({ type: "show_blacklist" }))}>
+            Show Blacklist
+          </Button>
+        </div>
+
+        {showBlacklistModal && blacklistData && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              padding: '20px',
+              borderRadius: '8px',
+              maxWidth: '80%',
+              maxHeight: '80%',
+              overflow: 'auto'
+            }}>
+              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                {JSON.stringify(blacklistData, null, 2)}
+              </pre>
+              <button 
+                onClick={() => setShowBlacklistModal(false)}
+                style={{ marginTop: '10px' }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
