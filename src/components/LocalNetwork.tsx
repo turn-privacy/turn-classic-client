@@ -1,76 +1,114 @@
-import { signTransaction, signup } from "../functions";
-import { LocalNetworkProps } from "../types/props";
-import { TransactionSigningUI } from "./TransactionSigningUI";
-import { WalletInfo } from "./WalletInfo";
+import { Card } from "./Card";
+import { Button } from "./Button";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { setIsSigning, setSignStatus } from "../store/transactionSlice";
+import { setSignStatus, setIsSigning } from "../store/transactionSlice";
+import { setWalletError } from "../store/errorSlice";
 
-export const LocalNetwork: React.FC<LocalNetworkProps> = ({
+interface LocalNetworkProps {
+  walletAddress: string | null;
+  walletSeedPhrase: string | null;
+  recipientAddress: string | null;
+  recipientSeedPhrase: string | null;
+  socket: WebSocket | null;
+  previewLucid: any;
+}
+
+export function LocalNetwork({
   walletAddress,
   walletSeedPhrase,
   recipientAddress,
   recipientSeedPhrase,
-  pendingTransaction,
   socket,
-  previewLucid
-}) => {
+  previewLucid,
+}: LocalNetworkProps) {
   const dispatch = useAppDispatch();
+  
+  // Redux selectors
+  const pendingTransaction = useAppSelector(state => state.transaction.pendingTransaction);
   const isSigning = useAppSelector(state => state.transaction.isSigning);
   const signStatus = useAppSelector(state => state.transaction.signStatus);
-  const { faucetSent, faucetTxHash } = useAppSelector(state => state.faucet);
+
+  const onSign = async () => {
+    if (!socket || !pendingTransaction || !previewLucid) {
+      dispatch(setWalletError("Missing required data for signing"));
+      return;
+    }
+
+    dispatch(setIsSigning(true));
+    dispatch(setSignStatus("Signing transaction..."));
+
+    try {
+      const tx = await previewLucid.fromTx(pendingTransaction);
+      const signedTx = await tx.sign().complete();
+      const txComplete = await signedTx.toString();
+
+      socket.send(JSON.stringify({
+        type: "sign_tx",
+        data: txComplete
+      }));
+    } catch (error) {
+      console.error("Error signing transaction:", error);
+      dispatch(setSignStatus("Failed to sign transaction"));
+      dispatch(setIsSigning(false));
+    }
+  };
 
   return (
     <>
-      <WalletInfo
-        address={walletAddress || ""}
-        seedPhrase={walletSeedPhrase || ""}
-        emoji="🏠"
-        faucetInfo={{
-          sent: faucetSent,
-          txHash: faucetTxHash
-        }}
-        onRequestFunds={() => {
-          if (socket && walletAddress) {
-            socket.send(JSON.stringify({ type: "faucet", address: walletAddress }));
-          }
-        }}
-        onSignup={() => {
-          if (socket && walletAddress && walletSeedPhrase && recipientAddress && recipientSeedPhrase) {
-            signup(recipientAddress, walletSeedPhrase, socket);
-          }
-        }}
-        socket={socket}
-      />
-
-      <WalletInfo
-        address={recipientAddress || ""}
-        seedPhrase={recipientSeedPhrase || ""}
-        emoji="🌆"
-      />
-
-      <TransactionSigningUI
-        pendingTransaction={pendingTransaction}
-        isSigning={isSigning}
-        signStatus={signStatus}
-        onSign={async () => {
-          if (socket && walletSeedPhrase && pendingTransaction && !isSigning) {
-            dispatch(setIsSigning(true));
-            try {
-              const success = await signTransaction(pendingTransaction, walletSeedPhrase, socket, previewLucid);
-              if (success) {
-                dispatch(setSignStatus("Sending signature to server..."));
-              } else {
-                dispatch(setSignStatus("Failed to sign transaction. Please try again."));
+      {walletAddress && walletSeedPhrase && (
+        <Card>
+          <h3>Your Wallet</h3>
+          <p>Address: {walletAddress}</p>
+          <p>Seed Phrase: {walletSeedPhrase}</p>
+          <Button
+            onClick={() => {
+              if (socket) {
+                socket.send(JSON.stringify({
+                  type: "signup",
+                  data: {
+                    address: walletAddress,
+                  },
+                }));
               }
-            } catch (error) {
-              console.error("Error in signing process:", error);
-              dispatch(setSignStatus("An error occurred during signing."));
-            } finally {
-              dispatch(setIsSigning(false));
-            }
-          }
-        }}
-      />
+            }}
+          >
+            Sign Up
+          </Button>
+        </Card>
+      )}
+
+      {recipientAddress && recipientSeedPhrase && (
+        <Card>
+          <h3>Recipient Wallet</h3>
+          <p>Address: {recipientAddress}</p>
+          <p>Seed Phrase: {recipientSeedPhrase}</p>
+          <Button
+            onClick={() => {
+              if (socket) {
+                socket.send(JSON.stringify({
+                  type: "signup",
+                  data: {
+                    address: recipientAddress,
+                  },
+                }));
+              }
+            }}
+          >
+            Sign Up
+          </Button>
+        </Card>
+      )}
+
+      {pendingTransaction && (
+        <Card>
+          <h3>Pending Transaction</h3>
+          <p>Transaction ready to sign!</p>
+          <Button onClick={onSign} disabled={isSigning}>
+            {isSigning ? "Signing..." : "Sign Transaction"}
+          </Button>
+          {signStatus && <p>{signStatus}</p>}
+        </Card>
+      )}
     </>
   );
-};
+}

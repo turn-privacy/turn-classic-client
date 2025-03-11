@@ -10,33 +10,42 @@ import { NetworkSelector } from "./components/NetworkSelector";
 import { CeremonyStatus } from "./components/CeremonyStatus";
 import { LocalNetwork } from "./components/LocalNetwork";
 import { PreviewNetwork } from "./components/PreviewNetwork";
-import { useAppDispatch } from "./store/hooks";
+import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { faucetSuccess } from "./store/faucetSlice";
 import { setWalletError, clearWalletError } from "./store/errorSlice";
-import { setSignStatus, setIsSigning } from "./store/transactionSlice";
+import { setSignStatus, setIsSigning, setPendingTransaction, resetTransactionState } from "./store/transactionSlice";
 import {
     setParticipantQueue,
     ceremonyConcludedSuccess,
     ceremonyFailedReset,
     setCeremonyFailure
 } from "./store/ceremonySlice";
+import {
+    setSelectedNetwork,
+    setWalletSelectList,
+    setPreviewWallet,
+    setPreviewWalletApi,
+    setPreviewLucid,
+    setPreviewAddress,
+    setWalletBalance
+} from "./store/networkSlice";
 
 function App() {
   const dispatch = useAppDispatch();
-  const [selectedNetwork, setSelectedNetwork] = useState<'local' | 'preview' | null>(null);
+  const selectedNetwork = useAppSelector(state => state.network.selectedNetwork);
+  const pendingTransaction = useAppSelector(state => state.transaction.pendingTransaction);
+  const previewWallet = useAppSelector(state => state.network.previewWallet);
+  const previewLucid = useAppSelector(state => state.network.previewLucid);
+  const previewWalletApi = useAppSelector(state => state.network.previewWalletApi);
+  const previewAddress = useAppSelector(state => state.network.previewAddress);
+  const walletBalance = useAppSelector(state => state.network.walletBalance);
+  const walletSelectList = useAppSelector(state => state.network.walletSelectList);
+
   const [walletSeedPhrase, setWalletSeedPhrase] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [recipientAddress, setRecipientAddress] = useState<string | null>(null);
   const [recipientSeedPhrase, setRecipientSeedPhrase] = useState<string | null>(null);
-  const [pendingTransaction, setPendingTransaction] = useState<any | null>(null);
-
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [walletSelectList, setWalletSelectList] = useState<string[]>([]);
-  const [previewWallet, setPreviewWallet] = useState<any>(null);
-  const [previewWalletApi, setPreviewWalletApi] = useState<any>(null);
-  const [previewLucid, setPreviewLucid] = useState<any>(null);
-  const [previewAddress, setPreviewAddress] = useState<string | null>(null);
-  const [walletBalance, setWalletBalance] = useState<{ lovelace: bigint } | null>(null);
   const [manualRecipientAddress, setManualRecipientAddress] = useState<string | null>(null);
 
   // Effect to get available wallets
@@ -49,7 +58,7 @@ function App() {
     }
 
     const labels = Object.keys((window as any).cardano);
-    setWalletSelectList(labels);
+    dispatch(setWalletSelectList(labels));
     dispatch(clearWalletError());
   }, [selectedNetwork, dispatch]);
 
@@ -57,7 +66,7 @@ function App() {
   const selectWallet = async (walletName: string) => {
     try {
       const choice = (window as any).cardano[walletName];
-      setPreviewWallet(choice);
+      dispatch(setPreviewWallet(choice));
     } catch (error) {
       console.error("Error selecting wallet:", error);
       dispatch(setWalletError(`Failed to select ${walletName}`));
@@ -72,13 +81,13 @@ function App() {
           new Blockfrost("https://cardano-preview.blockfrost.io/api/v0", process.env.REACT_APP_BLOCKFROST_API_KEY,),
           "Preprod");
         const api: WalletApi = await previewWallet.enable();
-        setPreviewWalletApi(api);
+        dispatch(setPreviewWalletApi(api));
         _lucid.selectWallet.fromAPI(api);
-        setPreviewLucid(_lucid);
+        dispatch(setPreviewLucid(_lucid));
 
         // Get wallet address
         const address = await _lucid.wallet().address();
-        setPreviewAddress(address);
+        dispatch(setPreviewAddress(address));
 
         // Get wallet balance
         const utxos = await _lucid.wallet().getUtxos();
@@ -88,7 +97,7 @@ function App() {
           }),
           { lovelace: BigInt(0) }
         );
-        setWalletBalance(balance);
+        dispatch(setWalletBalance(balance));
 
         // Generate recipient wallet
         const [recAddress, recSeedPhrase] = await init_get_wallet_address();
@@ -140,7 +149,7 @@ function App() {
         break;
       case "transactionReady":
         console.log("Transaction ready:", msg.data);
-        setPendingTransaction(msg.data);
+        dispatch(setPendingTransaction(msg.data));
         dispatch(setCeremonyFailure(null));
         break;
       case "faucet_sent":
@@ -151,7 +160,7 @@ function App() {
         console.log("%cSignature acknowledged:", "color: hotpink", msg.data);
         dispatch(setSignStatus("Transaction signed successfully!"));
         setTimeout(() => {
-          setPendingTransaction(null);
+          dispatch(setPendingTransaction(null));
           dispatch(setSignStatus(null));
         }, 3000);
         break;
@@ -162,9 +171,7 @@ function App() {
       case "ceremonyFailed":
         console.log("%cCeremony failed:", "color: red", msg.data.reason);
         console.log("%c" + msg.data.msg, "color: yellow");
-        setPendingTransaction(null);
-        dispatch(setSignStatus(null));
-        dispatch(setIsSigning(false));
+        dispatch(resetTransactionState());
         dispatch(ceremonyFailedReset(msg.data));
         break;
       default:
@@ -201,15 +208,12 @@ function App() {
     return () => {
       ws.close();
     };
-  }, [selectedNetwork]);
+  }, [selectedNetwork, dispatch]);
 
   return (
     <div style={styles.container}>
       <main style={styles.main}>
-        <NetworkSelector
-          selectedNetwork={selectedNetwork}
-          setSelectedNetwork={setSelectedNetwork}
-        />
+        <NetworkSelector />
 
         {!selectedNetwork && (
           <Card style={{ textAlign: "center" }}>
@@ -219,17 +223,9 @@ function App() {
 
         {selectedNetwork === 'preview' && (
           <PreviewNetwork
-            walletSelectList={walletSelectList}
-            previewWallet={previewWallet}
-            previewAddress={previewAddress}
-            walletBalance={walletBalance}
             recipientAddress={recipientAddress}
             recipientSeedPhrase={recipientSeedPhrase}
-            pendingTransaction={pendingTransaction}
             socket={socket}
-            previewLucid={previewLucid}
-            previewWalletApi={previewWalletApi}
-            onSelectWallet={selectWallet}
             setManualRecipientAddress={setManualRecipientAddress}
             manualRecipientAddress={manualRecipientAddress}
           />
@@ -241,7 +237,6 @@ function App() {
             walletSeedPhrase={walletSeedPhrase}
             recipientAddress={recipientAddress}
             recipientSeedPhrase={recipientSeedPhrase}
-            pendingTransaction={pendingTransaction}
             socket={socket}
             previewLucid={previewLucid}
           />

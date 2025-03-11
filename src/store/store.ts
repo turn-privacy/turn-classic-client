@@ -4,6 +4,7 @@ import transactionReducer from './transactionSlice';
 import faucetReducer from './faucetSlice';
 import errorReducer from './errorSlice';
 import ceremonyReducer from './ceremonySlice';
+import networkReducer from './networkSlice';
 
 export const store = configureStore({
     reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
         faucet: faucetReducer,
         error: errorReducer,
         ceremony: ceremonyReducer,
+        network: networkReducer,
     },
 });
 

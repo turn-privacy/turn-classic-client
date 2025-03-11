@@ -1,214 +1,197 @@
+import { useEffect } from "react";
 import { Card } from "./Card";
-import { Button } from "./Button";
-import { WalletInfo } from "./WalletInfo";
-import { TransactionSigningUI } from "./TransactionSigningUI";
-import { signTransaction } from "../functions";
-import { fromText, SignedMessage, UTxO } from "@lucid-evolution/lucid";
+import { styles } from "../styles";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { setRecipientType } from "../store/recipientSlice";
-import { setIsSigning, setSignStatus } from "../store/transactionSlice";
+import { setSignStatus, setIsSigning } from "../store/transactionSlice";
 import { setWalletError } from "../store/errorSlice";
+import { setPreviewWallet } from "../store/networkSlice";
+import { setRecipientType } from "../store/recipientSlice";
+import { Button } from "./Button";
 
-export interface PreviewNetworkProps {
-    walletSelectList: string[];
-    previewWallet: any;
-    previewAddress: string | null;
-    walletBalance: { lovelace: bigint } | null;
-    recipientAddress: string | null;
-    recipientSeedPhrase: string | null;
-    pendingTransaction: any;
-    socket: WebSocket | null;
-    previewLucid: any;
-    previewWalletApi: any;
-    onSelectWallet: (walletName: string) => void;
-    setManualRecipientAddress: (address: string) => void;
-    manualRecipientAddress: string | null;
+// Add missing styles
+const componentStyles = {
+  ...styles,
+  walletButtonContainer: {
+    display: "flex",
+    flexDirection: "row" as const,
+    gap: "1rem",
+    flexWrap: "wrap" as const,
+  },
+  input: {
+    width: "100%",
+    padding: "0.5rem",
+    marginBottom: "1rem",
+    border: "1px solid #646cff",
+    borderRadius: "4px",
+    backgroundColor: "transparent",
+    color: "#fff",
+  },
+};
+
+interface PreviewNetworkProps {
+  recipientAddress: string | null;
+  recipientSeedPhrase: string | null;
+  socket: WebSocket | null;
+  setManualRecipientAddress: (address: string | null) => void;
+  manualRecipientAddress: string | null;
 }
 
-export const PreviewNetwork: React.FC<PreviewNetworkProps> = ({
-    walletSelectList,
-    previewWallet,
-    previewAddress,
-    walletBalance,
-    recipientAddress,
-    recipientSeedPhrase,
-    pendingTransaction,
-    socket,
-    previewLucid,
-    previewWalletApi,
-    onSelectWallet,
-    setManualRecipientAddress,
-    manualRecipientAddress,
-}) => {
-    const dispatch = useAppDispatch();
-    const recipientType = useAppSelector(state => state.recipient.recipientType);
-    const isSigning = useAppSelector(state => state.transaction.isSigning);
-    const signStatus = useAppSelector(state => state.transaction.signStatus);
-    const walletError = useAppSelector(state => state.error.walletError);
-    const { faucetSent, faucetTxHash } = useAppSelector(state => state.faucet);
+export function PreviewNetwork({
+  recipientAddress,
+  recipientSeedPhrase,
+  socket,
+  setManualRecipientAddress,
+  manualRecipientAddress,
+}: PreviewNetworkProps) {
+  const dispatch = useAppDispatch();
+  
+  // Redux selectors
+  const walletSelectList = useAppSelector(state => state.network.walletSelectList);
+  const previewWallet = useAppSelector(state => state.network.previewWallet);
+  const previewAddress = useAppSelector(state => state.network.previewAddress);
+  const walletBalance = useAppSelector(state => state.network.walletBalance);
+  const pendingTransaction = useAppSelector(state => state.transaction.pendingTransaction);
+  const isSigning = useAppSelector(state => state.transaction.isSigning);
+  const signStatus = useAppSelector(state => state.transaction.signStatus);
+  const previewLucid = useAppSelector(state => state.network.previewLucid);
+  const previewWalletApi = useAppSelector(state => state.network.previewWalletApi);
+  const recipientType = useAppSelector(state => state.recipient.recipientType);
 
-    return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            {walletError ? (
-                <Card title="Error" error>
-                    <p>{walletError}</p>
-                </Card>
-            ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1rem" }}>
-                    {walletSelectList.map(wallet => (
-                        <Button
-                            key={wallet}
-                            onClick={() => onSelectWallet(wallet)}
-                            style={{
-                                backgroundColor: previewWallet && (window as any).cardano[wallet] === previewWallet ? "#00aaff" : "transparent"
-                            }}
-                        >
-                            {wallet}
-                        </Button>
-                    ))}
-                </div>
-            )}
+  const selectWallet = async (walletName: string) => {
+    try {
+      const choice = (window as any).cardano[walletName];
+      dispatch(setPreviewWallet(choice));
+    } catch (error) {
+      console.error("Error selecting wallet:", error);
+      dispatch(setWalletError(`Failed to select ${walletName}`));
+    }
+  };
 
-            {previewAddress && (
-                <>
-                    <WalletInfo
-                        address={previewAddress}
-                        seedPhrase=""
-                        emoji="💳"
-                        balance={walletBalance}
-                        faucetInfo={{
-                            sent: faucetSent,
-                            txHash: faucetTxHash
-                        }}
-                        onRequestFunds={() => {
-                            if (socket && previewAddress) {
-                                socket.send(JSON.stringify({ type: "faucet", address: previewAddress }));
-                            }
-                        }}
-                        onSignup={() => {
-                            if (socket && previewAddress && recipientAddress && previewLucid) {
-                                const payload = fromText(JSON.stringify({
-                                    recipient: recipientAddress,
-                                    extraMsg: "this is another field"
-                                }));
+  const onSign = async () => {
+    if (!socket || !pendingTransaction || !previewLucid || !previewWalletApi) {
+      dispatch(setWalletError("Missing required data for signing"));
+      return;
+    }
 
-                                previewLucid.wallet().signMessage(previewAddress, payload)
-                                    .then((signedMessage: SignedMessage) => {
-                                        socket.send(JSON.stringify({
-                                            type: "signup",
-                                            address: previewAddress,
-                                            signedMessage,
-                                            payload
-                                        }));
-                                    })
-                                    .catch((error: Error) => {
-                                        console.error("Error signing signup message:", error);
-                                        dispatch(setWalletError("Failed to sign signup message"));
-                                    });
-                            }
-                        }}
-                        socket={socket}
-                    />
+    dispatch(setIsSigning(true));
+    dispatch(setSignStatus("Signing transaction..."));
 
-                    <TransactionSigningUI
-                        pendingTransaction={pendingTransaction}
-                        isSigning={isSigning}
-                        signStatus={signStatus}
-                        onSign={async () => {
-                            if (socket && previewLucid && !isSigning) {
-                                dispatch(setIsSigning(true));
-                                try {
-                                    const success = await signTransaction(pendingTransaction, null, socket, previewLucid);
-                                    if (success) {
-                                        dispatch(setSignStatus("Sending signature to server..."));
-                                    } else {
-                                        dispatch(setSignStatus("Failed to sign transaction. Please try again."));
-                                    }
-                                } catch (error) {
-                                    console.error("Error in signing process:", error);
-                                    dispatch(setSignStatus("An error occurred during signing."));
-                                } finally {
-                                    dispatch(setIsSigning(false));
-                                }
-                            }
-                        }}
-                    />
+    try {
+      const signedTx = await previewWalletApi.signTx(pendingTransaction);
+      socket.send(JSON.stringify({
+        type: "sign_tx",
+        data: signedTx
+      }));
+    } catch (error) {
+      console.error("Error signing transaction:", error);
+      dispatch(setSignStatus("Failed to sign transaction"));
+      dispatch(setIsSigning(false));
+    }
+  };
 
-                    <div className="recipient-wallet-parent">
-                        <Card title="Choose How You Want To Create Your Recipient Wallet">
-                            <div style={{ display: "flex", flexDirection: "row", gap: "1rem" }}>
-                                <Button onClick={() => {
-                                    dispatch(setRecipientType("random"));
-                                }}>
-                                    Random Thow-Away Wallet
-                                </Button>
-                                <Button onClick={() => {
-                                    dispatch(setRecipientType("fresh"));
-                                }}>
-                                    Enter A Fresh Wallet Address
-                                </Button>
-                            </div>
-                        </Card>
-
-                        {recipientType === "random" && (
-                            <WalletInfo
-                                address={recipientAddress || ""}
-                                seedPhrase={recipientSeedPhrase || ""}
-                                emoji="🌆"
-                                showRecycle={true}
-                                onRecycleTada={async () => {
-                                    if (recipientSeedPhrase && previewLucid) {
-                                        // Switch to recipient wallet
-                                        previewLucid.selectWallet.fromSeed(recipientSeedPhrase);
-                                        try {
-                                            const tx = await previewLucid
-                                                .newTx()
-                                                .pay.ToAddress(
-                                                    "addr_test1qryvgass5dsrf2kxl3vgfz76uhp83kv5lagzcp29tcana68ca5aqa6swlq6llfamln09tal7n5kvt4275ckwedpt4v7q48uhex",
-                                                    {
-                                                        lovelace: (await previewLucid.wallet().getUtxos().then((utxos: UTxO[]) =>
-                                                            utxos.reduce((acc: bigint, utxo: UTxO) => acc + utxo.assets.lovelace, BigInt(0)))) - BigInt(2_000_000)
-                                                    }
-                                                )
-                                                .complete();
-                                            const signedTx = await tx.sign.withWallet().complete();
-                                            const txHash = await signedTx.submit();
-                                            console.log("Sent all ADA from recipient wallet. Tx:", txHash);
-                                        } catch (error) {
-                                            console.error("Failed to send ADA:", error);
-                                        } finally {
-                                            // Switch back to original wallet
-                                            previewLucid.selectWallet.fromAPI(previewWalletApi);
-                                        }
-                                    }
-                                }}
-                            />
-                        )}
-                        {recipientType === "fresh" && (
-                            <ManualRecipientWallet
-                                manualRecipientAddress={manualRecipientAddress}
-                                setManualRecipientAddress={setManualRecipientAddress}
-                            />
-                        )}
-                    </div>
-                </>
-            )}
+  return (
+    <>
+      <Card>
+        <h3>Select Wallet</h3>
+        <div style={componentStyles.walletButtonContainer}>
+          {walletSelectList.map((label) => (
+            <Button
+              key={label}
+              onClick={() => selectWallet(label)}
+              style={{
+                backgroundColor: previewWallet?.name === label ? "#00aaff" : "transparent"
+              }}
+            >
+              {label}
+            </Button>
+          ))}
         </div>
-    );
-};
+      </Card>
 
-interface ManualRecipientWalletProps {
-    setManualRecipientAddress: (address: string) => void;
-    manualRecipientAddress: string | null;
+      {previewWallet && (
+        <>
+          <Card>
+            <h3>Wallet Connected</h3>
+            <p>Address: {previewAddress}</p>
+            <p>Balance: {walletBalance ? Number(walletBalance.lovelace) / 1000000 : 0} ADA</p>
+          </Card>
+
+          {!recipientType && (
+            <Card>
+              <h3>Choose How You Want To Create Your Recipient Wallet</h3>
+              <div style={componentStyles.walletButtonContainer}>
+                <Button onClick={() => dispatch(setRecipientType("random"))}>
+                  Random Throw-Away Wallet
+                </Button>
+                <Button onClick={() => dispatch(setRecipientType("fresh"))}>
+                  Enter A Fresh Wallet Address
+                </Button>
+              </div>
+            </Card>
+          )}
+
+          {recipientType === "random" && recipientAddress && recipientSeedPhrase && (
+            <Card>
+              <h3>Recipient Wallet</h3>
+              <p>Address: {recipientAddress}</p>
+              <p>Seed Phrase: {recipientSeedPhrase}</p>
+              <Button
+                onClick={() => {
+                  if (socket) {
+                    socket.send(JSON.stringify({
+                      type: "signup",
+                      data: {
+                        address: recipientAddress,
+                      },
+                    }));
+                  }
+                }}
+              >
+                Sign Up
+              </Button>
+            </Card>
+          )}
+
+          {recipientType === "fresh" && (
+            <Card>
+              <h3>Manual Recipient Address</h3>
+              <input
+                type="text"
+                value={manualRecipientAddress || ""}
+                onChange={(e) => setManualRecipientAddress(e.target.value)}
+                placeholder="Enter recipient address"
+                style={componentStyles.input}
+              />
+              <Button
+                onClick={() => {
+                  if (socket && manualRecipientAddress) {
+                    socket.send(JSON.stringify({
+                      type: "signup",
+                      data: {
+                        address: manualRecipientAddress,
+                      },
+                    }));
+                  }
+                }}
+                disabled={!manualRecipientAddress}
+              >
+                Sign Up Manual Address
+              </Button>
+            </Card>
+          )}
+        </>
+      )}
+
+      {pendingTransaction && (
+        <Card>
+          <h3>Pending Transaction</h3>
+          <p>Transaction ready to sign!</p>
+          <Button onClick={onSign} disabled={isSigning}>
+            {isSigning ? "Signing..." : "Sign Transaction"}
+          </Button>
+          {signStatus && <p>{signStatus}</p>}
+        </Card>
+      )}
+    </>
+  );
 }
-
-const ManualRecipientWallet: React.FC<ManualRecipientWalletProps> = ({ setManualRecipientAddress, manualRecipientAddress }) => {
-    return <Card title="Manual Recipient Wallet">
-        Manual Recipient Wallet
-        <input type="text" value={manualRecipientAddress || ""} onChange={(e) => setManualRecipientAddress(e.target.value)} />
-        
-
-
-
-    </Card>;
-};
