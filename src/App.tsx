@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import "./styles/globals.css";
 import { Blockfrost, Lucid, WalletApi } from "@lucid-evolution/lucid";
 import { styles } from "./styles";
-import { 
-  init_get_wallet_address,
- } from "./functions";
+import { init_get_wallet_address } from "./functions";
 import { Card } from "./components/Card";
 import { NetworkSelector } from "./components/NetworkSelector";
 import { CeremonyStatus } from "./components/CeremonyStatus";
@@ -29,11 +27,20 @@ import {
     setPreviewAddress,
     setWalletBalance
 } from "./store/networkSlice";
+import {
+    setLocalWalletAddress,
+    setLocalWalletSeedPhrase,
+    setLocalRecipientAddress,
+    setLocalRecipientSeedPhrase,
+    setManualRecipientAddress,
+    setSocket
+} from "./store/walletSlice";
 
 function App() {
   const dispatch = useAppDispatch();
+  
+  // Network selectors
   const selectedNetwork = useAppSelector(state => state.network.selectedNetwork);
-  const pendingTransaction = useAppSelector(state => state.transaction.pendingTransaction);
   const previewWallet = useAppSelector(state => state.network.previewWallet);
   const previewLucid = useAppSelector(state => state.network.previewLucid);
   const previewWalletApi = useAppSelector(state => state.network.previewWalletApi);
@@ -41,12 +48,13 @@ function App() {
   const walletBalance = useAppSelector(state => state.network.walletBalance);
   const walletSelectList = useAppSelector(state => state.network.walletSelectList);
 
-  const [walletSeedPhrase, setWalletSeedPhrase] = useState<string | null>(null);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [recipientAddress, setRecipientAddress] = useState<string | null>(null);
-  const [recipientSeedPhrase, setRecipientSeedPhrase] = useState<string | null>(null);
-  const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [manualRecipientAddress, setManualRecipientAddress] = useState<string | null>(null);
+  // Wallet selectors
+  const localWalletAddress = useAppSelector(state => state.wallet.localWalletAddress);
+  const localWalletSeedPhrase = useAppSelector(state => state.wallet.localWalletSeedPhrase);
+  const localRecipientAddress = useAppSelector(state => state.wallet.localRecipientAddress);
+  const localRecipientSeedPhrase = useAppSelector(state => state.wallet.localRecipientSeedPhrase);
+  const manualRecipientAddress = useAppSelector(state => state.wallet.manualRecipientAddress);
+  const socket = useAppSelector(state => state.wallet.socket);
 
   // Effect to get available wallets
   useEffect(() => {
@@ -61,17 +69,6 @@ function App() {
     dispatch(setWalletSelectList(labels));
     dispatch(clearWalletError());
   }, [selectedNetwork, dispatch]);
-
-  // Function to select wallet
-  const selectWallet = async (walletName: string) => {
-    try {
-      const choice = (window as any).cardano[walletName];
-      dispatch(setPreviewWallet(choice));
-    } catch (error) {
-      console.error("Error selecting wallet:", error);
-      dispatch(setWalletError(`Failed to select ${walletName}`));
-    }
-  };
 
   // Effect to initialize Lucid with selected wallet
   useEffect(() => {
@@ -101,8 +98,8 @@ function App() {
 
         // Generate recipient wallet
         const [recAddress, recSeedPhrase] = await init_get_wallet_address();
-        setRecipientAddress(recAddress);
-        setRecipientSeedPhrase(recSeedPhrase);
+        dispatch(setLocalRecipientAddress(recAddress));
+        dispatch(setLocalRecipientSeedPhrase(recSeedPhrase));
 
         // Connect to WebSocket when wallet is connected
         const ws = new WebSocket("ws://localhost:8081");
@@ -110,10 +107,10 @@ function App() {
           console.log("Connected to server");
         };
         ws.onmessage = handleWsMessage;
-        setSocket(ws);
+        dispatch(setSocket(ws));
 
         return () => {
-          ws.close();
+          dispatch(setSocket(null));
         };
       } catch (error) {
         console.error("Error loading Lucid:", error);
@@ -128,14 +125,14 @@ function App() {
   // Handler for websocket messages
   const handleWsMessage = async (event: MessageEvent) => {
     console.log("Message from server:", event.data);
-    const socket = event.currentTarget as WebSocket;
+    const ws = event.currentTarget as WebSocket;
 
     const msg = JSON.parse(event.data);
 
     switch (msg.type) {
       case "Marco!":
         console.log("sending heartbeat (Polo!)");
-        socket.send(JSON.stringify({ type: "Polo!" }));
+        ws.send(JSON.stringify({ type: "Polo!" }));
         break;
       case "failed_signup":
         console.log("%cFailed to sign up:", "color: red", msg.data);
@@ -149,7 +146,7 @@ function App() {
         break;
       case "transactionReady":
         console.log("Transaction ready:", msg.data);
-        dispatch(setPendingTransaction(msg.data));
+        dispatch(setPendingTransaction(msg.data.tx));
         dispatch(setCeremonyFailure(null));
         break;
       case "faucet_sent":
@@ -188,25 +185,24 @@ function App() {
       console.log("Connected to server");
     };
     ws.onmessage = handleWsMessage;
+    dispatch(setSocket(ws));
 
     init_get_wallet_address().then(([address, seedPhrase]) => {
       console.log("Wallet Address:", address);
       console.log("Seed Phrase:", seedPhrase);
-      setWalletAddress(address);
-      setWalletSeedPhrase(seedPhrase);
+      dispatch(setLocalWalletAddress(address));
+      dispatch(setLocalWalletSeedPhrase(seedPhrase));
     });
 
     init_get_wallet_address().then(([recipientAddress, recipientSeedPhrase]) => {
       console.log("Recipient Address:", recipientAddress);
       console.log("Recipient Seed Phrase:", recipientSeedPhrase);
-      setRecipientAddress(recipientAddress);
-      setRecipientSeedPhrase(recipientSeedPhrase);
+      dispatch(setLocalRecipientAddress(recipientAddress));
+      dispatch(setLocalRecipientSeedPhrase(recipientSeedPhrase));
     });
 
-    setSocket(ws);
-
     return () => {
-      ws.close();
+      dispatch(setSocket(null));
     };
   }, [selectedNetwork, dispatch]);
 
@@ -223,20 +219,20 @@ function App() {
 
         {selectedNetwork === 'preview' && (
           <PreviewNetwork
-            recipientAddress={recipientAddress}
-            recipientSeedPhrase={recipientSeedPhrase}
+            recipientAddress={localRecipientAddress}
+            recipientSeedPhrase={localRecipientSeedPhrase}
             socket={socket}
-            setManualRecipientAddress={setManualRecipientAddress}
+            setManualRecipientAddress={(address) => dispatch(setManualRecipientAddress(address))}
             manualRecipientAddress={manualRecipientAddress}
           />
         )}
 
         {selectedNetwork === 'local' && (
           <LocalNetwork
-            walletAddress={walletAddress}
-            walletSeedPhrase={walletSeedPhrase}
-            recipientAddress={recipientAddress}
-            recipientSeedPhrase={recipientSeedPhrase}
+            walletAddress={localWalletAddress}
+            walletSeedPhrase={localWalletSeedPhrase}
+            recipientAddress={localRecipientAddress}
+            recipientSeedPhrase={localRecipientSeedPhrase}
             socket={socket}
             previewLucid={previewLucid}
           />

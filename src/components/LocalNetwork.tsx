@@ -3,6 +3,7 @@ import { Button } from "./Button";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setSignStatus, setIsSigning } from "../store/transactionSlice";
 import { setWalletError } from "../store/errorSlice";
+import { Lucid, fromText, Emulator } from "@lucid-evolution/lucid";
 
 interface LocalNetworkProps {
   walletAddress: string | null;
@@ -27,6 +28,38 @@ export function LocalNetwork({
   const pendingTransaction = useAppSelector(state => state.transaction.pendingTransaction);
   const isSigning = useAppSelector(state => state.transaction.isSigning);
   const signStatus = useAppSelector(state => state.transaction.signStatus);
+
+  const handleSignup = async () => {
+    if (!socket || !walletAddress || !walletSeedPhrase || !recipientAddress) {
+      console.error("Missing required data for signup");
+      return;
+    }
+
+    try {
+      // Create payload with recipient address
+      const payload = fromText(JSON.stringify({
+        recipient: recipientAddress,
+        extraMsg: "this is another field"
+      }));
+
+      // Initialize Lucid for signing
+      const lucid = await Lucid(new Emulator([]), "Preview");
+      lucid.selectWallet.fromSeed(walletSeedPhrase);
+
+      // Sign the payload
+      const signedMessage = await lucid.wallet().signMessage(walletAddress, payload);
+
+      // Send signup request
+      socket.send(JSON.stringify({
+        type: "signup",
+        address: walletAddress,
+        signedMessage,
+        payload
+      }));
+    } catch (error) {
+      console.error("Error during signup:", error);
+    }
+  };
 
   const onSign = async () => {
     if (!socket || !pendingTransaction || !previewLucid) {
@@ -55,23 +88,12 @@ export function LocalNetwork({
 
   return (
     <>
-      {walletAddress && walletSeedPhrase && (
+      {walletAddress && walletSeedPhrase && recipientAddress && (
         <Card>
           <h3>Your Wallet</h3>
           <p>Address: {walletAddress}</p>
           <p>Seed Phrase: {walletSeedPhrase}</p>
-          <Button
-            onClick={() => {
-              if (socket) {
-                socket.send(JSON.stringify({
-                  type: "signup",
-                  data: {
-                    address: walletAddress,
-                  },
-                }));
-              }
-            }}
-          >
+          <Button onClick={handleSignup}>
             Sign Up
           </Button>
         </Card>
@@ -82,20 +104,6 @@ export function LocalNetwork({
           <h3>Recipient Wallet</h3>
           <p>Address: {recipientAddress}</p>
           <p>Seed Phrase: {recipientSeedPhrase}</p>
-          <Button
-            onClick={() => {
-              if (socket) {
-                socket.send(JSON.stringify({
-                  type: "signup",
-                  data: {
-                    address: recipientAddress,
-                  },
-                }));
-              }
-            }}
-          >
-            Sign Up
-          </Button>
         </Card>
       )}
 

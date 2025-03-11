@@ -5,6 +5,7 @@ import faucetReducer from './faucetSlice';
 import errorReducer from './errorSlice';
 import ceremonyReducer from './ceremonySlice';
 import networkReducer from './networkSlice';
+import walletReducer from './walletSlice';
 
 export const store = configureStore({
     reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
         error: errorReducer,
         ceremony: ceremonyReducer,
         network: networkReducer,
+        wallet: walletReducer,
     },
 });
 
