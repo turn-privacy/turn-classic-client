@@ -6,6 +6,7 @@ import { setWalletError, clearWalletError } from "./store/errorSlice";
 import { setWalletSelectList, setPreviewWallet, setPreviewAddress, setWalletBalance } from "./store/networkSlice";
 import { Card } from "./components/Card";
 import { Button } from "./components/Button";
+import { Modal } from "./components/Modal";
 import { Blockfrost, Lucid } from "@lucid-evolution/lucid";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [balance, setBalance] = useState<bigint | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Effect to get available wallets
   useEffect(() => {
@@ -95,8 +97,19 @@ function App() {
             <h3>Connected Wallet</h3>
             <p>Address: {walletAddress}</p>
             <p>Balance: {balance ? Number(balance) / 1000000 : 0} ADA</p>
+            <Button
+              onClick={() => setIsModalOpen(true)}
+              style={{ marginTop: '1rem', width: '100%' }}
+            >
+              Sign Up
+            </Button>
           </Card>
         )}
+
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <h2>Sign Up</h2>
+          {/* Modal content will go here */}
+        </Modal>
       </main>
     </div>
   );
