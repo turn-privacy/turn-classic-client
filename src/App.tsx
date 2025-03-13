@@ -11,7 +11,7 @@ import { PreviewNetwork } from "./components/PreviewNetwork";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { faucetSuccess } from "./store/faucetSlice";
 import { setWalletError, clearWalletError } from "./store/errorSlice";
-import { setSignStatus, setIsSigning, setPendingTransaction, resetTransactionState } from "./store/transactionSlice";
+import { setSignStatus, setPendingTransaction, resetTransactionState } from "./store/transactionSlice";
 import {
     setParticipantQueue,
     ceremonyConcludedSuccess,
@@ -19,9 +19,7 @@ import {
     setCeremonyFailure
 } from "./store/ceremonySlice";
 import {
-    setSelectedNetwork,
     setWalletSelectList,
-    setPreviewWallet,
     setPreviewWalletApi,
     setPreviewLucid,
     setPreviewAddress,
