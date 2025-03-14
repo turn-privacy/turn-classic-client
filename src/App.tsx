@@ -146,6 +146,23 @@ function App() {
       setCeremoniesError(error instanceof Error ? error.message : "Failed to fetch ceremonies");
     }
   };
+
+  const handleSignCeremony = async (ceremonyId: string) => {
+    const ceremony = ceremonies.find((c: any) => c.id === ceremonyId);
+    const witness = await lucid.fromTx(ceremony.transaction).partialSign.withWallet();
+    console.log("witness", witness);
+    const response = await fetch('http://localhost:8000/submit_signature', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: ceremonyId, witness })
+    });
+    if (!response.ok) {
+      throw new Error('Failed to submit signature');
+    }
+    console.log("Signature submitted successfully");
+  }
   
   return (
     <div style={styles.container}>
@@ -282,9 +299,16 @@ function App() {
                     marginBottom: '0.5rem',
                     borderRadius: '4px'
                   }}>
+                    {
+                      ceremony.participants.map((participant: any) => participant.address).includes(walletAddress) && (
+                        <Button onClick={() => handleSignCeremony(ceremony.id)}>Sign Ceremony</Button>
+                      )
+                    }
+
                     <p><strong>Ceremony ID:</strong> {ceremony.id}</p>
                     <p><strong>Participants:</strong> {ceremony.participants.length}</p>
                     <p><strong>Witnesses:</strong> {ceremony.witnesses.length}</p>
+                    <p><strong>Transaction:</strong> {ceremony.transaction}</p>
                     <div style={{ marginTop: '0.5rem' }}>
                       <p><strong>Participants:</strong></p>
                       {ceremony.participants.map((participant: any, pIndex: number) => (
