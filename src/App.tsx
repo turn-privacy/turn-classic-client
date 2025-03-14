@@ -29,6 +29,8 @@ function App() {
   const [ceremoniesError, setCeremoniesError] = useState<string | null>(null);
   const [pendingCeremony, setPendingCeremony] = useState<any | null>(null);
   const [isPendingCeremonyModalOpen, setIsPendingCeremonyModalOpen] = useState(false);
+  const [hasSignedCeremony, setHasSignedCeremony] = useState(false);
+  const [ceremonyStatus, setCeremonyStatus] = useState<string | null>(null);
 
   // Effect to get available wallets
   useEffect(() => {
@@ -121,23 +123,6 @@ function App() {
     }
   };
 
-  const handleSignCeremony = async (ceremonyId: string) => {
-    const ceremony = ceremonies.find((c: any) => c.id === ceremonyId);
-    const witness = await lucid.fromTx(ceremony.transaction).partialSign.withWallet();
-    console.log("witness", witness);
-    const response = await fetch('http://localhost:8000/submit_signature', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ id: ceremonyId, witness })
-    });
-    if (!response.ok) {
-      throw new Error('Failed to submit signature');
-    }
-    console.log("Signature submitted successfully");
-  }
-
   // Effect to poll for queue and ceremonies data
   useEffect(() => {
     // Initial fetch
@@ -180,8 +165,11 @@ function App() {
   // Effect to check for ceremonies that need signing
   useEffect(() => {
     if (!walletAddress || ceremonies.length === 0) {
-      setPendingCeremony(null);
-      setIsPendingCeremonyModalOpen(false);
+      // Only reset if we haven't signed yet
+      if (!hasSignedCeremony) {
+        setPendingCeremony(null);
+        setIsPendingCeremonyModalOpen(false);
+      }
       return;
     }
 
@@ -195,11 +183,83 @@ function App() {
     if (ceremonyNeedingSigning) {
       setPendingCeremony(ceremonyNeedingSigning);
       setIsPendingCeremonyModalOpen(true);
-    } else {
+    } else if (!hasSignedCeremony) {
+      // Only close the modal if we haven't signed yet
       setPendingCeremony(null);
       setIsPendingCeremonyModalOpen(false);
     }
-  }, [ceremonies, walletAddress]);
+  }, [ceremonies, walletAddress, hasSignedCeremony]); // Added hasSignedCeremony to dependencies
+
+  // Effect to poll ceremony status after signing
+  useEffect(() => {
+    if (!hasSignedCeremony || !pendingCeremony) return;
+
+    const pollStatus = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/ceremony_status?id=${pendingCeremony.id}`);
+        const status = await response.text();
+        setCeremonyStatus(status);
+
+        // If the ceremony is on-chain, stop polling
+        if (status === 'on-chain') {
+          return true;
+        }
+
+        // If the ceremony is still pending, fetch latest witness count
+        if (status === 'pending') {
+          const ceremoniesResponse = await fetch('http://localhost:8000/list_active_ceremonies');
+          if (ceremoniesResponse.ok) {
+            const ceremonies = await ceremoniesResponse.json();
+            const updatedCeremony = ceremonies.find((c: any) => c.id === pendingCeremony.id);
+            if (updatedCeremony) {
+              setPendingCeremony(updatedCeremony);
+            }
+          }
+        }
+
+        return false;
+      } catch (error) {
+        console.error("Failed to fetch ceremony status:", error);
+        return false;
+      }
+    };
+
+    // Poll immediately
+    pollStatus();
+
+    // Set up polling interval
+    const intervalId = setInterval(async () => {
+      const shouldStop = await pollStatus();
+      if (shouldStop) {
+        clearInterval(intervalId);
+      }
+    }, POLLING_INTERVAL);
+
+    // Cleanup
+    return () => clearInterval(intervalId);
+  }, [hasSignedCeremony, pendingCeremony]);
+
+  const handleSignCeremony = async (ceremonyId: string) => {
+    try {
+      const ceremony = ceremonies.find((c: any) => c.id === ceremonyId);
+      const witness = await lucid.fromTx(ceremony.transaction).partialSign.withWallet();
+      console.log("witness", witness);
+      const response = await fetch('http://localhost:8000/submit_signature', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: ceremonyId, witness })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to submit signature');
+      }
+      console.log("Signature submitted successfully");
+      setHasSignedCeremony(true);
+    } catch (error) {
+      console.error("Failed to sign ceremony:", error);
+    }
+  }
 
   return (
     <div style={styles.container}>
@@ -344,6 +404,19 @@ function App() {
                     <p><strong>Ceremony ID:</strong> {ceremony.id}</p>
                     <p><strong>Participants:</strong> {ceremony.participants.length}</p>
                     <p><strong>Witnesses:</strong> {ceremony.witnesses.length}</p>
+                    {ceremony.transactionHash && (
+                      <p>
+                        <strong>Transaction:</strong>{' '}
+                        <a 
+                          href={`https://preview.cardanoscan.io/transaction/${ceremony.transactionHash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: '#00aaff', textDecoration: 'underline' }}
+                        >
+                          {ceremony.transactionHash}
+                        </a>
+                      </p>
+                    )}
                     <p><strong>Transaction:</strong> {ceremony.transaction}</p>
                     <div style={{ marginTop: '0.5rem' }}>
                       <p><strong>Participants:</strong></p>
@@ -365,33 +438,75 @@ function App() {
           </div>
         </Modal>
 
-        <Modal isOpen={isPendingCeremonyModalOpen} onClose={() => setIsPendingCeremonyModalOpen(false)}>
-          <h2>Ceremony Requires Your Signature</h2>
+        <Modal isOpen={isPendingCeremonyModalOpen} onClose={() => {
+          setIsPendingCeremonyModalOpen(false);
+          setHasSignedCeremony(false);
+          setCeremonyStatus(null);
+        }}>
+          <h2>{hasSignedCeremony ? 'Ceremony Status' : 'Ceremony Requires Your Signature'}</h2>
           {pendingCeremony && (
             <div style={{ marginBottom: '1rem' }}>
               <p><strong>Ceremony ID:</strong> {pendingCeremony.id}</p>
               <p><strong>Total Participants:</strong> {pendingCeremony.participants.length}</p>
               <p><strong>Signatures Collected:</strong> {pendingCeremony.witnesses.length}</p>
-              <div style={{ marginTop: '1rem' }}>
-                <p><strong>Participants:</strong></p>
-                {pendingCeremony.participants.map((participant: any, pIndex: number) => (
-                  <div key={pIndex} style={{ 
-                    marginLeft: '1rem',
-                    padding: '0.5rem',
-                    borderLeft: '2px solid #ccc',
-                    backgroundColor: participant.address === walletAddress ? '#f0f8ff' : 'transparent'
-                  }}>
-                    <p>Address: {participant.address}</p>
-                    <p>Recipient: {participant.recipient}</p>
+              {pendingCeremony.transactionHash && (
+                <p>
+                  <strong>Transaction:</strong>{' '}
+                  <a 
+                    href={`https://preview.cardanoscan.io/transaction/${pendingCeremony.transactionHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#00aaff', textDecoration: 'underline' }}
+                  >
+                    {pendingCeremony.transactionHash}
+                  </a>
+                </p>
+              )}
+              {hasSignedCeremony ? (
+                <div style={{ 
+                  marginTop: '1rem',
+                  padding: '1rem',
+                  backgroundColor: ceremonyStatus === 'on-chain' ? '#e8f5e9' : '#fff3e0',
+                  borderRadius: '4px',
+                  textAlign: 'center'
+                }}>
+                  {ceremonyStatus === 'pending' && (
+                    <>
+                      <p>Waiting for other participants to sign...</p>
+                      <p>Signatures collected: {pendingCeremony.witnesses.length} of {pendingCeremony.participants.length + 1}</p>
+                    </>
+                  )}
+                  {ceremonyStatus === 'on-chain' && (
+                    <p style={{ color: '#2e7d32' }}>Transaction successfully submitted to chain!</p>
+                  )}
+                  {ceremonyStatus === 'could not find' && (
+                    <p style={{ color: '#d32f2f' }}>Error: Ceremony not found</p>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div style={{ marginTop: '1rem' }}>
+                    <p><strong>Participants:</strong></p>
+                    {pendingCeremony.participants.map((participant: any, pIndex: number) => (
+                      <div key={pIndex} style={{ 
+                        marginLeft: '1rem',
+                        padding: '0.5rem',
+                        borderLeft: '2px solid #ccc',
+                        backgroundColor: participant.address === walletAddress ? '#f0f8ff' : 'transparent'
+                      }}>
+                        <p>Address: {participant.address}</p>
+                        <p>Recipient: {participant.recipient}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <Button 
-                onClick={() => handleSignCeremony(pendingCeremony.id)}
-                style={{ width: '100%', marginTop: '1rem', backgroundColor: '#4CAF50', color: 'white' }}
-              >
-                Sign Ceremony
-              </Button>
+                  <Button 
+                    onClick={() => handleSignCeremony(pendingCeremony.id)}
+                    style={{ width: '100%', marginTop: '1rem', backgroundColor: '#4CAF50', color: 'white' }}
+                  >
+                    Sign Ceremony
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </Modal>
