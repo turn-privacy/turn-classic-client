@@ -210,6 +210,7 @@ function App() {
             <h3>Connected Wallet</h3>
             <p>Address: {walletAddress}</p>
             <p>Balance: {balance ? Number(balance) / 1000000 : 0} ADA</p>
+            <p>Current Queue Size: {queue.length} participant{queue.length !== 1 ? 's' : ''}</p>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
               <Button
                 onClick={() => setIsModalOpen(true)}
