@@ -9,7 +9,7 @@ import { Button } from "./components/Button";
 import { Modal } from "./components/Modal";
 import { Blockfrost, Lucid, fromText } from "@lucid-evolution/lucid";
 
-const POLLING_INTERVAL = 30000; // 30 seconds in milliseconds
+const POLLING_INTERVAL = 10000; // 30 seconds in milliseconds
 
 function App() {
   const dispatch = useAppDispatch();
@@ -27,6 +27,8 @@ function App() {
   const [isCeremoniesModalOpen, setIsCeremoniesModalOpen] = useState(false);
   const [ceremonies, setCeremonies] = useState<any[]>([]);
   const [ceremoniesError, setCeremoniesError] = useState<string | null>(null);
+  const [pendingCeremony, setPendingCeremony] = useState<any | null>(null);
+  const [isPendingCeremonyModalOpen, setIsPendingCeremonyModalOpen] = useState(false);
 
   // Effect to get available wallets
   useEffect(() => {
@@ -174,6 +176,30 @@ function App() {
     // Cleanup on unmount
     return () => clearInterval(intervalId);
   }, []); // Empty dependency array since we want this to run once on mount
+
+  // Effect to check for ceremonies that need signing
+  useEffect(() => {
+    if (!walletAddress || ceremonies.length === 0) {
+      setPendingCeremony(null);
+      setIsPendingCeremonyModalOpen(false);
+      return;
+    }
+
+    // Find the first ceremony where the user is a participant and hasn't signed yet
+    const ceremonyNeedingSigning = ceremonies.find(ceremony => {
+      const isParticipant = ceremony.participants.some((p: any) => p.address === walletAddress);
+      const hasNotSigned = !ceremony.witnesses.includes(walletAddress);
+      return isParticipant && hasNotSigned;
+    });
+
+    if (ceremonyNeedingSigning) {
+      setPendingCeremony(ceremonyNeedingSigning);
+      setIsPendingCeremonyModalOpen(true);
+    } else {
+      setPendingCeremony(null);
+      setIsPendingCeremonyModalOpen(false);
+    }
+  }, [ceremonies, walletAddress]);
 
   return (
     <div style={styles.container}>
@@ -337,6 +363,37 @@ function App() {
               </div>
             )}
           </div>
+        </Modal>
+
+        <Modal isOpen={isPendingCeremonyModalOpen} onClose={() => setIsPendingCeremonyModalOpen(false)}>
+          <h2>Ceremony Requires Your Signature</h2>
+          {pendingCeremony && (
+            <div style={{ marginBottom: '1rem' }}>
+              <p><strong>Ceremony ID:</strong> {pendingCeremony.id}</p>
+              <p><strong>Total Participants:</strong> {pendingCeremony.participants.length}</p>
+              <p><strong>Signatures Collected:</strong> {pendingCeremony.witnesses.length}</p>
+              <div style={{ marginTop: '1rem' }}>
+                <p><strong>Participants:</strong></p>
+                {pendingCeremony.participants.map((participant: any, pIndex: number) => (
+                  <div key={pIndex} style={{ 
+                    marginLeft: '1rem',
+                    padding: '0.5rem',
+                    borderLeft: '2px solid #ccc',
+                    backgroundColor: participant.address === walletAddress ? '#f0f8ff' : 'transparent'
+                  }}>
+                    <p>Address: {participant.address}</p>
+                    <p>Recipient: {participant.recipient}</p>
+                  </div>
+                ))}
+              </div>
+              <Button 
+                onClick={() => handleSignCeremony(pendingCeremony.id)}
+                style={{ width: '100%', marginTop: '1rem', backgroundColor: '#4CAF50', color: 'white' }}
+              >
+                Sign Ceremony
+              </Button>
+            </div>
+          )}
         </Modal>
       </main>
     </div>
