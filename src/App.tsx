@@ -9,6 +9,8 @@ import { Button } from "./components/Button";
 import { Modal } from "./components/Modal";
 import { Blockfrost, Lucid, fromText } from "@lucid-evolution/lucid";
 
+const POLLING_INTERVAL = 30000; // 30 seconds in milliseconds
+
 function App() {
   const dispatch = useAppDispatch();
   const walletSelectList = useAppSelector(state => state.network.walletSelectList);
@@ -117,36 +119,6 @@ function App() {
     }
   };
 
-  const handleViewQueue = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/queue');
-      if (!response.ok) {
-        throw new Error('Failed to fetch queue');
-      }
-      const data = await response.json();
-      setQueue(data);
-      setQueueError(null);
-    } catch (error) {
-      console.error("Failed to fetch queue:", error);
-      setQueueError(error instanceof Error ? error.message : "Failed to fetch queue");
-    }
-  };
-
-  const handleViewCeremonies = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/list_active_ceremonies');
-      if (!response.ok) {
-        throw new Error('Failed to fetch ceremonies');
-      }
-      const data = await response.json();
-      setCeremonies(data);
-      setCeremoniesError(null);
-    } catch (error) {
-      console.error("Failed to fetch ceremonies:", error);
-      setCeremoniesError(error instanceof Error ? error.message : "Failed to fetch ceremonies");
-    }
-  };
-
   const handleSignCeremony = async (ceremonyId: string) => {
     const ceremony = ceremonies.find((c: any) => c.id === ceremonyId);
     const witness = await lucid.fromTx(ceremony.transaction).partialSign.withWallet();
@@ -163,7 +135,46 @@ function App() {
     }
     console.log("Signature submitted successfully");
   }
-  
+
+  // Effect to poll for queue and ceremonies data
+  useEffect(() => {
+    // Initial fetch
+    const fetchData = async () => {
+      try {
+        // Fetch queue
+        const queueResponse = await fetch('http://localhost:8000/queue');
+        if (queueResponse.ok) {
+          const queueData = await queueResponse.json();
+          setQueue(queueData);
+          setQueueError(null);
+        }
+
+        // Fetch ceremonies
+        const ceremoniesResponse = await fetch('http://localhost:8000/list_active_ceremonies');
+        if (ceremoniesResponse.ok) {
+          const ceremoniesData = await ceremoniesResponse.json();
+          setCeremonies(ceremoniesData);
+          setCeremoniesError(null);
+        }
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+        if (error instanceof Error) {
+          setQueueError(error.message);
+          setCeremoniesError(error.message);
+        }
+      }
+    };
+
+    // Fetch immediately
+    fetchData();
+
+    // Set up polling interval
+    const intervalId = setInterval(fetchData, POLLING_INTERVAL);
+
+    // Cleanup on unmount
+    return () => clearInterval(intervalId);
+  }, []); // Empty dependency array since we want this to run once on mount
+
   return (
     <div style={styles.container}>
       <main style={styles.main}>
@@ -209,7 +220,6 @@ function App() {
               <Button
                 onClick={() => {
                   setIsQueueModalOpen(true);
-                  handleViewQueue();
                 }}
                 style={{ flex: 1 }}
               >
@@ -218,7 +228,6 @@ function App() {
               <Button
                 onClick={() => {
                   setIsCeremoniesModalOpen(true);
-                  handleViewCeremonies();
                 }}
                 style={{ flex: 1 }}
               >
