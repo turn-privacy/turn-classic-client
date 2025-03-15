@@ -1,6 +1,11 @@
 import { styles } from "../styles";
-import { ButtonProps } from "../types/props";
 
+interface ButtonProps {
+  onClick: () => void;
+  disabled?: boolean;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+}
 
 export const Button: React.FC<ButtonProps> = ({ onClick, disabled, children, style = {} }) => (
   <button

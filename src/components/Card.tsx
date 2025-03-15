@@ -1,5 +1,11 @@
 import { styles } from "../styles";
-import { CardProps } from "../types/props";
+
+interface CardProps {
+  title?: string;
+  children: React.ReactNode;
+  error?: boolean;
+  style?: React.CSSProperties;
+}
 
 export const Card: React.FC<CardProps> = ({ title, children, error, style = {} }) => (
   <div style={{ ...styles.card, ...(error ? styles.errorCard : {}), ...style }}>

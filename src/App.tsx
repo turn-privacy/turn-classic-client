@@ -4,6 +4,7 @@ import { styles } from "./styles";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { setWalletError, clearWalletError } from "./store/errorSlice";
 import { setWalletSelectList, setPreviewWallet, setPreviewAddress, setWalletBalance } from "./store/networkSlice";
+import { setQueue, setQueueError } from "./store/queueSlice";
 import { Card } from "./components/Card";
 import { Button } from "./components/Button";
 import { Modal } from "./components/Modal";
@@ -14,21 +15,28 @@ const POLLING_INTERVAL = 10000; // 30 seconds in milliseconds
 function App() {
   const dispatch = useAppDispatch();
   const walletSelectList = useAppSelector(state => state.network.walletSelectList);
+  const queue = useAppSelector(state => state.queue.participants);
+  const queueError = useAppSelector(state => state.queue.error);
+  
+  // group 1
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [balance, setBalance] = useState<bigint | null>(null);
+  // group 2
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
   const [recipientAddress, setRecipientAddress] = useState<string>("");
   const [signupError, setSignupError] = useState<string | null>(null);
+  // group 3
   const [lucid, setLucid] = useState<any | null>(null);
   const [isQueueModalOpen, setIsQueueModalOpen] = useState(false);
-  const [queue, setQueue] = useState<any[]>([]);
-  const [queueError, setQueueError] = useState<string | null>(null);
+  // group 4
   const [isCeremoniesModalOpen, setIsCeremoniesModalOpen] = useState(false);
   const [ceremonies, setCeremonies] = useState<any[]>([]);
+  // group 5
   const [ceremoniesError, setCeremoniesError] = useState<string | null>(null);
   const [pendingCeremony, setPendingCeremony] = useState<any | null>(null);
   const [isPendingCeremonyModalOpen, setIsPendingCeremonyModalOpen] = useState(false);
+  // group 6
   const [hasSignedCeremony, setHasSignedCeremony] = useState(false);
   const [ceremonyStatus, setCeremonyStatus] = useState<string | null>(null);
 
@@ -132,8 +140,8 @@ function App() {
         const queueResponse = await fetch('http://localhost:8000/queue');
         if (queueResponse.ok) {
           const queueData = await queueResponse.json();
-          setQueue(queueData);
-          setQueueError(null);
+          dispatch(setQueue(queueData));
+          dispatch(setQueueError(null));
         }
 
         // Fetch ceremonies
@@ -146,7 +154,7 @@ function App() {
       } catch (error) {
         console.error("Failed to fetch data:", error);
         if (error instanceof Error) {
-          setQueueError(error.message);
+          dispatch(setQueueError(error.message));
           setCeremoniesError(error.message);
         }
       }
