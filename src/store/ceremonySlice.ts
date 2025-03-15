@@ -15,11 +15,17 @@ interface Ceremony {
 interface CeremonyState {
     ceremonies: Ceremony[];
     error: string | null;
+    pendingCeremony: Ceremony | null;
+    ceremonyStatus: string | null;
+    hasSignedCeremony: boolean;
 }
 
 const initialState: CeremonyState = {
     ceremonies: [],
     error: null,
+    pendingCeremony: null,
+    ceremonyStatus: null,
+    hasSignedCeremony: false,
 };
 
 export const ceremonySlice = createSlice({
@@ -43,6 +49,20 @@ export const ceremonySlice = createSlice({
                 state.ceremonies[index] = action.payload;
             }
         },
+        setPendingCeremony: (state, action: PayloadAction<Ceremony | null>) => {
+            state.pendingCeremony = action.payload;
+        },
+        setCeremonyStatus: (state, action: PayloadAction<string | null>) => {
+            state.ceremonyStatus = action.payload;
+        },
+        setHasSignedCeremony: (state, action: PayloadAction<boolean>) => {
+            state.hasSignedCeremony = action.payload;
+        },
+        resetCeremonyStatus: (state) => {
+            state.pendingCeremony = null;
+            state.ceremonyStatus = null;
+            state.hasSignedCeremony = false;
+        },
     }
 });
 
@@ -51,6 +71,10 @@ export const {
     setCeremonyError,
     clearCeremonies,
     updateCeremony,
+    setPendingCeremony,
+    setCeremonyStatus,
+    setHasSignedCeremony,
+    resetCeremonyStatus,
 } = ceremonySlice.actions;
 
 export default ceremonySlice.reducer; 
