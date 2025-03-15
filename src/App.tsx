@@ -17,7 +17,7 @@ function App() {
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [balance, setBalance] = useState<bigint | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
   const [recipientAddress, setRecipientAddress] = useState<string>("");
   const [signupError, setSignupError] = useState<string | null>(null);
   const [lucid, setLucid] = useState<any | null>(null);
@@ -114,7 +114,7 @@ function App() {
       }
 
       // Success! Close modal and reset state
-      setIsModalOpen(false);
+      setIsSignupModalOpen(false);
       setRecipientAddress("");
       setSignupError(null);
     } catch (error) {
@@ -299,7 +299,7 @@ function App() {
             <p>Current Queue Size: {queue.length} participant{queue.length !== 1 ? 's' : ''}</p>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
               <Button
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => setIsSignupModalOpen(true)}
                 style={{ flex: 1 }}
               >
                 Sign Up
@@ -324,7 +324,7 @@ function App() {
           </Card>
         )}
 
-        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <Modal isOpen={isSignupModalOpen} onClose={() => setIsSignupModalOpen(false)}>
           <h2>Sign Up</h2>
           <div style={{ marginBottom: '1rem' }}>
             <input
@@ -370,7 +370,6 @@ function App() {
                     borderRadius: '4px'
                   }}>
                     <p><strong>Address:</strong> {participant.address}</p>
-                    <p><strong>Recipient:</strong> {participant.recipient}</p>
                   </div>
                 ))}
               </div>
@@ -427,7 +426,6 @@ function App() {
                           borderLeft: '2px solid #ccc'
                         }}>
                           <p>Address: {participant.address}</p>
-                          <p>Recipient: {participant.recipient}</p>
                         </div>
                       ))}
                     </div>
@@ -495,7 +493,6 @@ function App() {
                         backgroundColor: participant.address === walletAddress ? '#f0f8ff' : 'transparent'
                       }}>
                         <p>Address: {participant.address}</p>
-                        <p>Recipient: {participant.recipient}</p>
                       </div>
                     ))}
                   </div>
