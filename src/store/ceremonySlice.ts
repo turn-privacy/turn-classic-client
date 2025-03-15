@@ -1,63 +1,56 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface CeremonyFailure {
-    reason: string;
-    msg: string;
+interface Participant {
+    address: string;
+}
+
+interface Ceremony {
+    id: string;
+    participants: Participant[];
+    witnesses: string[];
+    transaction: string;
+    transactionHash?: string;
 }
 
 interface CeremonyState {
-    ceremonyConcluded: boolean;
-    ceremonyTxId: string | null;
-    ceremonyFailure: CeremonyFailure | null;
-    participantQueue: any[];
+    ceremonies: Ceremony[];
+    error: string | null;
 }
 
 const initialState: CeremonyState = {
-    ceremonyConcluded: false,
-    ceremonyTxId: null,
-    ceremonyFailure: null,
-    participantQueue: []
+    ceremonies: [],
+    error: null,
 };
 
 export const ceremonySlice = createSlice({
     name: 'ceremony',
     initialState,
     reducers: {
-        setCeremonyConcluded: (state, action: PayloadAction<boolean>) => {
-            state.ceremonyConcluded = action.payload;
+        setCeremonies: (state, action: PayloadAction<Ceremony[]>) => {
+            state.ceremonies = action.payload;
+            state.error = null;
         },
-        setCeremonyTxId: (state, action: PayloadAction<string | null>) => {
-            state.ceremonyTxId = action.payload;
+        setCeremonyError: (state, action: PayloadAction<string | null>) => {
+            state.error = action.payload;
         },
-        setCeremonyFailure: (state, action: PayloadAction<CeremonyFailure | null>) => {
-            state.ceremonyFailure = action.payload;
+        clearCeremonies: (state) => {
+            state.ceremonies = [];
+            state.error = null;
         },
-        setParticipantQueue: (state, action: PayloadAction<any[]>) => {
-            state.participantQueue = action.payload;
+        updateCeremony: (state, action: PayloadAction<Ceremony>) => {
+            const index = state.ceremonies.findIndex(c => c.id === action.payload.id);
+            if (index !== -1) {
+                state.ceremonies[index] = action.payload;
+            }
         },
-        // Convenience action for ceremony success
-        ceremonyConcludedSuccess: (state, action: PayloadAction<{ tx: string }>) => {
-            state.ceremonyConcluded = true;
-            state.ceremonyTxId = action.payload.tx;
-            state.participantQueue = [];
-            state.ceremonyFailure = null;
-        },
-        // Convenience action for ceremony failure
-        ceremonyFailedReset: (state, action: PayloadAction<CeremonyFailure>) => {
-            state.ceremonyConcluded = false;
-            state.ceremonyTxId = null;
-            state.ceremonyFailure = action.payload;
-        }
     }
 });
 
 export const {
-    setCeremonyConcluded,
-    setCeremonyTxId,
-    setCeremonyFailure,
-    setParticipantQueue,
-    ceremonyConcludedSuccess,
-    ceremonyFailedReset
+    setCeremonies,
+    setCeremonyError,
+    clearCeremonies,
+    updateCeremony,
 } = ceremonySlice.actions;
 
 export default ceremonySlice.reducer; 

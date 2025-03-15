@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { setWalletError, clearWalletError } from "./store/errorSlice";
 import { setWalletSelectList, setPreviewWallet, setPreviewAddress, setWalletBalance } from "./store/networkSlice";
 import { setQueue, setQueueError } from "./store/queueSlice";
+import { setCeremonies, setCeremonyError, updateCeremony } from "./store/ceremonySlice";
 import { Card } from "./components/Card";
 import { Button } from "./components/Button";
 import { Modal } from "./components/Modal";
@@ -17,6 +18,8 @@ function App() {
   const walletSelectList = useAppSelector(state => state.network.walletSelectList);
   const queue = useAppSelector(state => state.queue.participants);
   const queueError = useAppSelector(state => state.queue.error);
+  const ceremonies = useAppSelector(state => state.ceremony.ceremonies);
+  const ceremoniesError = useAppSelector(state => state.ceremony.error);
   
   // group 1
   const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
@@ -31,9 +34,7 @@ function App() {
   const [isQueueModalOpen, setIsQueueModalOpen] = useState(false);
   // group 4
   const [isCeremoniesModalOpen, setIsCeremoniesModalOpen] = useState(false);
-  const [ceremonies, setCeremonies] = useState<any[]>([]);
   // group 5
-  const [ceremoniesError, setCeremoniesError] = useState<string | null>(null);
   const [pendingCeremony, setPendingCeremony] = useState<any | null>(null);
   const [isPendingCeremonyModalOpen, setIsPendingCeremonyModalOpen] = useState(false);
   // group 6
@@ -148,14 +149,14 @@ function App() {
         const ceremoniesResponse = await fetch('http://localhost:8000/list_active_ceremonies');
         if (ceremoniesResponse.ok) {
           const ceremoniesData = await ceremoniesResponse.json();
-          setCeremonies(ceremoniesData);
-          setCeremoniesError(null);
+          dispatch(setCeremonies(ceremoniesData));
+          dispatch(setCeremonyError(null));
         }
       } catch (error) {
         console.error("Failed to fetch data:", error);
         if (error instanceof Error) {
           dispatch(setQueueError(error.message));
-          setCeremoniesError(error.message);
+          dispatch(setCeremonyError(error.message));
         }
       }
     };
@@ -196,7 +197,7 @@ function App() {
       setPendingCeremony(null);
       setIsPendingCeremonyModalOpen(false);
     }
-  }, [ceremonies, walletAddress, hasSignedCeremony]); // Added hasSignedCeremony to dependencies
+  }, [ceremonies, walletAddress, hasSignedCeremony]);
 
   // Effect to poll ceremony status after signing
   useEffect(() => {
@@ -221,6 +222,7 @@ function App() {
             const updatedCeremony = ceremonies.find((c: any) => c.id === pendingCeremony.id);
             if (updatedCeremony) {
               setPendingCeremony(updatedCeremony);
+              dispatch(updateCeremony(updatedCeremony));
             }
           }
         }
@@ -245,11 +247,15 @@ function App() {
 
     // Cleanup
     return () => clearInterval(intervalId);
-  }, [hasSignedCeremony, pendingCeremony]);
+  }, [hasSignedCeremony, pendingCeremony, dispatch]);
 
   const handleSignCeremony = async (ceremonyId: string) => {
     try {
       const ceremony = ceremonies.find((c: any) => c.id === ceremonyId);
+      if (!ceremony) {
+        console.error("Ceremony not found");
+        return;
+      }
       const witness = await lucid.fromTx(ceremony.transaction).partialSign.withWallet();
       console.log("witness", witness);
       const response = await fetch('http://localhost:8000/submit_signature', {
