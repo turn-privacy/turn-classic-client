@@ -5,6 +5,7 @@ import ceremonyReducer from './ceremonySlice';
 import queueReducer from './queueSlice';
 import walletReducer from './walletSlice';
 import modalReducer from './modalSlice';
+import signupReducer from './signupSlice';
 
 export const store = configureStore({
     reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
         queue: queueReducer,
         wallet: walletReducer,
         modal: modalReducer,
+        signup: signupReducer,
     },
 });
 

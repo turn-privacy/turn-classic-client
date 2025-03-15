@@ -26,6 +26,11 @@ import {
   setCeremoniesModalOpen,
   setPendingCeremonyModalOpen,
 } from "./store/modalSlice";
+import {
+  setRecipientAddress,
+  setSignupError,
+  resetSignupForm,
+} from "./store/signupSlice";
 import { Card } from "./components/Card";
 import { Button } from "./components/Button";
 import { Modal } from "./components/Modal";
@@ -53,14 +58,9 @@ function App() {
     isCeremoniesModalOpen,
     isPendingCeremonyModalOpen,
   } = useAppSelector(state => state.modal);
+  const recipientAddress = useAppSelector(state => state.signup.recipientAddress);
+  const signupError = useAppSelector(state => state.signup.error);
   
-  // group 2
-  const [recipientAddress, setRecipientAddress] = useState<string>("");
-  const [signupError, setSignupError] = useState<string | null>(null);
-  // group 3
-  // group 4
-  // group 5
-
   // Effect to get available wallets
   useEffect(() => {
     if (typeof (window as any).cardano === 'undefined') {
@@ -109,7 +109,7 @@ function App() {
 
   const handleSignup = async () => {
     if (!walletAddress || !recipientAddress) {
-      setSignupError("Please provide both addresses");
+      dispatch(setSignupError("Please provide both addresses"));
       return;
     }
 
@@ -144,11 +144,10 @@ function App() {
 
       // Success! Close modal and reset state
       dispatch(setSignupModalOpen(false));
-      setRecipientAddress("");
-      setSignupError(null);
+      dispatch(resetSignupForm());
     } catch (error) {
       console.error("Signup failed:", error);
-      setSignupError(error instanceof Error ? error.message : "Failed to sign up");
+      dispatch(setSignupError(error instanceof Error ? error.message : "Failed to sign up"));
     }
   };
 
@@ -354,13 +353,16 @@ function App() {
           </Card>
         )}
 
-        <Modal isOpen={isSignupModalOpen} onClose={() => dispatch(setSignupModalOpen(false))}>
+        <Modal isOpen={isSignupModalOpen} onClose={() => {
+          dispatch(setSignupModalOpen(false));
+          dispatch(resetSignupForm());
+        }}>
           <h2>Sign Up</h2>
           <div style={{ marginBottom: '1rem' }}>
             <input
               type="text"
               value={recipientAddress}
-              onChange={(e) => setRecipientAddress(e.target.value)}
+              onChange={(e) => dispatch(setRecipientAddress(e.target.value))}
               placeholder="Recipient Address"
               style={{
                 width: '100%',
