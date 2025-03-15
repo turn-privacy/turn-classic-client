@@ -14,6 +14,18 @@ import {
   setHasSignedCeremony,
   resetCeremonyStatus
 } from "./store/ceremonySlice";
+import {
+  setSelectedWallet,
+  setAddress,
+  setBalance,
+  setLucid,
+} from "./store/walletSlice";
+import {
+  setSignupModalOpen,
+  setQueueModalOpen,
+  setCeremoniesModalOpen,
+  setPendingCeremonyModalOpen,
+} from "./store/modalSlice";
 import { Card } from "./components/Card";
 import { Button } from "./components/Button";
 import { Modal } from "./components/Modal";
@@ -31,22 +43,23 @@ function App() {
   const pendingCeremony = useAppSelector(state => state.ceremony.pendingCeremony);
   const ceremonyStatus = useAppSelector(state => state.ceremony.ceremonyStatus);
   const hasSignedCeremony = useAppSelector(state => state.ceremony.hasSignedCeremony);
+  const selectedWallet = useAppSelector(state => state.wallet.selectedWallet);
+  const walletAddress = useAppSelector(state => state.wallet.address);
+  const balance = useAppSelector(state => state.wallet.balance);
+  const lucid = useAppSelector(state => state.wallet.lucid);
+  const {
+    isSignupModalOpen,
+    isQueueModalOpen,
+    isCeremoniesModalOpen,
+    isPendingCeremonyModalOpen,
+  } = useAppSelector(state => state.modal);
   
-  // group 1
-  const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [balance, setBalance] = useState<bigint | null>(null);
   // group 2
-  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
   const [recipientAddress, setRecipientAddress] = useState<string>("");
   const [signupError, setSignupError] = useState<string | null>(null);
   // group 3
-  const [lucid, setLucid] = useState<any | null>(null);
-  const [isQueueModalOpen, setIsQueueModalOpen] = useState(false);
   // group 4
-  const [isCeremoniesModalOpen, setIsCeremoniesModalOpen] = useState(false);
   // group 5
-  const [isPendingCeremonyModalOpen, setIsPendingCeremonyModalOpen] = useState(false);
 
   // Effect to get available wallets
   useEffect(() => {
@@ -72,7 +85,7 @@ function App() {
       );
       
       _lucid.selectWallet.fromAPI(api);
-      setLucid(_lucid);
+      dispatch(setLucid(_lucid));
       const address = await _lucid.wallet().address();
       
       // Get wallet balance
@@ -85,9 +98,9 @@ function App() {
       dispatch(setPreviewWallet(walletName));
       dispatch(setPreviewAddress(address));
       dispatch(setWalletBalance({ lovelace: walletBalance }));
-      setSelectedWallet(walletName);
-      setWalletAddress(address);
-      setBalance(walletBalance);
+      dispatch(setSelectedWallet(walletName));
+      dispatch(setAddress(address));
+      dispatch(setBalance(walletBalance));
     } catch (error) {
       console.error("Failed to connect to wallet:", error);
       dispatch(setWalletError("Failed to connect to wallet"));
@@ -130,7 +143,7 @@ function App() {
       }
 
       // Success! Close modal and reset state
-      setIsSignupModalOpen(false);
+      dispatch(setSignupModalOpen(false));
       setRecipientAddress("");
       setSignupError(null);
     } catch (error) {
@@ -184,7 +197,7 @@ function App() {
       // Only reset if we haven't signed yet
       if (!hasSignedCeremony) {
         dispatch(setPendingCeremony(null));
-        setIsPendingCeremonyModalOpen(false);
+        dispatch(setPendingCeremonyModalOpen(false));
       }
       return;
     }
@@ -198,11 +211,11 @@ function App() {
 
     if (ceremonyNeedingSigning) {
       dispatch(setPendingCeremony(ceremonyNeedingSigning));
-      setIsPendingCeremonyModalOpen(true);
+      dispatch(setPendingCeremonyModalOpen(true));
     } else if (!hasSignedCeremony) {
       // Only close the modal if we haven't signed yet
       dispatch(setPendingCeremony(null));
-      setIsPendingCeremonyModalOpen(false);
+      dispatch(setPendingCeremonyModalOpen(false));
     }
   }, [ceremonies, walletAddress, hasSignedCeremony, dispatch]);
 
@@ -316,27 +329,23 @@ function App() {
           <Card>
             <h3>Connected Wallet</h3>
             <p>Address: {walletAddress}</p>
-            <p>Balance: {balance ? Number(balance) / 1000000 : 0} ADA</p>
+            <p>Balance: {balance ? Number(BigInt(balance)) / 1000000 : 0} ADA</p>
             <p>Current Queue Size: {queue.length} participant{queue.length !== 1 ? 's' : ''}</p>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
               <Button
-                onClick={() => setIsSignupModalOpen(true)}
+                onClick={() => dispatch(setSignupModalOpen(true))}
                 style={{ flex: 1 }}
               >
                 Sign Up
               </Button>
               <Button
-                onClick={() => {
-                  setIsQueueModalOpen(true);
-                }}
+                onClick={() => dispatch(setQueueModalOpen(true))}
                 style={{ flex: 1 }}
               >
                 View Queue
               </Button>
               <Button
-                onClick={() => {
-                  setIsCeremoniesModalOpen(true);
-                }}
+                onClick={() => dispatch(setCeremoniesModalOpen(true))}
                 style={{ flex: 1 }}
               >
                 View Ceremonies
@@ -345,7 +354,7 @@ function App() {
           </Card>
         )}
 
-        <Modal isOpen={isSignupModalOpen} onClose={() => setIsSignupModalOpen(false)}>
+        <Modal isOpen={isSignupModalOpen} onClose={() => dispatch(setSignupModalOpen(false))}>
           <h2>Sign Up</h2>
           <div style={{ marginBottom: '1rem' }}>
             <input
@@ -373,7 +382,7 @@ function App() {
           </div>
         </Modal>
 
-        <Modal isOpen={isQueueModalOpen} onClose={() => setIsQueueModalOpen(false)}>
+        <Modal isOpen={isQueueModalOpen} onClose={() => dispatch(setQueueModalOpen(false))}>
           <h2>Current Queue</h2>
           <div style={{ marginBottom: '1rem' }}>
             {queueError ? (
@@ -398,7 +407,7 @@ function App() {
           </div>
         </Modal>
 
-        <Modal isOpen={isCeremoniesModalOpen} onClose={() => setIsCeremoniesModalOpen(false)}>
+        <Modal isOpen={isCeremoniesModalOpen} onClose={() => dispatch(setCeremoniesModalOpen(false))}>
           <h2>Active Ceremonies</h2>
           <div style={{ marginBottom: '1rem' }}>
             {ceremoniesError ? (
@@ -458,7 +467,7 @@ function App() {
         </Modal>
 
         <Modal isOpen={isPendingCeremonyModalOpen} onClose={() => {
-          setIsPendingCeremonyModalOpen(false);
+          dispatch(setPendingCeremonyModalOpen(false));
           dispatch(resetCeremonyStatus());
         }}>
           <h2>{hasSignedCeremony ? 'Ceremony Status' : 'Ceremony Requires Your Signature'}</h2>
