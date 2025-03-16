@@ -34,6 +34,7 @@ import {
 import { Card } from "./components/Card";
 import { Button } from "./components/Button";
 import { Modal } from "./components/Modal";
+import Footer from "./components/Footer";
 import { Blockfrost, Lucid, fromText } from "@lucid-evolution/lucid";
 
 const POLLING_INTERVAL = 10000; // 30 seconds in milliseconds
@@ -539,6 +540,7 @@ function App() {
           )}
         </Modal>
       </main>
+      <Footer />
     </div>
   );
 }
