@@ -39,11 +39,6 @@ button:hover {
   color: #ef4444 !important;
 }
 
-* {
-  font-family: "JetBrains Mono", monospace;
-  letter-spacing: -0.025em;
-}
-
 /* Socials */
 a[href*="discord.gg"],
 a[href*="github.com"] {
@@ -58,7 +53,7 @@ a[href*="github.com"]:hover {
   border-color: #ef4444 !important;
 }
 
-/* Override the global font for specific elements that need JetBrains Mono */
+/* Override font only for specific technical elements */
 .wallet-button-wrapper,
 button,
 input,
