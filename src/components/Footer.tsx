@@ -39,9 +39,9 @@ function Footer() {
             Follow us on
           </h2>
           <img
-            src={twitter} // Ensure this is the correct source for your Twitter logo
+            src={twitter}
             alt="Twitter logo"
-            className="h-8 w-8 object-cover cursor-pointer"
+            className="h-8 w-8 object-cover cursor-pointer hover:opacity-80 transition-opacity duration-200"
           />
         </div>
       </div>
