@@ -1,4 +1,14 @@
+const path = require('path');
+
 module.exports = {
+  style: {
+    postcss: {
+      plugins: [
+        require('tailwindcss'),
+        require('autoprefixer'),
+      ],
+    },
+  },
   webpack: {
     configure: (webpackConfig) => {
       webpackConfig.experiments = {
@@ -18,7 +28,12 @@ module.exports = {
       webpackConfig.resolve = {
         ...webpackConfig.resolve,
         fallback: {
-          buffer: require.resolve("buffer/"),
+          "stream": require.resolve("stream-browserify"),
+          "buffer": require.resolve("buffer/"),
+          "crypto": require.resolve("crypto-browserify"),
+          "process": require.resolve("process/browser"),
+          "path": require.resolve("path-browserify"),
+          "fs": false
         },
       };
 

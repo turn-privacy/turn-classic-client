@@ -1,9 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap');
 @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap");
 
 body {
   margin: 0;
   padding: 0;
-  background: #111827;
+  background-color: black;
+  color: white;
+  font-family: 'Raleway', sans-serif;
+}
+
+.font-dm {
+  font-family: 'DM Sans', serif;
+}
+
+.font-raleway {
+  font-family: 'Raleway', sans-serif;
+}
+
+.font-mono {
   font-family: "JetBrains Mono", monospace;
 }
 
@@ -42,4 +56,14 @@ a[href*="github.com"]:hover {
   opacity: 1;
   color: #ef4444 !important;
   border-color: #ef4444 !important;
+}
+
+/* Override the global font for specific elements that need JetBrains Mono */
+.wallet-button-wrapper,
+button,
+input,
+code,
+pre {
+  font-family: "JetBrains Mono", monospace;
+  letter-spacing: -0.025em;
 }
