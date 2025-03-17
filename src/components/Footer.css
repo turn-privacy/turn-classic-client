@@ -32,13 +32,15 @@
 
 .quick-links {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 12px;
 }
 
 .quick-links h2 {
   font-weight: bold;
   font-size: 18px;
+  margin: 0;
 }
 
 .quick-links a {
@@ -55,13 +57,15 @@
 
 .social-section {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 12px;
 }
 
 .social-section h2 {
   font-weight: bold;
   font-size: 18px;
+  margin: 0;
 }
 
 .social-section img {
