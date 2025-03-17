@@ -34,7 +34,7 @@ import { Card } from "./components/Card";
 import { Button } from "./components/Button";
 import { Modal } from "./components/Modal";
 import Footer from "./components/Footer";
-import { Blockfrost, Lucid, fromText } from "@lucid-evolution/lucid";
+import { Blockfrost, Emulator, Lucid, fromText } from "@lucid-evolution/lucid";
 import { HeadBox } from "./components/HeadBox";
 const POLLING_INTERVAL = 10000; // 30 seconds in milliseconds
 
@@ -80,7 +80,8 @@ function App() {
       
       // Initialize Lucid
       const _lucid = await Lucid(
-        new Blockfrost("https://cardano-preview.blockfrost.io/api/v0", process.env.REACT_APP_BLOCKFROST_API_KEY),
+        // new Blockfrost("https://cardano-preview.blockfrost.io/api/v0", process.env.REACT_APP_BLOCKFROST_API_KEY),
+        new Emulator([]),
         "Preprod"
       );
       
@@ -128,7 +129,7 @@ function App() {
       console.log("signed message", signedMessage);
 
       // Send to API
-      const response = await fetch('http://localhost:8000/signup', {
+      const response = await fetch(`${process.env.REACT_APP_BASE_SERVER_URL}/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +160,7 @@ function App() {
     const fetchData = async () => {
       try {
         // Fetch queue
-        const queueResponse = await fetch('http://localhost:8000/queue');
+        const queueResponse = await fetch(`${process.env.REACT_APP_BASE_SERVER_URL}/queue`);
         if (queueResponse.ok) {
           const queueData = await queueResponse.json();
           dispatch(setQueue(queueData));
@@ -167,7 +168,7 @@ function App() {
         }
 
         // Fetch ceremonies
-        const ceremoniesResponse = await fetch('http://localhost:8000/list_active_ceremonies');
+        const ceremoniesResponse = await fetch(`${process.env.REACT_APP_BASE_SERVER_URL}/list_active_ceremonies`);
         if (ceremoniesResponse.ok) {
           const ceremoniesData = await ceremoniesResponse.json();
           dispatch(setCeremonies(ceremoniesData));
@@ -226,7 +227,7 @@ function App() {
 
     const pollStatus = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/ceremony_status?id=${pendingCeremony.id}`);
+        const response = await fetch(`${process.env.REACT_APP_BASE_SERVER_URL}/ceremony_status?id=${pendingCeremony.id}`);
         const status = await response.text();
         dispatch(setCeremonyStatus(status));
 
@@ -237,7 +238,7 @@ function App() {
 
         // If the ceremony is still pending, fetch latest witness count
         if (status === 'pending') {
-          const ceremoniesResponse = await fetch('http://localhost:8000/list_active_ceremonies');
+          const ceremoniesResponse = await fetch(`${process.env.REACT_APP_BASE_SERVER_URL}/list_active_ceremonies`);
           if (ceremoniesResponse.ok) {
             const ceremonies = await ceremoniesResponse.json();
             const updatedCeremony = ceremonies.find((c: any) => c.id === pendingCeremony.id);
@@ -279,7 +280,7 @@ function App() {
       }
       const witness = await lucid.fromTx(ceremony.transaction).partialSign.withWallet();
       console.log("witness", witness);
-      const response = await fetch('http://localhost:8000/submit_signature', {
+      const response = await fetch(`${process.env.REACT_APP_BASE_SERVER_URL}/submit_signature`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
