@@ -116,8 +116,10 @@ function App() {
     try {
       // Create the payload
       const payload = fromText(JSON.stringify({
+        context: "By signing this message, you express your intention to participate in a Turn Mixing Ceremony. A transaction will be created, and you will be asked to sign it. Failure to do so will result in your wallet being blacklisted from the Turn service. By signing this message, you also confirm that you have backed up the private key of the receiving address.",
         address: walletAddress,
-        recipient: recipientAddress
+        recipient: recipientAddress,
+
       }));
 
       console.log("signing message");
@@ -518,7 +520,7 @@ function App() {
                         marginLeft: '1rem',
                         padding: '0.5rem',
                         borderLeft: '2px solid #ccc',
-                        backgroundColor: participant.address === walletAddress ? '#f0f8ff' : 'transparent'
+                        backgroundColor: participant.address === walletAddress ? 'darkgrey' : 'transparent'
                       }}>
                         <p>Address: {participant.address}</p>
                       </div>

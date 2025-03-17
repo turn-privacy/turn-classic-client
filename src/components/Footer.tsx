@@ -13,7 +13,7 @@ function Footer() {
             alt="logo"
           />
           <h1>
-            Turn Network
+            Turn 
           </h1>
         </div>
 
@@ -60,7 +60,7 @@ function Footer() {
 
       {/* Footer Text */}
       <div className="footer-text">
-        © 2025 Turn Network. All rights reserved. Built on Turn Network.
+        © 2025 Turn. All rights reserved. Built on Cardano.
       </div>
     </footer>
   );
