@@ -16,6 +16,17 @@ module.exports = {
       maxWidth: {
         '5xl': '64rem', // Ensure this matches Figma's max-width
       },
+      colors: {
+        white: {
+          DEFAULT: '#FFFFFF',
+          15: 'rgba(255, 255, 255, 0.15)',
+          3: 'rgba(255, 255, 255, 0.03)',
+        },
+        slate: {
+          50: '#F8FAFC',
+          300: '#CBD5E1',
+        },
+      },
     },
     screens: {
       'sm': '640px',
@@ -30,5 +41,8 @@ module.exports = {
   ],
   daisyui: {
     themes: ["light"], // This ensures DaisyUI doesn't override our custom styles
+    base: false, // This prevents DaisyUI from injecting its base styles
+    styled: true,
+    utils: true,
   },
 } 
