@@ -62,3 +62,26 @@ pre {
   font-family: "JetBrains Mono", monospace;
   letter-spacing: -0.025em;
 }
+
+.head-box-title {
+  display: flex;
+  gap: 10px;
+}
+
+.head-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.head-box-items {
+  display: flex;
+  gap: 10px;
+}
+
+.head-box-items a {
+  color: white;
+  text-decoration: none;
+}
+

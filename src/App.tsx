@@ -36,7 +36,7 @@ import { Button } from "./components/Button";
 import { Modal } from "./components/Modal";
 import Footer from "./components/Footer";
 import { Blockfrost, Lucid, fromText } from "@lucid-evolution/lucid";
-
+import { HeadBox } from "./components/HeadBox";
 const POLLING_INTERVAL = 10000; // 30 seconds in milliseconds
 
 function App() {
@@ -298,6 +298,7 @@ function App() {
   return (
     <div className="bg-[url(/bg-main.png)] bg-no-repeat bg-cover">
       <div className="min-h-screen">
+        <HeadBox />
         <main>
           <div style={styles.container}>
             <h1>Turn Classic</h1>
