@@ -37,10 +37,12 @@ function Footer() {
           <h2>
             Follow us on
           </h2>
-          <img
-            src={twitter}
-            alt="Twitter logo"
-          />
+          <a href="https://x.com/turnprotocol" target="_blank" rel="noopener noreferrer">
+            <img
+              src={twitter}
+              alt="Twitter logo"
+            />
+          </a>
         </div>
       </div>
 
