@@ -306,7 +306,7 @@ function App() {
             {walletSelectList.length === 0 ? (
               <p>No wallets found. Please install a Cardano wallet.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div className="wallet-list">
                 {walletSelectList.map((wallet, index) => (
                   <button
                     key={index}
@@ -327,7 +327,7 @@ function App() {
             <p>Address: {walletAddress}</p>
             <p>Balance: {balance ? Number(BigInt(balance)) / 1000000 : 0} ADA</p>
             <p>Current Queue Size: {queue.length} participant{queue.length !== 1 ? 's' : ''}</p>
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+            <div className="wallet-actions">
               <Button
                 onClick={() => dispatch(setSignupModalOpen(true))}
                 style={{ flex: 1 }}
@@ -355,22 +355,16 @@ function App() {
           dispatch(resetSignupForm());
         }}>
           <h2>Sign Up</h2>
-          <div style={{ marginBottom: '1rem' }}>
+          <div className="signup-form">
             <input
               type="text"
               value={recipientAddress}
               onChange={(e) => dispatch(setRecipientAddress(e.target.value))}
               placeholder="Recipient Address"
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                marginBottom: '0.5rem',
-                border: '1px solid #ccc',
-                borderRadius: '4px'
-              }}
+              className="signup-input"
             />
             {signupError && (
-              <p style={{ color: 'red', marginBottom: '0.5rem' }}>{signupError}</p>
+              <p className="signup-error">{signupError}</p>
             )}
             <Button 
               onClick={handleSignup}
@@ -383,21 +377,15 @@ function App() {
 
         <Modal isOpen={isQueueModalOpen} onClose={() => dispatch(setQueueModalOpen(false))}>
           <h2>Current Queue</h2>
-          <div style={{ marginBottom: '1rem' }}>
+          <div className="signup-form">
             {queueError ? (
-              <p style={{ color: 'red' }}>{queueError}</p>
+              <p className="signup-error">{queueError}</p>
             ) : queue.length === 0 ? (
               <p>No participants in queue</p>
             ) : (
-              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <div className="queue-list">
                 {queue.map((participant, index) => (
-                  <div key={index} style={{ 
-                    padding: '1rem', 
-                    borderBottom: '1px solid #eee',
-                    backgroundColor: '#f5f5f5',
-                    marginBottom: '0.5rem',
-                    borderRadius: '4px'
-                  }}>
+                  <div key={index} className="queue-item">
                     <p><strong>Address:</strong> {participant.address}</p>
                   </div>
                 ))}
@@ -408,23 +396,15 @@ function App() {
 
         <Modal isOpen={isCeremoniesModalOpen} onClose={() => dispatch(setCeremoniesModalOpen(false))}>
           <h2>Active Ceremonies</h2>
-          <div style={{ marginBottom: '1rem' }}>
+          <div className="signup-form">
             {ceremoniesError ? (
-              <p style={{ color: 'red' }}>{ceremoniesError}</p>
+              <p className="signup-error">{ceremoniesError}</p>
             ) : ceremonies.length === 0 ? (
               <p>No active ceremonies</p>
             ) : (
-              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <div className="ceremonies-list">
                 {ceremonies.map((ceremony, index) => (
-                  <div key={ceremony.id} style={{ 
-                    padding: '1rem', 
-                    borderBottom: '1px solid #eee',
-                    backgroundColor: '#f5f5f5',
-                    marginBottom: '0.5rem',
-                    borderRadius: '4px',
-                    wordBreak: 'break-all',
-                    overflowWrap: 'break-word'
-                  }}>
+                  <div key={ceremony.id} className="ceremony-item">
                     {
                       ceremony.participants.map((participant: any) => participant.address).includes(walletAddress) && (
                         <Button onClick={() => handleSignCeremony(ceremony.id)}>Sign Ceremony</Button>
@@ -441,21 +421,17 @@ function App() {
                           href={`https://preview.cardanoscan.io/transaction/${ceremony.transactionHash}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ color: '#00aaff', textDecoration: 'underline' }}
+                          className="ceremony-transaction-link"
                         >
                           {ceremony.transactionHash}
                         </a>
                       </p>
                     )}
                     <p><strong>Transaction:</strong> <span style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>{ceremony.transaction}</span></p>
-                    <div style={{ marginTop: '0.5rem' }}>
+                    <div className="ceremony-participants">
                       <p><strong>Participants:</strong></p>
                       {ceremony.participants.map((participant: any, pIndex: number) => (
-                        <div key={pIndex} style={{ 
-                          marginLeft: '1rem',
-                          padding: '0.5rem',
-                          borderLeft: '2px solid #ccc'
-                        }}>
+                        <div key={pIndex} className="ceremony-participant">
                           <p>Address: {participant.address}</p>
                         </div>
                       ))}
@@ -473,7 +449,7 @@ function App() {
         }}>
           <h2>{hasSignedCeremony ? 'Ceremony Status' : 'Ceremony Requires Your Signature'}</h2>
           {pendingCeremony && (
-            <div style={{ marginBottom: '1rem' }}>
+            <div className="signup-form">
               <p><strong>Ceremony ID:</strong> {pendingCeremony.id}</p>
               <p><strong>Total Participants:</strong> {pendingCeremony.participants.length}</p>
               <p><strong>Signatures Collected:</strong> {pendingCeremony.witnesses.length}</p>
@@ -484,20 +460,14 @@ function App() {
                     href={`https://preview.cardanoscan.io/transaction/${pendingCeremony.transactionHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ color: '#00aaff', textDecoration: 'underline' }}
+                    className="ceremony-transaction-link"
                   >
                     {pendingCeremony.transactionHash}
                   </a>
                 </p>
               )}
               {hasSignedCeremony ? (
-                <div style={{ 
-                  marginTop: '1rem',
-                  padding: '1rem',
-                  backgroundColor: ceremonyStatus === 'on-chain' ? '#e8f5e9' : '#fff3e0',
-                  borderRadius: '4px',
-                  textAlign: 'center'
-                }}>
+                <div className={`ceremony-status ${ceremonyStatus === 'on-chain' ? 'ceremony-status-success' : ceremonyStatus === 'pending' ? 'ceremony-status-pending' : 'ceremony-status-error'}`}>
                   {ceremonyStatus === 'pending' && (
                     <>
                       <p>Waiting for other participants to sign...</p>
@@ -508,20 +478,15 @@ function App() {
                     <p style={{ color: '#2e7d32' }}>Transaction successfully submitted to chain!</p>
                   )}
                   {ceremonyStatus === 'could not find' && (
-                    <p style={{ color: '#d32f2f' }}>Error: Ceremony not found</p>
+                    <p className="ceremony-status-error">Error: Ceremony not found</p>
                   )}
                 </div>
               ) : (
                 <>
-                  <div style={{ marginTop: '1rem' }}>
+                  <div className="ceremony-participants">
                     <p><strong>Participants:</strong></p>
                     {pendingCeremony.participants.map((participant: any, pIndex: number) => (
-                      <div key={pIndex} style={{ 
-                        marginLeft: '1rem',
-                        padding: '0.5rem',
-                        borderLeft: '2px solid #ccc',
-                        backgroundColor: participant.address === walletAddress ? 'darkgrey' : 'transparent'
-                      }}>
+                      <div key={pIndex} className={`ceremony-participant ${participant.address === walletAddress ? 'ceremony-participant-current' : ''}`}>
                         <p>Address: {participant.address}</p>
                       </div>
                     ))}
