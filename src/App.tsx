@@ -306,18 +306,13 @@ function App() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {walletSelectList.map((wallet, index) => (
-                  <Button
+                  <button
                     key={index}
                     onClick={() => handleWalletSelect(wallet)}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      backgroundColor: selectedWallet === wallet ? '#00aaff' : 'transparent',
-                      color: selectedWallet === wallet ? 'white' : 'inherit'
-                    }}
+                    className={`wallet-select-button ${selectedWallet === wallet ? 'selected' : ''}`}
                   >
                     {wallet}
-                  </Button>
+                  </button>
                 ))}
               </div>
             )}

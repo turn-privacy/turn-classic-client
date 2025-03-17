@@ -1,11 +1,36 @@
 @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap');
 @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap");
 
+:root {
+  /* Primary Colors */
+  --color-primary: #ffa722;
+  --color-primary-hover: #e4810f;
+  
+  /* Background Colors */
+  --color-bg-black: #000000;
+  --color-bg-dark: #111111;
+  --color-bg-gradient-end: #1a1a1a;
+  --color-bg-hover: #222222;
+  
+  /* Border Colors */
+  --color-border: #333333;
+  
+  /* Text Colors */
+  --color-text: #ffffff;
+  --color-text-muted: #999999;
+  
+  /* Error Colors */
+  --color-error: #ff4444;
+  
+  /* Overlay Colors */
+  --color-overlay: rgba(0, 0, 0, 0.5);
+}
+
 body {
   margin: 0;
   padding: 0;
-  background-color: black;
-  color: white;
+  background-color: var(--color-bg-black);
+  color: var(--color-text);
   font-family: 'Raleway', sans-serif;
   overflow-x: hidden;
   width: 100%;
@@ -51,10 +76,6 @@ dialog::backdrop {
   opacity: 1;
 }
 
-button:hover {
-  color: #ef4444 !important;
-}
-
 /* Socials */
 a[href*="discord.gg"],
 a[href*="github.com"] {
@@ -65,8 +86,8 @@ a[href*="github.com"] {
 a[href*="discord.gg"]:hover,
 a[href*="github.com"]:hover {
   opacity: 1;
-  color: #ef4444 !important;
-  border-color: #ef4444 !important;
+  color: var(--color-error) !important;
+  border-color: var(--color-error) !important;
 }
 
 /* Override font only for specific technical elements */
@@ -99,8 +120,8 @@ pre {
   box-sizing: border-box;
   padding: 1rem 2rem;
   margin: 1rem auto;
-  background-color: #111111;
-  border: 1px solid #333333;
+  background-color: var(--color-bg-dark);
+  border: 1px solid var(--color-border);
   border-radius: 1rem;
 }
 
@@ -109,13 +130,13 @@ pre {
 }
 
 .head-box-items a {
-  color: white;
+  color: var(--color-text);
   text-decoration: none;
 }
 
 .container {
   min-height: 100vh;
-  background: linear-gradient(to bottom, #000000, #1a1a1a);
+  background: linear-gradient(to bottom, var(--color-bg-black), var(--color-bg-gradient-end));
   display: flex;
   flex-direction: column;
 }
@@ -130,39 +151,44 @@ pre {
 }
 
 .card {
-  color: white;
-  border: 2px solid #00aaff;
+  color: var(--color-text);
+  border: 2px solid var(--color-primary);
   border-radius: 8px;
   padding: 1.5rem;
-  background-color: rgba(0, 170, 255, 0.1);
+  background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
   margin-bottom: 1rem;
 }
 
 .card.error {
-  border: 2px solid #ff4444;
-  background-color: rgba(255, 0, 0, 0.1);
+  border: 2px solid var(--color-error);
+  background-color: color-mix(in srgb, var(--color-error) 10%, transparent);
 }
 
 .card h4 {
   margin: 0 0 1rem 0;
-  color: #00aaff;
+  color: var(--color-primary);
 }
 
 .card.error h4 {
-  color: #ff4444;
+  color: var(--color-error);
 }
 
 .btn {
   padding: 0.75rem 1.5rem;
-  background-color: #00aaff;
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--color-text);
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn:hover {
+  background-color: var(--color-primary-hover);
 }
 
 .btn:disabled {
-  background-color: #666;
+  background-color: var(--color-text-muted);
   cursor: not-allowed;
   opacity: 0.7;
 }
@@ -174,7 +200,7 @@ pre {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--color-overlay);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -182,8 +208,8 @@ pre {
 }
 
 .modal-content {
-  background-color: #111111;
-  color: white;
+  background-color: var(--color-bg-dark);
+  color: var(--color-text);
   padding: 2rem;
   border-radius: 8px;
   max-width: 500px;
@@ -191,7 +217,7 @@ pre {
   max-height: 90vh;
   overflow: auto;
   position: relative;
-  border: 1px solid #333333;
+  border: 1px solid var(--color-border);
 }
 
 .modal-close-button {
@@ -204,11 +230,45 @@ pre {
   cursor: pointer;
   padding: 0.5rem;
   line-height: 1;
-  color: #999;
+  color: var(--color-text-muted);
   transition: color 0.2s ease;
 }
 
 .modal-close-button:hover {
-  color: #ef4444;
+  color: var(--color-error);
+}
+
+.modal-content a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.modal-content a:hover {
+  color: var(--color-primary-hover);
+}
+
+/* Wallet Selection Styles */
+.wallet-select-button {
+  width: 100%;
+  text-align: left;
+  padding: 1rem;
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.wallet-select-button:hover {
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-primary);
+  transform: translateX(4px);
+}
+
+.wallet-select-button.selected {
+  background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  border-color: var(--color-primary);
 }
 
