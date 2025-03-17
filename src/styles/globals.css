@@ -125,6 +125,20 @@ pre {
   border-radius: 1rem;
 }
 
+.head-box-network {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-hover);
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.2rem;
+}
+
+.head-box-network a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+
 .head-box-items {
   display: flex;
 }
