@@ -1,4 +1,5 @@
 import twitter from '../assets/twitter.svg';
+import discord from '../assets/discord.svg';
 import './Footer.css';
 
 function Footer() {
@@ -37,12 +38,20 @@ function Footer() {
           <h2>
             Follow us on
           </h2>
-          <a href="https://x.com/turnprotocol" target="_blank" rel="noopener noreferrer">
-            <img
-              src={twitter}
-              alt="Twitter logo"
-            />
-          </a>
+          <div className="social-icons">
+            <a href="https://x.com/turnprotocol" target="_blank" rel="noopener noreferrer">
+              <img
+                src={twitter}
+                alt="Twitter logo"
+              />
+            </a>
+            <a href="https://discord.com/invite/4BTgMb9BBB" target="_blank" rel="noopener noreferrer">
+              <img
+                src={discord}
+                alt="Discord logo"
+              />
+            </a>
+          </div>
         </div>
       </div>
 
