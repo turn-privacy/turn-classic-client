@@ -329,7 +329,7 @@ pre {
 .queue-item {
   padding: 1rem;
   border-bottom: 1px solid #eee;
-  background-color: #f5f5f5;
+  background-color: darkgrey;
   margin-bottom: 0.5rem;
   border-radius: 4px;
 }
@@ -372,11 +372,12 @@ pre {
 }
 
 .ceremony-status-pending {
-  background-color: #fff3e0;
+  /*  */
+  background-color: darkgrey;
 }
 
 .ceremony-status-success {
-  background-color: #e8f5e9;
+  background-color: darkgrey;
 }
 
 .ceremony-status-error {

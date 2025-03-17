@@ -119,7 +119,7 @@ function App() {
         context: "By signing this message, you express your intention to participate in a Turn Mixing Ceremony. A transaction will be created, and you will be asked to sign it. Failure to do so will result in your wallet being blacklisted from the Turn service. By signing this message, you also confirm that you have backed up the private key of the receiving address.",
         address: walletAddress,
         recipient: recipientAddress,
-
+        signupTimestamp: new Date()
       }));
 
       console.log("signing message");
@@ -475,7 +475,7 @@ function App() {
                     </>
                   )}
                   {ceremonyStatus === 'on-chain' && (
-                    <p style={{ color: '#2e7d32' }}>Transaction successfully submitted to chain!</p>
+                    <p style={{ color: 'white' }}>Transaction successfully submitted to chain!</p>
                   )}
                   {ceremonyStatus === 'could not find' && (
                     <p className="ceremony-status-error">Error: Ceremony not found</p>
