@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import "./styles/globals.css";
-import { styles } from "./styles";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { setWalletError, clearWalletError } from "./store/errorSlice";
 import { setWalletSelectList, setPreviewWallet, setPreviewAddress, setWalletBalance } from "./store/networkSlice";
@@ -296,256 +295,253 @@ function App() {
   }
 
   return (
-    <div className="bg-[url(/bg-main.png)] bg-no-repeat bg-cover">
-      <div className="min-h-screen">
+    <div className="container">
+      <div className="main">
         <HeadBox />
-        <main>
-          <div style={styles.container}>
-            <h1>Turn Classic</h1>
-            {!selectedWallet && (
-              <Card>
-                <h3>Available Wallets</h3>
-                {walletSelectList.length === 0 ? (
-                  <p>No wallets found. Please install a Cardano wallet.</p>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {walletSelectList.map((wallet, index) => (
-                      <Button
-                        key={index}
-                        onClick={() => handleWalletSelect(wallet)}
-                        style={{
-                          width: '100%',
-                          textAlign: 'left',
-                          backgroundColor: selectedWallet === wallet ? '#00aaff' : 'transparent',
-                          color: selectedWallet === wallet ? 'white' : 'inherit'
-                        }}
-                      >
-                        {wallet}
-                      </Button>
-                    ))}
-                  </div>
-                )}
-              </Card>
+        {!selectedWallet && (
+          <Card>
+            <h3>Available Wallets</h3>
+            {walletSelectList.length === 0 ? (
+              <p>No wallets found. Please install a Cardano wallet.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {walletSelectList.map((wallet, index) => (
+                  <Button
+                    key={index}
+                    onClick={() => handleWalletSelect(wallet)}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      backgroundColor: selectedWallet === wallet ? '#00aaff' : 'transparent',
+                      color: selectedWallet === wallet ? 'white' : 'inherit'
+                    }}
+                  >
+                    {wallet}
+                  </Button>
+                ))}
+              </div>
             )}
+          </Card>
+        )}
 
-            {walletAddress && (
-              <Card>
-                <h3>Connected Wallet</h3>
-                <p>Address: {walletAddress}</p>
-                <p>Balance: {balance ? Number(BigInt(balance)) / 1000000 : 0} ADA</p>
-                <p>Current Queue Size: {queue.length} participant{queue.length !== 1 ? 's' : ''}</p>
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-                  <Button
-                    onClick={() => dispatch(setSignupModalOpen(true))}
-                    style={{ flex: 1 }}
-                  >
-                    Sign Up
-                  </Button>
-                  <Button
-                    onClick={() => dispatch(setQueueModalOpen(true))}
-                    style={{ flex: 1 }}
-                  >
-                    View Queue
-                  </Button>
-                  <Button
-                    onClick={() => dispatch(setCeremoniesModalOpen(true))}
-                    style={{ flex: 1 }}
-                  >
-                    View Ceremonies
-                  </Button>
-                </div>
-              </Card>
+        {walletAddress && (
+          <Card>
+            <h3>Connected Wallet</h3>
+            <p>Address: {walletAddress}</p>
+            <p>Balance: {balance ? Number(BigInt(balance)) / 1000000 : 0} ADA</p>
+            <p>Current Queue Size: {queue.length} participant{queue.length !== 1 ? 's' : ''}</p>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+              <Button
+                onClick={() => dispatch(setSignupModalOpen(true))}
+                style={{ flex: 1 }}
+              >
+                Sign Up
+              </Button>
+              <Button
+                onClick={() => dispatch(setQueueModalOpen(true))}
+                style={{ flex: 1 }}
+              >
+                View Queue
+              </Button>
+              <Button
+                onClick={() => dispatch(setCeremoniesModalOpen(true))}
+                style={{ flex: 1 }}
+              >
+                View Ceremonies
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        <Modal isOpen={isSignupModalOpen} onClose={() => {
+          dispatch(setSignupModalOpen(false));
+          dispatch(resetSignupForm());
+        }}>
+          <h2>Sign Up</h2>
+          <div style={{ marginBottom: '1rem' }}>
+            <input
+              type="text"
+              value={recipientAddress}
+              onChange={(e) => dispatch(setRecipientAddress(e.target.value))}
+              placeholder="Recipient Address"
+              style={{
+                width: '100%',
+                padding: '0.5rem',
+                marginBottom: '0.5rem',
+                border: '1px solid #ccc',
+                borderRadius: '4px'
+              }}
+            />
+            {signupError && (
+              <p style={{ color: 'red', marginBottom: '0.5rem' }}>{signupError}</p>
             )}
+            <Button 
+              onClick={handleSignup}
+              style={{ width: '100%' }}
+            >
+              Sign Up
+            </Button>
+          </div>
+        </Modal>
 
-            <Modal isOpen={isSignupModalOpen} onClose={() => {
-              dispatch(setSignupModalOpen(false));
-              dispatch(resetSignupForm());
-            }}>
-              <h2>Sign Up</h2>
-              <div style={{ marginBottom: '1rem' }}>
-                <input
-                  type="text"
-                  value={recipientAddress}
-                  onChange={(e) => dispatch(setRecipientAddress(e.target.value))}
-                  placeholder="Recipient Address"
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
+        <Modal isOpen={isQueueModalOpen} onClose={() => dispatch(setQueueModalOpen(false))}>
+          <h2>Current Queue</h2>
+          <div style={{ marginBottom: '1rem' }}>
+            {queueError ? (
+              <p style={{ color: 'red' }}>{queueError}</p>
+            ) : queue.length === 0 ? (
+              <p>No participants in queue</p>
+            ) : (
+              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                {queue.map((participant, index) => (
+                  <div key={index} style={{ 
+                    padding: '1rem', 
+                    borderBottom: '1px solid #eee',
+                    backgroundColor: '#f5f5f5',
                     marginBottom: '0.5rem',
-                    border: '1px solid #ccc',
                     borderRadius: '4px'
-                  }}
-                />
-                {signupError && (
-                  <p style={{ color: 'red', marginBottom: '0.5rem' }}>{signupError}</p>
-                )}
-                <Button 
-                  onClick={handleSignup}
-                  style={{ width: '100%' }}
-                >
-                  Sign Up
-                </Button>
-              </div>
-            </Modal>
-
-            <Modal isOpen={isQueueModalOpen} onClose={() => dispatch(setQueueModalOpen(false))}>
-              <h2>Current Queue</h2>
-              <div style={{ marginBottom: '1rem' }}>
-                {queueError ? (
-                  <p style={{ color: 'red' }}>{queueError}</p>
-                ) : queue.length === 0 ? (
-                  <p>No participants in queue</p>
-                ) : (
-                  <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                    {queue.map((participant, index) => (
-                      <div key={index} style={{ 
-                        padding: '1rem', 
-                        borderBottom: '1px solid #eee',
-                        backgroundColor: '#f5f5f5',
-                        marginBottom: '0.5rem',
-                        borderRadius: '4px'
-                      }}>
-                        <p><strong>Address:</strong> {participant.address}</p>
-                      </div>
-                    ))}
+                  }}>
+                    <p><strong>Address:</strong> {participant.address}</p>
                   </div>
-                )}
+                ))}
               </div>
-            </Modal>
+            )}
+          </div>
+        </Modal>
 
-            <Modal isOpen={isCeremoniesModalOpen} onClose={() => dispatch(setCeremoniesModalOpen(false))}>
-              <h2>Active Ceremonies</h2>
-              <div style={{ marginBottom: '1rem' }}>
-                {ceremoniesError ? (
-                  <p style={{ color: 'red' }}>{ceremoniesError}</p>
-                ) : ceremonies.length === 0 ? (
-                  <p>No active ceremonies</p>
-                ) : (
-                  <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                    {ceremonies.map((ceremony, index) => (
-                      <div key={ceremony.id} style={{ 
-                        padding: '1rem', 
-                        borderBottom: '1px solid #eee',
-                        backgroundColor: '#f5f5f5',
-                        marginBottom: '0.5rem',
-                        borderRadius: '4px'
-                      }}>
-                        {
-                          ceremony.participants.map((participant: any) => participant.address).includes(walletAddress) && (
-                            <Button onClick={() => handleSignCeremony(ceremony.id)}>Sign Ceremony</Button>
-                          )
-                        }
+        <Modal isOpen={isCeremoniesModalOpen} onClose={() => dispatch(setCeremoniesModalOpen(false))}>
+          <h2>Active Ceremonies</h2>
+          <div style={{ marginBottom: '1rem' }}>
+            {ceremoniesError ? (
+              <p style={{ color: 'red' }}>{ceremoniesError}</p>
+            ) : ceremonies.length === 0 ? (
+              <p>No active ceremonies</p>
+            ) : (
+              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                {ceremonies.map((ceremony, index) => (
+                  <div key={ceremony.id} style={{ 
+                    padding: '1rem', 
+                    borderBottom: '1px solid #eee',
+                    backgroundColor: '#f5f5f5',
+                    marginBottom: '0.5rem',
+                    borderRadius: '4px',
+                    wordBreak: 'break-all',
+                    overflowWrap: 'break-word'
+                  }}>
+                    {
+                      ceremony.participants.map((participant: any) => participant.address).includes(walletAddress) && (
+                        <Button onClick={() => handleSignCeremony(ceremony.id)}>Sign Ceremony</Button>
+                      )
+                    }
 
-                        <p><strong>Ceremony ID:</strong> {ceremony.id}</p>
-                        <p><strong>Participants:</strong> {ceremony.participants.length}</p>
-                        <p><strong>Witnesses:</strong> {ceremony.witnesses.length}</p>
-                        {ceremony.transactionHash && (
-                          <p>
-                            <strong>Transaction:</strong>{' '}
-                            <a 
-                              href={`https://preview.cardanoscan.io/transaction/${ceremony.transactionHash}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{ color: '#00aaff', textDecoration: 'underline' }}
-                            >
-                              {ceremony.transactionHash}
-                            </a>
-                          </p>
-                        )}
-                        <p><strong>Transaction:</strong> {ceremony.transaction}</p>
-                        <div style={{ marginTop: '0.5rem' }}>
-                          <p><strong>Participants:</strong></p>
-                          {ceremony.participants.map((participant: any, pIndex: number) => (
-                            <div key={pIndex} style={{ 
-                              marginLeft: '1rem',
-                              padding: '0.5rem',
-                              borderLeft: '2px solid #ccc'
-                            }}>
-                              <p>Address: {participant.address}</p>
-                            </div>
-                          ))}
+                    <p><strong>Ceremony ID:</strong> {ceremony.id}</p>
+                    <p><strong>Participants:</strong> {ceremony.participants.length}</p>
+                    <p><strong>Witnesses:</strong> {ceremony.witnesses.length}</p>
+                    {ceremony.transactionHash && (
+                      <p>
+                        <strong>Transaction:</strong>{' '}
+                        <a 
+                          href={`https://preview.cardanoscan.io/transaction/${ceremony.transactionHash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: '#00aaff', textDecoration: 'underline' }}
+                        >
+                          {ceremony.transactionHash}
+                        </a>
+                      </p>
+                    )}
+                    <p><strong>Transaction:</strong> <span style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>{ceremony.transaction}</span></p>
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <p><strong>Participants:</strong></p>
+                      {ceremony.participants.map((participant: any, pIndex: number) => (
+                        <div key={pIndex} style={{ 
+                          marginLeft: '1rem',
+                          padding: '0.5rem',
+                          borderLeft: '2px solid #ccc'
+                        }}>
+                          <p>Address: {participant.address}</p>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </Modal>
-
-            <Modal isOpen={isPendingCeremonyModalOpen} onClose={() => {
-              dispatch(setPendingCeremonyModalOpen(false));
-              dispatch(resetCeremonyStatus());
-            }}>
-              <h2>{hasSignedCeremony ? 'Ceremony Status' : 'Ceremony Requires Your Signature'}</h2>
-              {pendingCeremony && (
-                <div style={{ marginBottom: '1rem' }}>
-                  <p><strong>Ceremony ID:</strong> {pendingCeremony.id}</p>
-                  <p><strong>Total Participants:</strong> {pendingCeremony.participants.length}</p>
-                  <p><strong>Signatures Collected:</strong> {pendingCeremony.witnesses.length}</p>
-                  {pendingCeremony.transactionHash && (
-                    <p>
-                      <strong>Transaction:</strong>{' '}
-                      <a 
-                        href={`https://preview.cardanoscan.io/transaction/${pendingCeremony.transactionHash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: '#00aaff', textDecoration: 'underline' }}
-                      >
-                        {pendingCeremony.transactionHash}
-                      </a>
-                    </p>
-                  )}
-                  {hasSignedCeremony ? (
-                    <div style={{ 
-                      marginTop: '1rem',
-                      padding: '1rem',
-                      backgroundColor: ceremonyStatus === 'on-chain' ? '#e8f5e9' : '#fff3e0',
-                      borderRadius: '4px',
-                      textAlign: 'center'
-                    }}>
-                      {ceremonyStatus === 'pending' && (
-                        <>
-                          <p>Waiting for other participants to sign...</p>
-                          <p>Signatures collected: {pendingCeremony.witnesses.length} of {pendingCeremony.participants.length + 1}</p>
-                        </>
-                      )}
-                      {ceremonyStatus === 'on-chain' && (
-                        <p style={{ color: '#2e7d32' }}>Transaction successfully submitted to chain!</p>
-                      )}
-                      {ceremonyStatus === 'could not find' && (
-                        <p style={{ color: '#d32f2f' }}>Error: Ceremony not found</p>
-                      )}
+                      ))}
                     </div>
-                  ) : (
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </Modal>
+
+        <Modal isOpen={isPendingCeremonyModalOpen} onClose={() => {
+          dispatch(setPendingCeremonyModalOpen(false));
+          dispatch(resetCeremonyStatus());
+        }}>
+          <h2>{hasSignedCeremony ? 'Ceremony Status' : 'Ceremony Requires Your Signature'}</h2>
+          {pendingCeremony && (
+            <div style={{ marginBottom: '1rem' }}>
+              <p><strong>Ceremony ID:</strong> {pendingCeremony.id}</p>
+              <p><strong>Total Participants:</strong> {pendingCeremony.participants.length}</p>
+              <p><strong>Signatures Collected:</strong> {pendingCeremony.witnesses.length}</p>
+              {pendingCeremony.transactionHash && (
+                <p>
+                  <strong>Transaction:</strong>{' '}
+                  <a 
+                    href={`https://preview.cardanoscan.io/transaction/${pendingCeremony.transactionHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#00aaff', textDecoration: 'underline' }}
+                  >
+                    {pendingCeremony.transactionHash}
+                  </a>
+                </p>
+              )}
+              {hasSignedCeremony ? (
+                <div style={{ 
+                  marginTop: '1rem',
+                  padding: '1rem',
+                  backgroundColor: ceremonyStatus === 'on-chain' ? '#e8f5e9' : '#fff3e0',
+                  borderRadius: '4px',
+                  textAlign: 'center'
+                }}>
+                  {ceremonyStatus === 'pending' && (
                     <>
-                      <div style={{ marginTop: '1rem' }}>
-                        <p><strong>Participants:</strong></p>
-                        {pendingCeremony.participants.map((participant: any, pIndex: number) => (
-                          <div key={pIndex} style={{ 
-                            marginLeft: '1rem',
-                            padding: '0.5rem',
-                            borderLeft: '2px solid #ccc',
-                            backgroundColor: participant.address === walletAddress ? '#f0f8ff' : 'transparent'
-                          }}>
-                            <p>Address: {participant.address}</p>
-                          </div>
-                        ))}
-                      </div>
-                      <Button 
-                        onClick={() => handleSignCeremony(pendingCeremony.id)}
-                        style={{ width: '100%', marginTop: '1rem', backgroundColor: '#4CAF50', color: 'white' }}
-                      >
-                        Sign Ceremony
-                      </Button>
+                      <p>Waiting for other participants to sign...</p>
+                      <p>Signatures collected: {pendingCeremony.witnesses.length} of {pendingCeremony.participants.length + 1}</p>
                     </>
                   )}
+                  {ceremonyStatus === 'on-chain' && (
+                    <p style={{ color: '#2e7d32' }}>Transaction successfully submitted to chain!</p>
+                  )}
+                  {ceremonyStatus === 'could not find' && (
+                    <p style={{ color: '#d32f2f' }}>Error: Ceremony not found</p>
+                  )}
                 </div>
+              ) : (
+                <>
+                  <div style={{ marginTop: '1rem' }}>
+                    <p><strong>Participants:</strong></p>
+                    {pendingCeremony.participants.map((participant: any, pIndex: number) => (
+                      <div key={pIndex} style={{ 
+                        marginLeft: '1rem',
+                        padding: '0.5rem',
+                        borderLeft: '2px solid #ccc',
+                        backgroundColor: participant.address === walletAddress ? '#f0f8ff' : 'transparent'
+                      }}>
+                        <p>Address: {participant.address}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <Button 
+                    onClick={() => handleSignCeremony(pendingCeremony.id)}
+                    style={{ width: '100%', marginTop: '1rem', backgroundColor: '#4CAF50', color: 'white' }}
+                  >
+                    Sign Ceremony
+                  </Button>
+                </>
               )}
-            </Modal>
-          </div>
-        </main>
-        <Footer />
+            </div>
+          )}
+        </Modal>
       </div>
+      <Footer />
     </div>
   );
 }

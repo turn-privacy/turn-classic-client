@@ -7,6 +7,19 @@ body {
   background-color: black;
   color: white;
   font-family: 'Raleway', sans-serif;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+* {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 .font-dm {
@@ -66,22 +79,85 @@ pre {
 .head-box-title {
   display: flex;
   gap: 10px;
+  align-items: center;
+}
+
+.head-box-title img {
+  width: 30px;
+  height: auto;
 }
 
 .head-box {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
+  width: calc(100% - 4rem);
+  max-width: 1200px;
+  box-sizing: border-box;
+  padding: 1rem 2rem;
+  margin: 1rem auto;
+  background-color: #111111;
+  border: 1px solid #333333;
+  border-radius: 1rem;
 }
 
 .head-box-items {
   display: flex;
-  gap: 10px;
 }
 
 .head-box-items a {
   color: white;
   text-decoration: none;
+}
+
+.container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #000000, #1a1a1a);
+}
+
+.main {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.card {
+  color: white;
+  border: 2px solid #00aaff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background-color: rgba(0, 170, 255, 0.1);
+  margin-bottom: 1rem;
+}
+
+.card.error {
+  border: 2px solid #ff4444;
+  background-color: rgba(255, 0, 0, 0.1);
+}
+
+.card h4 {
+  margin: 0 0 1rem 0;
+  color: #00aaff;
+}
+
+.card.error h4 {
+  color: #ff4444;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  background-color: #00aaff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 

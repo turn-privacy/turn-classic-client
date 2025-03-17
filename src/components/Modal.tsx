@@ -1,4 +1,3 @@
-import { styles } from "../styles";
 
 interface ModalProps {
   isOpen: boolean;

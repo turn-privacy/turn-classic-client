@@ -1,4 +1,3 @@
-import { styles } from "../styles";
 
 interface ButtonProps {
   onClick: () => void;
@@ -9,11 +8,8 @@ interface ButtonProps {
 
 export const Button: React.FC<ButtonProps> = ({ onClick, disabled, children, style = {} }) => (
   <button
-    style={{
-      ...styles.button,
-      ...(disabled ? styles.disabledButton : {}),
-      ...style
-    }}
+    className="btn"
+    style={style}
     onClick={onClick}
     disabled={disabled}
   >
