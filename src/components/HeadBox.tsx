@@ -13,10 +13,10 @@ export const HeadBox = () => {
                     Turn
                 </h1>
                 {
-                    process.env.REACT_APP_NETWORK === "preprod" && (
+                    process.env.REACT_APP_NETWORK === "preview" && (
                         <div className="head-box-network">
                             <a href="https://docs.cardano.org/cardano-testnets/tools/faucet" target="_blank" rel="noopener noreferrer">
-                                preprod
+                                preview
                             </a>
                         </div>
                     )

@@ -34,9 +34,12 @@ import { Card } from "./components/Card";
 import { Button } from "./components/Button";
 import { Modal } from "./components/Modal";
 import Footer from "./components/Footer";
-import { Blockfrost, Emulator, Lucid, fromText } from "@lucid-evolution/lucid";
+import { Blockfrost, Emulator, Lucid, fromText, paymentCredentialOf } from "@lucid-evolution/lucid";
 import { HeadBox } from "./components/HeadBox";
+import * as CML from "@anastasia-labs/cardano-multiplatform-lib-browser";
 const POLLING_INTERVAL = 10000; // 30 seconds in milliseconds
+
+// todo: check payment credential can't already be found in list of witnesses on a ceremony 
 
 function App() {
   const dispatch = useAppDispatch();
@@ -82,7 +85,7 @@ function App() {
       const _lucid = await Lucid(
         // new Blockfrost("https://cardano-preview.blockfrost.io/api/v0", process.env.REACT_APP_BLOCKFROST_API_KEY),
         new Emulator([]),
-        "Preprod"
+        "Preview"
       );
       
       _lucid.selectWallet.fromAPI(api);
@@ -204,18 +207,40 @@ function App() {
       return;
     }
 
-    // Find the first ceremony where the user is a participant and hasn't signed yet
-    const ceremonyNeedingSigning = ceremonies.find(ceremony => {
-      const isParticipant = ceremony.participants.some((p: any) => p.address === walletAddress);
-      const hasNotSigned = !ceremony.witnesses.includes(walletAddress);
-      return isParticipant && hasNotSigned;
-    });
+    // Find the first ceremony where the user is a participant
+    const userCeremony = ceremonies.find(ceremony => 
+      ceremony.participants.some((p: any) => p.address === walletAddress)
+    );
 
-    if (ceremonyNeedingSigning) {
-      dispatch(setPendingCeremony(ceremonyNeedingSigning));
-      dispatch(setPendingCeremonyModalOpen(true));
+    if (userCeremony) {
+      // Check if user has already provided a witness
+      const userPaymentCredentialHash = paymentCredentialOf(walletAddress).hash;
+      const hasAlreadySigned = userCeremony.witnesses.some((witness: string) => {
+        try {
+          const txWitness = CML.TransactionWitnessSet.from_cbor_hex(witness).vkeywitnesses()?.get(0);
+          if (!txWitness) return false;
+          const publicKey = txWitness.vkey();
+          const witnessPaymentCredentialHash = publicKey.hash().to_hex();
+          return witnessPaymentCredentialHash === userPaymentCredentialHash;
+        } catch (error) {
+          console.error("Error checking witness:", error);
+          return false;
+        }
+      });
+
+      if (hasAlreadySigned) {
+        // User has already signed, show status popup
+        dispatch(setPendingCeremony(userCeremony));
+        dispatch(setPendingCeremonyModalOpen(true));
+        dispatch(setHasSignedCeremony(true));
+      } else {
+        // User needs to sign
+        dispatch(setPendingCeremony(userCeremony));
+        dispatch(setPendingCeremonyModalOpen(true));
+        dispatch(setHasSignedCeremony(false));
+      }
     } else if (!hasSignedCeremony) {
-      // Only close the modal if we haven't signed yet
+      // No ceremony found for user and they haven't signed anything
       dispatch(setPendingCeremony(null));
       dispatch(setPendingCeremonyModalOpen(false));
     }
