@@ -37,6 +37,12 @@
   gap: 12px;
 }
 
+.quick-links > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .quick-links h2 {
   font-weight: bold;
   font-size: 18px;
@@ -49,6 +55,7 @@
   text-decoration: none;
   cursor: pointer;
   transition: color 0.2s;
+  padding: 4px 0;
 }
 
 .quick-links a:hover {

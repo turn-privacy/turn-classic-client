@@ -1,5 +1,5 @@
 export const appConfig = {
-  title: "Lucid Evolution",
+  title: "Turn",
   logo: {
     path: "/lucid-evolution-al-red.svg",
     alt: "Lucid Evolution Logo",

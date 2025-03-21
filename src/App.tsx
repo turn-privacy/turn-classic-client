@@ -34,7 +34,7 @@ import { Card } from "./components/Card";
 import { Button } from "./components/Button";
 import { Modal } from "./components/Modal";
 import Footer from "./components/Footer";
-import { Blockfrost, Emulator, Lucid, fromText, paymentCredentialOf } from "@lucid-evolution/lucid";
+import { Emulator, Lucid, fromText, paymentCredentialOf } from "@lucid-evolution/lucid";
 import { HeadBox } from "./components/HeadBox";
 import * as CML from "@anastasia-labs/cardano-multiplatform-lib-browser";
 const POLLING_INTERVAL = 10000; // 30 seconds in milliseconds

@@ -30,6 +30,13 @@ function Footer() {
             >
               Docs
             </a>
+            <a
+              href={`${process.env.REACT_APP_BASE_SERVER_URL}/ceremony_history`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              History
+            </a>
           </div>
         </div>
 
