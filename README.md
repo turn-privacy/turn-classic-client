@@ -5,6 +5,18 @@
 - [ ] reformate component system to do less passing values (it will help to make the PreviewNetwork component more hierarchical)
 
 
+## dotenv
+
+```ini
+REACT_APP_BLOCKFROST_API_KEY=""
+# REACT_APP_WEBSOCKET_URL="ws://"
+REACT_APP_NETWORK="preprod"
+# REACT_APP_BASE_SERVER_URL="http://localhost:8000"
+REACT_APP_BASE_SERVER_URL="https://"
+
+```
+
+
 <br/>
 <br/>
 <br/>
