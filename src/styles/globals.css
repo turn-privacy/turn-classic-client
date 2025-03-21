@@ -402,3 +402,33 @@ pre {
   color: white;
 }
 
+/* Admin Modal Styles */
+.admin-content {
+  margin-top: 1rem;
+}
+
+.admin-section {
+  background-color: var(--color-bg-hover);
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-section h3 {
+  margin: 0 0 1rem 0;
+  color: var(--color-primary);
+}
+
+.admin-info {
+  font-family: "JetBrains Mono", monospace;
+}
+
+.admin-info p {
+  margin: 0.5rem 0;
+  word-break: break-all;
+}
+
+.admin-info strong {
+  color: var(--color-text-muted);
+}
+
