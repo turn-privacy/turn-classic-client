@@ -327,7 +327,7 @@ function App() {
       <div className="main">
         <HeadBox />
         {!selectedWallet && (
-          <Card>
+          <Card className="wallet-selection-card">
             <h3>Available Wallets</h3>
             {walletSelectList.length === 0 ? (
               <p>No wallets found. Please install a Cardano wallet.</p>

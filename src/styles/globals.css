@@ -293,6 +293,13 @@ pre {
   gap: 0.5rem;
 }
 
+.wallet-selection-card {
+  width: calc(100% - 4rem);
+  max-width: 1200px;
+  margin: 1rem auto;
+  box-sizing: border-box;
+}
+
 .wallet-actions {
   display: flex;
   gap: 1rem;
