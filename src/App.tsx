@@ -529,7 +529,7 @@ function App() {
           )}
         </Modal>
       </div>
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }

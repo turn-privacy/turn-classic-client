@@ -1,5 +1,4 @@
-
-
+import { Menu } from './Menu';
 
 export const HeadBox = () => {
     return (
@@ -23,11 +22,7 @@ export const HeadBox = () => {
                 }
             </div>
             <div className="head-box-items">
-                <div>
-                    <a href="https://turn-network.gitbook.io/turn" target="_blank" rel="noopener noreferrer">
-                        Docs
-                    </a>
-                </div>
+                <Menu />
             </div>
         </div>
     );
