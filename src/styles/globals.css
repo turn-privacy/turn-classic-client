@@ -432,3 +432,15 @@ pre {
   color: var(--color-text-muted);
 }
 
+.admin-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-error {
+  color: var(--color-error);
+  margin: 0;
+  font-size: 0.9rem;
+}
+

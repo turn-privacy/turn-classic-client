@@ -61,6 +61,22 @@ export const Menu = () => {
             >
               Discord
             </a>
+            <a
+              href="https://medium.com/@networkturn"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setIsOpen(false)}
+            >
+              Medium
+            </a>
+            <a
+              href="https://github.com/turn-privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setIsOpen(false)}
+            >
+              Github
+            </a>
             {isAdmin && (
               <button 
                 className="menu-item-button"
