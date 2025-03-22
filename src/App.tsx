@@ -334,7 +334,7 @@ function App() {
             // className="animated-text-non-animated"
             >
               <p>
-                Welcome to Turn Network, please connect your wallet to begin protecting your financial data.
+                Welcome to Turn Network, please connect your wallet to get started and begin protecting your financial data.
               </p>
             </div>
             {walletSelectList.length === 0 ? (
@@ -390,6 +390,11 @@ function App() {
           dispatch(resetSignupForm());
         }}>
           <h2>Sign Up</h2>
+          <div className="explanation-text">
+            <p>
+              Enter a receiving address. Click "Sign Up". You will be prompted to sign a message expressing your intention to participate in a Turn Mixing Ceremony. Once signed you will be added to the queue. After enough participants have joined the queue a transaction will be created and you will be asked to sign it. Once all participants have signed the transaction it will be submitted to the chain.
+            </p>
+          </div>
           <div className="signup-form">
             <input
               type="text"
@@ -451,7 +456,7 @@ function App() {
                     <p><strong>Witnesses:</strong> {ceremony.witnesses.length}</p>
                     {ceremony.transactionHash && (
                       <p>
-                        <strong>Transaction:</strong>{' '}
+                        <strong>Transaction Hash:</strong>{' '}
                         <a
                           href={`https://preview.cardanoscan.io/transaction/${ceremony.transactionHash}`}
                           target="_blank"
@@ -462,12 +467,19 @@ function App() {
                         </a>
                       </p>
                     )}
-                    <p><strong>Transaction:</strong> <span style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>{ceremony.transaction}</span></p>
+                    {/* <p><strong>Transaction:</strong> <span style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>{ceremony.transaction}</span></p> */}
+                    <p>
+                      <strong>Transaction:</strong> 
+                    {/* <span style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>{ceremony.transaction}</span> */}
+                    <code>
+                      {ceremony.transaction}
+                    </code>
+                    </p>
                     <div className="ceremony-participants">
                       <p><strong>Participants:</strong></p>
                       {ceremony.participants.map((participant: any, pIndex: number) => (
                         <div key={pIndex} className="ceremony-participant">
-                          <p>Address: {participant.address}</p>
+                          <p>{participant.address}</p>
                         </div>
                       ))}
                     </div>

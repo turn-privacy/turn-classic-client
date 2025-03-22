@@ -229,14 +229,57 @@ pre {
 .modal-content {
   background-color: var(--color-bg-dark);
   color: var(--color-text);
-  padding: 2rem;
+  padding: 2.5rem;
   border-radius: 8px;
-  max-width: 500px;
-  width: 90%;
+  max-width: 800px;
+  width: 95%;
   max-height: 90vh;
   overflow: auto;
   position: relative;
   border: 1px solid var(--color-border);
+}
+
+.modal-content h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: var(--color-primary);
+}
+
+.modal-content p {
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.explanation-text {
+  font-family: monospace;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.signup-form {
+  margin-bottom: 1.5rem;
+}
+
+.signup-input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background-color: var(--color-bg-hover);
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.signup-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.signup-error {
+  color: var(--color-error);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
 }
 
 .modal-close-button {
@@ -268,16 +311,25 @@ pre {
 }
 
 /* Wallet Selection Styles */
+.wallet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
 .wallet-select-button {
   width: 100%;
-  text-align: left;
-  padding: 1rem;
+  text-align: center;
+  padding: 0.75rem 1rem;
   background-color: transparent;
   border: 1px solid var(--color-border);
   border-radius: 4px;
   color: var(--color-text);
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 0.9rem;
 }
 
 .wallet-select-button:hover {
@@ -292,12 +344,6 @@ pre {
 }
 
 /* App.tsx specific styles */
-.wallet-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
 .wallet-selection-card {
   width: calc(100% - 4rem);
   max-width: 1200px;
@@ -307,73 +353,134 @@ pre {
 
 .wallet-actions {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.5rem;
   margin-top: 1rem;
-  flex-wrap: wrap;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .wallet-action-button {
-  flex: 1;
-}
-
-.signup-form {
-  margin-bottom: 1rem;
-}
-
-.signup-input {
   width: 100%;
-  padding: 0.5rem;
-  margin-bottom: 0.5rem;
-  border: 1px solid #ccc;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  background-color: transparent;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
 }
 
-.signup-error {
-  color: red;
-  margin-bottom: 0.5rem;
+.wallet-action-button:hover {
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-primary);
+  transform: translateX(4px);
 }
 
 .queue-list {
   max-height: 400px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .queue-item {
   padding: 1rem;
-  border-bottom: 1px solid #eee;
-  background-color: darkgrey;
-  margin-bottom: 0.5rem;
+  background-color: var(--color-bg-hover);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.queue-item:hover {
+  border-color: var(--color-primary);
+  background-color: color-mix(in srgb, var(--color-primary) 5%, var(--color-bg-hover));
+}
+
+.queue-item p {
+  margin: 0;
+  font-family: "JetBrains Mono", monospace;
+}
+
+.queue-item strong {
+  color: var(--color-primary);
 }
 
 .ceremonies-list {
   max-height: 400px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .ceremony-item {
   padding: 1rem;
-  border-bottom: 1px solid #eee;
-  background-color: #f5f5f5;
-  margin-bottom: 0.5rem;
+  background-color: var(--color-bg-hover);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
+  transition: all 0.2s ease;
   word-break: break-all;
   overflow-wrap: break-word;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ceremony-item:hover {
+  border-color: var(--color-primary);
+  background-color: color-mix(in srgb, var(--color-primary) 5%, var(--color-bg-hover));
+}
+
+.ceremony-item p {
+  margin: 0.5rem 0;
+  font-family: "JetBrains Mono", monospace;
+}
+
+.ceremony-item strong {
+  color: var(--color-primary);
 }
 
 .ceremony-transaction-link {
-  color: #00aaff;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.ceremony-transaction-link:hover {
+  color: var(--color-primary-hover);
   text-decoration: underline;
 }
 
 .ceremony-participants {
-  margin-top: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
 }
 
 .ceremony-participant {
   margin-left: 1rem;
   padding: 0.5rem;
-  border-left: 2px solid #ccc;
+  border-left: 2px solid var(--color-border);
+  transition: all 0.2s ease;
+}
+
+.ceremony-participant:hover {
+  border-left-color: var(--color-primary);
+}
+
+.ceremony-participant-current {
+  background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  border-left-color: var(--color-primary);
 }
 
 .ceremony-status {
@@ -381,30 +488,34 @@ pre {
   padding: 1rem;
   border-radius: 4px;
   text-align: center;
+  background-color: var(--color-bg-hover);
+  border: 1px solid var(--color-border);
 }
 
 .ceremony-status-pending {
-  /*  */
-  background-color: darkgrey;
+  border-color: var(--color-primary);
 }
 
 .ceremony-status-success {
-  background-color: darkgrey;
+  border-color: var(--color-primary);
+  background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
 }
 
 .ceremony-status-error {
-  color: #d32f2f;
-}
-
-.ceremony-participant-current {
-  background-color: darkgrey;
+  border-color: var(--color-error);
+  color: var(--color-error);
 }
 
 .sign-ceremony-button {
   width: 100%;
   margin-top: 1rem;
-  background-color: #4CAF50;
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--color-text);
+  transition: all 0.2s ease;
+}
+
+.sign-ceremony-button:hover {
+  background-color: var(--color-primary-hover);
 }
 
 /* Admin Modal Styles */
