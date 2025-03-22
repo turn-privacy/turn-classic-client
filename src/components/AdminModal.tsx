@@ -12,13 +12,13 @@ interface AdminModalProps {
 
 export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
   const walletAddress = useAppSelector(state => state.wallet.address);
-  const selectedWallet = useAppSelector(state => state.wallet.selectedWallet);
+  const lucid = useAppSelector(state => state.wallet.lucid);
   const spendingCredential = walletAddress ? paymentCredentialOf(walletAddress).hash : null;
   const [resetError, setResetError] = useState<string | null>(null);
   const [isResetting, setIsResetting] = useState(false);
 
   const handleReset = async () => {
-    if (!walletAddress || !selectedWallet) return;
+    if (!walletAddress || !lucid) return;
     
     try {
       setIsResetting(true);
@@ -33,7 +33,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
       }));
 
       // Get the signed message from the wallet
-      const signedMessage = await (window as any).cardano[selectedWallet].signMessage(walletAddress, message);
+      const signedMessage = await lucid.wallet().signMessage(walletAddress, message);
 
       // Send to API
       const response = await fetch(`${process.env.REACT_APP_BASE_SERVER_URL}/admin/reset`, {
