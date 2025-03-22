@@ -4,11 +4,11 @@ import { useAppDispatch, useAppSelector } from "./store/hooks";
 import { setWalletError, clearWalletError } from "./store/errorSlice";
 import { setWalletSelectList, setPreviewWallet, setPreviewAddress, setWalletBalance } from "./store/networkSlice";
 import { setQueue, setQueueError } from "./store/queueSlice";
-import { 
-  setCeremonies, 
-  setCeremonyError, 
-  updateCeremony, 
-  setPendingCeremony, 
+import {
+  setCeremonies,
+  setCeremonyError,
+  updateCeremony,
+  setPendingCeremony,
   setCeremonyStatus,
   setHasSignedCeremony,
   resetCeremonyStatus
@@ -63,7 +63,7 @@ function App() {
   } = useAppSelector(state => state.modal);
   const recipientAddress = useAppSelector(state => state.signup.recipientAddress);
   const signupError = useAppSelector(state => state.signup.error);
-  
+
   // Effect to get available wallets
   useEffect(() => {
     if (typeof (window as any).cardano === 'undefined') {
@@ -80,25 +80,25 @@ function App() {
     try {
       const wallet = (window as any).cardano[walletName];
       const api = await wallet.enable();
-      
+
       // Initialize Lucid
       const _lucid = await Lucid(
         // new Blockfrost("https://cardano-preview.blockfrost.io/api/v0", process.env.REACT_APP_BLOCKFROST_API_KEY),
         new Emulator([]),
         "Preview"
       );
-      
+
       _lucid.selectWallet.fromAPI(api);
       dispatch(setLucid(_lucid));
       const address = await _lucid.wallet().address();
-      
+
       // Get wallet balance
       const utxos = await _lucid.wallet().getUtxos();
       const walletBalance = utxos.reduce(
         (acc, utxo) => acc + utxo.assets.lovelace,
         BigInt(0)
       );
-      
+
       dispatch(setPreviewWallet(walletName));
       dispatch(setPreviewAddress(address));
       dispatch(setWalletBalance({ lovelace: walletBalance }));
@@ -208,7 +208,7 @@ function App() {
     }
 
     // Find the first ceremony where the user is a participant
-    const userCeremony = ceremonies.find(ceremony => 
+    const userCeremony = ceremonies.find(ceremony =>
       ceremony.participants.some((p: any) => p.address === walletAddress)
     );
 
@@ -329,8 +329,17 @@ function App() {
         {!selectedWallet && (
           <Card className="wallet-selection-card">
             <h3>Available Wallets</h3>
+            <div 
+            className="animated-text"
+            // className="animated-text-non-animated"
+            >
+              <p>
+                Welcome to Turn Network, please connect your wallet to begin protecting your financial data.
+              </p>
+            </div>
             {walletSelectList.length === 0 ? (
-              <p>No wallets found. Please install a Cardano wallet.</p>
+              <p>
+                No wallets found. Please install a Cardano wallet.</p>
             ) : (
               <div className="wallet-list">
                 {walletSelectList.map((wallet, index) => (
@@ -392,7 +401,7 @@ function App() {
             {signupError && (
               <p className="signup-error">{signupError}</p>
             )}
-            <Button 
+            <Button
               onClick={handleSignup}
               style={{ width: '100%' }}
             >
@@ -443,7 +452,7 @@ function App() {
                     {ceremony.transactionHash && (
                       <p>
                         <strong>Transaction:</strong>{' '}
-                        <a 
+                        <a
                           href={`https://preview.cardanoscan.io/transaction/${ceremony.transactionHash}`}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -482,7 +491,7 @@ function App() {
               {pendingCeremony.transactionHash && (
                 <p>
                   <strong>Transaction:</strong>{' '}
-                  <a 
+                  <a
                     href={`https://preview.cardanoscan.io/transaction/${pendingCeremony.transactionHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -517,7 +526,7 @@ function App() {
                       </div>
                     ))}
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => handleSignCeremony(pendingCeremony.id)}
                     style={{ width: '100%', marginTop: '1rem', backgroundColor: '#4CAF50', color: 'white' }}
                   >

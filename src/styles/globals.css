@@ -449,3 +449,34 @@ pre {
   font-size: 0.9rem;
 }
 
+/* Typing Animation Styles */
+.animated-text, .animated-text-non-animated {
+  margin-bottom: 1.5rem;
+}
+
+.animated-text, .animated-text-non-animated p {
+  margin: 0;
+  font-family: monospace;
+}
+
+.animated-text p {
+  overflow: hidden;
+  border-right: 2px solid var(--color-primary);
+  white-space: nowrap;
+  animation: 
+    typing 3.5s steps(40, end),
+    blink-caret .75s step-end 3.5s;
+  width: 0;
+  animation-fill-mode: forwards;
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: var(--color-primary) }
+}
+
