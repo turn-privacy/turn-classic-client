@@ -987,3 +987,11 @@ pre {
   text-decoration: underline;
 }
 
+.connect-wallet-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 40vh;
+  width: 100%;
+}
+

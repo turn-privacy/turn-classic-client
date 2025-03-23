@@ -20,6 +20,7 @@ import {
 } from "./store/walletSlice";
 import {
   setActiveView,
+  setShowWalletSelect,
 } from "./store/modalSlice";
 import {
   setRecipientAddress,
@@ -50,6 +51,7 @@ function App() {
   const lucid = useAppSelector(state => state.wallet.lucid);
   const {
     activeView,
+    showWalletSelect,
   } = useAppSelector(state => state.modal);
   const recipientAddress = useAppSelector(state => state.signup.recipientAddress);
   const signupError = useAppSelector(state => state.signup.error);
@@ -330,12 +332,21 @@ function App() {
     <div className="container">
       <div className="main">
         <HeadBox />
-        {!selectedWallet && (
+        {!selectedWallet && !showWalletSelect && (
+          <div className="connect-wallet-container">
+            <Button
+              onClick={() => dispatch(setShowWalletSelect(true))}
+              style={{ width: '100%', maxWidth: '400px' }}
+            >
+              Connect Wallet
+            </Button>
+          </div>
+        )}
+        {!selectedWallet && showWalletSelect && (
           <Card className="wallet-selection-card">
             <h3>Available Wallets</h3>
             <div 
-            className="animated-text"
-            // className="animated-text-non-animated"
+              className="animated-text"
             >
               <p>
                 Welcome to Turn Network, please connect your wallet to get started and begin protecting your financial data.
