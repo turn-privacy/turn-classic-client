@@ -4,14 +4,12 @@ import { AdminModal } from './AdminModal';
 import { useAppSelector } from '../store/hooks';
 import { paymentCredentialOf } from '@lucid-evolution/lucid';
 
-const ADMIN_CREDENTIAL = 'f773436b65daf2dd60a937330c8da08514f3f3c4bc08ea966d3e89f0';
-
 export const Menu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const walletAddress = useAppSelector(state => state.wallet.address);
   const spendingCredential = walletAddress ? paymentCredentialOf(walletAddress).hash : null;
-  const isAdmin = spendingCredential === ADMIN_CREDENTIAL;
+  const isAdmin = spendingCredential === process.env.REACT_APP_ADMIN_CREDENTIAL;
 
   const handleAdminClick = () => {
     setIsOpen(false);

@@ -33,11 +33,10 @@ import {
 import { Card } from "./components/Card";
 import { Button } from "./components/Button";
 import { Modal } from "./components/Modal";
-import Footer from "./components/Footer";
 import { Emulator, Lucid, fromText, paymentCredentialOf } from "@lucid-evolution/lucid";
 import { HeadBox } from "./components/HeadBox";
 import * as CML from "@anastasia-labs/cardano-multiplatform-lib-browser";
-const POLLING_INTERVAL = 10000; // 30 seconds in milliseconds
+const POLLING_INTERVAL = 30000; // 30 seconds in milliseconds
 
 // todo: check payment credential can't already be found in list of witnesses on a ceremony 
 
@@ -366,10 +365,11 @@ function App() {
               <Button
                 onClick={() => dispatch(setSignupModalOpen(true))}
                 style={{ flex: 1 }}
+                disabled={queue.some(participant => participant.address === walletAddress)}
               >
                 Sign Up
               </Button>
-              <Button
+              {/* <Button
                 onClick={() => dispatch(setQueueModalOpen(true))}
                 style={{ flex: 1 }}
               >
@@ -380,7 +380,7 @@ function App() {
                 style={{ flex: 1 }}
               >
                 View Ceremonies
-              </Button>
+              </Button> */}
             </div>
           </Card>
         )}
@@ -396,6 +396,12 @@ function App() {
             </p>
           </div>
           <div className="signup-form">
+            <div className="mixing-amount-options">
+              <button className="mixing-amount-button selected">1,000 ADA</button>
+              <button className="mixing-amount-button" disabled>5,000 ADA</button>
+              <button className="mixing-amount-button" disabled>10,000 ADA</button>
+              <button className="mixing-amount-button" disabled>100,000 ADA</button>
+            </div>
             <input
               type="text"
               value={recipientAddress}
@@ -412,6 +418,12 @@ function App() {
             >
               Sign Up
             </Button>
+             <div className="explanation-text">
+            <p>
+              To remain anonymous, please enter a receiving address that is not associated with your wallet and which you have not previously used for any purpose.
+            </p>
+          </div>
+
           </div>
         </Modal>
 
@@ -490,7 +502,7 @@ function App() {
           </div>
         </Modal>
 
-        <Modal isOpen={isPendingCeremonyModalOpen} onClose={() => {
+         <Modal isOpen={isPendingCeremonyModalOpen} onClose={() => {
           dispatch(setPendingCeremonyModalOpen(false));
           dispatch(resetCeremonyStatus());
         }}>
