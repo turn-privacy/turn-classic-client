@@ -24,6 +24,7 @@ import {
   setQueueModalOpen,
   setCeremoniesModalOpen,
   setPendingCeremonyModalOpen,
+  setActiveView,
 } from "./store/modalSlice";
 import {
   setRecipientAddress,
@@ -59,6 +60,7 @@ function App() {
     isQueueModalOpen,
     isCeremoniesModalOpen,
     isPendingCeremonyModalOpen,
+    activeView,
   } = useAppSelector(state => state.modal);
   const recipientAddress = useAppSelector(state => state.signup.recipientAddress);
   const signupError = useAppSelector(state => state.signup.error);
@@ -356,55 +358,60 @@ function App() {
         )}
 
         {walletAddress && (
-          // <Card>
-          //   <h3>Connected Wallet</h3>
-          //   <p>Address: {walletAddress}</p>
-          //   <p>Balance: {balance ? Number(BigInt(balance)) / 1000000 : 0} ADA</p>
-          //   <p>Current Queue Size: {queue.length} participant{queue.length !== 1 ? 's' : ''}</p>
-          //   <div className="wallet-actions">
-          //     <Button
-          //       onClick={() => dispatch(setSignupModalOpen(true))}
-          //       style={{ flex: 1 }}
-          //       disabled={queue.some(participant => participant.address === walletAddress)}
-          //     >
-          //       Sign Up
-          //     </Button>
-          //     {/* <Button
-          //       onClick={() => dispatch(setQueueModalOpen(true))}
-          //       style={{ flex: 1 }}
-          //     >
-          //       View Queue
-          //     </Button>
-          //     <Button
-          //       onClick={() => dispatch(setCeremoniesModalOpen(true))}
-          //       style={{ flex: 1 }}
-          //     >
-          //       View Ceremonies
-          //     </Button> */}
+          <div className="post-wallet-container">
+            <div className="nav-bar">
+              <button 
+                className={`nav-button ${activeView === 'signup' ? 'active' : ''}`}
+                onClick={() => dispatch(setActiveView('signup'))}
+              >
+                Sign Up
+              </button>
+              <button 
+                className={`nav-button ${activeView === 'info' ? 'active' : ''}`}
+                onClick={() => dispatch(setActiveView('info'))}
+              >
+                Info
+              </button>
+            </div>
 
-          //   </div>
-          // </Card>
+            {activeView === 'signup' && (
+              <div className="signup-button-container">
+                <Button
+                  onClick={() => dispatch(setSignupModalOpen(true))}
+                  style={{
+                    padding: '1rem 2rem',
+                    fontSize: '1.2rem',
+                    maxWidth: '200px'
+                  }}
+                  disabled={queue.some(participant => participant.address === walletAddress)}
+                >
+                  Sign Up
+                </Button>
+              </div>
+            )}
 
-           <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            minHeight: '50vh',
-            width: '100%'
-          }}>
-            <Button
-              onClick={() => dispatch(setSignupModalOpen(true))}
-              style={{ 
-                padding: '1rem 2rem',
-                fontSize: '1.2rem',
-                maxWidth: '200px'
-              }}
-              disabled={queue.some(participant => participant.address === walletAddress)}
-            >
-              Sign Up
-            </Button>
+            {activeView === 'info' && (
+              <div className="info-container">
+                <Card>
+                  <h3>About Turn Network</h3>
+                  <p>Turn Network is a decentralized mixing service for Cardano. It helps protect your financial privacy by breaking the on-chain link between source and destination addresses.</p>
+                  
+                  <h4>How it Works</h4>
+                  <ul>
+                    <li>Sign up with your source address and a fresh destination address</li>
+                    <li>Wait for enough participants to join the queue</li>
+                    <li>Sign the mixing transaction when prompted</li>
+                    <li>Receive your mixed funds at your destination address</li>
+                  </ul>
+                  
+                  <h4>Security Features</h4>
+                  <ul>
+                    <li>Fully decentralized - no custodial risk</li>
+                  </ul>
+                </Card>
+              </div>
+            )}
           </div>
-          
         )}
 
         <Modal isOpen={isSignupModalOpen} onClose={() => {

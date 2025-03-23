@@ -5,6 +5,7 @@ interface ModalState {
     isQueueModalOpen: boolean;
     isCeremoniesModalOpen: boolean;
     isPendingCeremonyModalOpen: boolean;
+    activeView: 'signup' | 'info';
 }
 
 const initialState: ModalState = {
@@ -12,6 +13,7 @@ const initialState: ModalState = {
     isQueueModalOpen: false,
     isCeremoniesModalOpen: false,
     isPendingCeremonyModalOpen: false,
+    activeView: 'signup',
 };
 
 export const modalSlice = createSlice({
@@ -30,6 +32,9 @@ export const modalSlice = createSlice({
         setPendingCeremonyModalOpen: (state, action: PayloadAction<boolean>) => {
             state.isPendingCeremonyModalOpen = action.payload;
         },
+        setActiveView: (state, action: PayloadAction<'signup' | 'info'>) => {
+            state.activeView = action.payload;
+        },
         closeAllModals: (state) => {
             state.isSignupModalOpen = false;
             state.isQueueModalOpen = false;
@@ -44,6 +49,7 @@ export const {
     setQueueModalOpen,
     setCeremoniesModalOpen,
     setPendingCeremonyModalOpen,
+    setActiveView,
     closeAllModals,
 } = modalSlice.actions;
 
