@@ -1003,3 +1003,9 @@ pre {
   z-index: -1;
 }
 
+.transaction-hash {
+  color: var(--color-text);
+  text-decoration: none;
+  font-family: "JetBrains Mono", monospace;
+}
+

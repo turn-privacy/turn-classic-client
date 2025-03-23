@@ -401,6 +401,7 @@ function App() {
                           <p><strong>Ceremony ID:</strong> {pendingCeremony.id}</p>
                           <p><strong>Total Participants:</strong> {pendingCeremony.participants.length}</p>
                           <p><strong>Signatures Collected:</strong> {pendingCeremony.witnesses.length} of {pendingCeremony.participants.length}</p>
+                          <p><strong>Transaction Hash:</strong> <a href={`https://preview.cardanoscan.io/transaction/${pendingCeremony.transactionHash}`} target="_blank" rel="noopener noreferrer" className="transaction-hash">{pendingCeremony.transactionHash}</a></p>
                         </div>
                         
                         {hasSignedCeremony ? (
