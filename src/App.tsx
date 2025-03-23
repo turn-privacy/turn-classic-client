@@ -20,7 +20,6 @@ import {
   setLucid,
 } from "./store/walletSlice";
 import {
-  setSignupModalOpen,
   setQueueModalOpen,
   setCeremoniesModalOpen,
   setPendingCeremonyModalOpen,
@@ -56,7 +55,6 @@ function App() {
   const balance = useAppSelector(state => state.wallet.balance);
   const lucid = useAppSelector(state => state.wallet.lucid);
   const {
-    isSignupModalOpen,
     isQueueModalOpen,
     isCeremoniesModalOpen,
     isPendingCeremonyModalOpen,
@@ -149,8 +147,7 @@ function App() {
         throw new Error(errorText);
       }
 
-      // Success! Close modal and reset state
-      dispatch(setSignupModalOpen(false));
+      // Success! Reset form
       dispatch(resetSignupForm());
     } catch (error) {
       console.error("Signup failed:", error);
@@ -375,18 +372,45 @@ function App() {
             </div>
 
             {activeView === 'signup' && (
-              <div className="signup-button-container">
-                <Button
-                  onClick={() => dispatch(setSignupModalOpen(true))}
-                  style={{
-                    padding: '1rem 2rem',
-                    fontSize: '1.2rem',
-                    maxWidth: '200px'
-                  }}
-                  disabled={queue.some(participant => participant.address === walletAddress)}
-                >
-                  Sign Up
-                </Button>
+              <div className="signup-view">
+                <Card>
+                  <h2>Sign Up</h2>
+                  <div className="explanation-text">
+                    <p>
+                      Enter a receiving address. Click "Sign Up". You will be prompted to sign a message expressing your intention to participate in a Turn Mixing Ceremony. Once signed you will be added to the queue. After enough participants have joined the queue a transaction will be created and you will be asked to sign it. Once all participants have signed the transaction it will be submitted to the chain.
+                    </p>
+                  </div>
+                  <div className="signup-form">
+                    <div className="mixing-amount-options">
+                      <button className="mixing-amount-button selected">1,000 ADA</button>
+                      <button className="mixing-amount-button" disabled>5,000 ADA</button>
+                      <button className="mixing-amount-button" disabled>10,000 ADA</button>
+                      <button className="mixing-amount-button" disabled>100,000 ADA</button>
+                    </div>
+                    <input
+                      type="text"
+                      value={recipientAddress}
+                      onChange={(e) => dispatch(setRecipientAddress(e.target.value))}
+                      placeholder="Recipient Address"
+                      className="signup-input"
+                    />
+                    {signupError && (
+                      <p className="signup-error">{signupError}</p>
+                    )}
+                    <Button
+                      onClick={handleSignup}
+                      style={{ width: '100%' }}
+                      disabled={queue.some(participant => participant.address === walletAddress)}
+                    >
+                      Sign Up
+                    </Button>
+                    <div className="explanation-text">
+                      <p>
+                        To remain anonymous, please enter a receiving address that is not associated with your wallet and which you have not previously used for any purpose.
+                      </p>
+                    </div>
+                  </div>
+                </Card>
               </div>
             )}
 
@@ -407,54 +431,14 @@ function App() {
                   <h4>Security Features</h4>
                   <ul>
                     <li>Fully decentralized - no custodial risk</li>
+                    <li>Zero-knowledge proofs ensure privacy</li>
+                    <li>Multi-party computation for secure mixing</li>
                   </ul>
                 </Card>
               </div>
             )}
           </div>
         )}
-
-        <Modal isOpen={isSignupModalOpen} onClose={() => {
-          dispatch(setSignupModalOpen(false));
-          dispatch(resetSignupForm());
-        }}>
-          <h2>Sign Up</h2>
-          <div className="explanation-text">
-            <p>
-              Enter a receiving address. Click "Sign Up". You will be prompted to sign a message expressing your intention to participate in a Turn Mixing Ceremony. Once signed you will be added to the queue. After enough participants have joined the queue a transaction will be created and you will be asked to sign it. Once all participants have signed the transaction it will be submitted to the chain.
-            </p>
-          </div>
-          <div className="signup-form">
-            <div className="mixing-amount-options">
-              <button className="mixing-amount-button selected">1,000 ADA</button>
-              <button className="mixing-amount-button" disabled>5,000 ADA</button>
-              <button className="mixing-amount-button" disabled>10,000 ADA</button>
-              <button className="mixing-amount-button" disabled>100,000 ADA</button>
-            </div>
-            <input
-              type="text"
-              value={recipientAddress}
-              onChange={(e) => dispatch(setRecipientAddress(e.target.value))}
-              placeholder="Recipient Address"
-              className="signup-input"
-            />
-            {signupError && (
-              <p className="signup-error">{signupError}</p>
-            )}
-            <Button
-              onClick={handleSignup}
-              style={{ width: '100%' }}
-            >
-              Sign Up
-            </Button>
-             <div className="explanation-text">
-            <p>
-              To remain anonymous, please enter a receiving address that is not associated with your wallet and which you have not previously used for any purpose.
-            </p>
-          </div>
-
-          </div>
-        </Modal>
 
         <Modal isOpen={isQueueModalOpen} onClose={() => dispatch(setQueueModalOpen(false))}>
           <h2>Current Queue</h2>

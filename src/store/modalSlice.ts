@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface ModalState {
-    isSignupModalOpen: boolean;
     isQueueModalOpen: boolean;
     isCeremoniesModalOpen: boolean;
     isPendingCeremonyModalOpen: boolean;
@@ -9,7 +8,6 @@ interface ModalState {
 }
 
 const initialState: ModalState = {
-    isSignupModalOpen: false,
     isQueueModalOpen: false,
     isCeremoniesModalOpen: false,
     isPendingCeremonyModalOpen: false,
@@ -20,9 +18,6 @@ export const modalSlice = createSlice({
     name: 'modal',
     initialState,
     reducers: {
-        setSignupModalOpen: (state, action: PayloadAction<boolean>) => {
-            state.isSignupModalOpen = action.payload;
-        },
         setQueueModalOpen: (state, action: PayloadAction<boolean>) => {
             state.isQueueModalOpen = action.payload;
         },
@@ -36,7 +31,6 @@ export const modalSlice = createSlice({
             state.activeView = action.payload;
         },
         closeAllModals: (state) => {
-            state.isSignupModalOpen = false;
             state.isQueueModalOpen = false;
             state.isCeremoniesModalOpen = false;
             state.isPendingCeremonyModalOpen = false;
@@ -45,7 +39,6 @@ export const modalSlice = createSlice({
 });
 
 export const {
-    setSignupModalOpen,
     setQueueModalOpen,
     setCeremoniesModalOpen,
     setPendingCeremonyModalOpen,
