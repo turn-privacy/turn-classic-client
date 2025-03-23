@@ -31,7 +31,7 @@ import { Card } from "./components/Card";
 import { Button } from "./components/Button";
 import { Emulator, Lucid, fromText, paymentCredentialOf } from "@lucid-evolution/lucid";
 import { HeadBox } from "./components/HeadBox";
-import { Decoration } from "./components/Decoration";
+import Decoration from "./components/Decoration";
 import * as CML from "@anastasia-labs/cardano-multiplatform-lib-browser";
 import {
   setProtocolParameters,

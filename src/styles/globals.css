@@ -989,18 +989,17 @@ pre {
 
 .connect-wallet-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 40vh;
+  min-height: 70vh;
   width: 100%;
   position: relative;
+  gap: 20vh;
 }
 
 .decoration-container {
-  position: absolute;
-  left: 50%;
-  top: calc(100% + 10vh);
-  transform: translateX(-50%);
+  position: relative;
   z-index: -1;
 }
 
