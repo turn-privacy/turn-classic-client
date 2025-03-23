@@ -496,16 +496,25 @@ function App() {
                       </div>
                       <div className="signup-form">
                         <div className="mixing-amount-options">
+                          <label className="form-label">Select Token</label>
+                          <select className="currency-select">
+                            <option value="ada">ADA</option>
+                            <option value="rsbtc" disabled>rsBTC (Coming Soon)</option>
+                            <option value="snek" disabled>Snek (Coming Soon)</option>
+                            <option value="usdm" disabled>USDM (Coming Soon)</option>
+                          </select>
+                          <label className="form-label">Select Amount</label>
                           <button className="mixing-amount-button selected">{(parseInt(uniformOutputValue) / 1_000_000).toLocaleString()} ADA</button>
                           <button className="mixing-amount-button" disabled>5,000 ADA</button>
                           <button className="mixing-amount-button" disabled>10,000 ADA</button>
                           <button className="mixing-amount-button" disabled>100,000 ADA</button>
                         </div>
+                        <label className="form-label">Recipient Address</label>
                         <input
                           type="text"
                           value={recipientAddress}
                           onChange={(e) => dispatch(setRecipientAddress(e.target.value))}
-                          placeholder="Recipient Address"
+                          placeholder="Enter recipient address"
                           className="signup-input"
                         />
                         {signupError && (
