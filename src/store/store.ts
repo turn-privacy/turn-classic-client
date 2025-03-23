@@ -6,6 +6,7 @@ import queueReducer from './queueSlice';
 import walletReducer from './walletSlice';
 import modalReducer from './modalSlice';
 import signupReducer from './signupSlice';
+import protocolReducer from './protocolSlice';
 
 export const store = configureStore({
     reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
         wallet: walletReducer,
         modal: modalReducer,
         signup: signupReducer,
+        protocol: protocolReducer,
     },
 });
 

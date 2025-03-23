@@ -11,7 +11,6 @@ import {
   setPendingCeremony,
   setCeremonyStatus,
   setHasSignedCeremony,
-  resetCeremonyStatus
 } from "./store/ceremonySlice";
 import {
   setSelectedWallet,
@@ -20,7 +19,6 @@ import {
   setLucid,
 } from "./store/walletSlice";
 import {
-  setQueueModalOpen,
   setActiveView,
 } from "./store/modalSlice";
 import {
@@ -30,34 +28,32 @@ import {
 } from "./store/signupSlice";
 import { Card } from "./components/Card";
 import { Button } from "./components/Button";
-import { Modal } from "./components/Modal";
 import { Emulator, Lucid, fromText, paymentCredentialOf } from "@lucid-evolution/lucid";
 import { HeadBox } from "./components/HeadBox";
 import * as CML from "@anastasia-labs/cardano-multiplatform-lib-browser";
+import {
+  setProtocolParameters,
+  setProtocolError,
+} from "./store/protocolSlice";
 const POLLING_INTERVAL = 30000; // 30 seconds in milliseconds
-
-// todo: check payment credential can't already be found in list of witnesses on a ceremony 
 
 function App() {
   const dispatch = useAppDispatch();
   const walletSelectList = useAppSelector(state => state.network.walletSelectList);
   const queue = useAppSelector(state => state.queue.participants);
-  const queueError = useAppSelector(state => state.queue.error);
   const ceremonies = useAppSelector(state => state.ceremony.ceremonies);
-  const ceremoniesError = useAppSelector(state => state.ceremony.error);
   const pendingCeremony = useAppSelector(state => state.ceremony.pendingCeremony);
   const ceremonyStatus = useAppSelector(state => state.ceremony.ceremonyStatus);
   const hasSignedCeremony = useAppSelector(state => state.ceremony.hasSignedCeremony);
   const selectedWallet = useAppSelector(state => state.wallet.selectedWallet);
   const walletAddress = useAppSelector(state => state.wallet.address);
-  const balance = useAppSelector(state => state.wallet.balance);
   const lucid = useAppSelector(state => state.wallet.lucid);
   const {
-    isQueueModalOpen,
     activeView,
   } = useAppSelector(state => state.modal);
   const recipientAddress = useAppSelector(state => state.signup.recipientAddress);
   const signupError = useAppSelector(state => state.signup.error);
+  const { minParticipants, uniformOutputValue } = useAppSelector(state => state.protocol);
 
   // Effect to get available wallets
   useEffect(() => {
@@ -71,6 +67,25 @@ function App() {
     dispatch(clearWalletError());
   }, [dispatch]);
 
+  // Effect to fetch protocol parameters
+  useEffect(() => {
+    const fetchProtocolParameters = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BASE_SERVER_URL}/protocol_parameters`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch protocol parameters');
+        }
+        const data = await response.json();
+        dispatch(setProtocolParameters(data));
+      } catch (error) {
+        console.error('Error fetching protocol parameters:', error);
+        dispatch(setProtocolError(error instanceof Error ? error.message : 'Failed to fetch protocol parameters'));
+      }
+    };
+
+    fetchProtocolParameters();
+  }, [dispatch]);
+
   const handleWalletSelect = async (walletName: string) => {
     try {
       const wallet = (window as any).cardano[walletName];
@@ -78,7 +93,6 @@ function App() {
 
       // Initialize Lucid
       const _lucid = await Lucid(
-        // new Blockfrost("https://cardano-preview.blockfrost.io/api/v0", process.env.REACT_APP_BLOCKFROST_API_KEY),
         new Emulator([]),
         "Preview"
       );
@@ -445,10 +459,10 @@ function App() {
                             Position in Queue: {queue.findIndex(p => p.address === walletAddress) + 1} of {queue.length}
                           </p>
                           <p className="queue-target">
-                            Target Pool Size: 3 participants
+                            Target Pool Size: {minParticipants} participants
                           </p>
                           <p className="queue-waiting">
-                            Waiting for {Math.max(0, 3 - queue.length)} more {3 - queue.length === 1 ? 'participant' : 'participants'} to join
+                            Waiting for {Math.max(0, minParticipants - queue.length)} more {minParticipants - queue.length === 1 ? 'participant' : 'participants'} to join
                           </p>
                         </div>
                       </div>
@@ -468,7 +482,7 @@ function App() {
                       </div>
                       <div className="signup-form">
                         <div className="mixing-amount-options">
-                          <button className="mixing-amount-button selected">1,000 ADA</button>
+                          <button className="mixing-amount-button selected">{(parseInt(uniformOutputValue) / 1_000_000).toLocaleString()} ADA</button>
                           <button className="mixing-amount-button" disabled>5,000 ADA</button>
                           <button className="mixing-amount-button" disabled>10,000 ADA</button>
                           <button className="mixing-amount-button" disabled>100,000 ADA</button>
@@ -524,27 +538,7 @@ function App() {
             )}
           </div>
         )}
-
-        <Modal isOpen={isQueueModalOpen} onClose={() => dispatch(setQueueModalOpen(false))}>
-          <h2>Current Queue</h2>
-          <div className="signup-form">
-            {queueError ? (
-              <p className="signup-error">{queueError}</p>
-            ) : queue.length === 0 ? (
-              <p>No participants in queue</p>
-            ) : (
-              <div className="queue-list">
-                {queue.map((participant, index) => (
-                  <div key={index} className="queue-item">
-                    <p><strong>Address:</strong> {participant.address}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </Modal>
       </div>
-      {/* <Footer /> */}
     </div>
   );
 }
