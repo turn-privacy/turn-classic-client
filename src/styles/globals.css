@@ -993,5 +993,14 @@ pre {
   align-items: center;
   min-height: 40vh;
   width: 100%;
+  position: relative;
+}
+
+.decoration-container {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 10vh);
+  transform: translateX(-50%);
+  z-index: -1;
 }
 
