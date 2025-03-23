@@ -21,8 +21,6 @@ import {
 } from "./store/walletSlice";
 import {
   setQueueModalOpen,
-  setCeremoniesModalOpen,
-  setPendingCeremonyModalOpen,
   setActiveView,
 } from "./store/modalSlice";
 import {
@@ -56,8 +54,6 @@ function App() {
   const lucid = useAppSelector(state => state.wallet.lucid);
   const {
     isQueueModalOpen,
-    isCeremoniesModalOpen,
-    isPendingCeremonyModalOpen,
     activeView,
   } = useAppSelector(state => state.modal);
   const recipientAddress = useAppSelector(state => state.signup.recipientAddress);
@@ -200,7 +196,6 @@ function App() {
       // Only reset if we haven't signed yet
       if (!hasSignedCeremony) {
         dispatch(setPendingCeremony(null));
-        dispatch(setPendingCeremonyModalOpen(false));
       }
       return;
     }
@@ -229,18 +224,15 @@ function App() {
       if (hasAlreadySigned) {
         // User has already signed, show status popup
         dispatch(setPendingCeremony(userCeremony));
-        dispatch(setPendingCeremonyModalOpen(true));
         dispatch(setHasSignedCeremony(true));
       } else {
         // User needs to sign
         dispatch(setPendingCeremony(userCeremony));
-        dispatch(setPendingCeremonyModalOpen(true));
         dispatch(setHasSignedCeremony(false));
       }
     } else if (!hasSignedCeremony) {
       // No ceremony found for user and they haven't signed anything
       dispatch(setPendingCeremony(null));
-      dispatch(setPendingCeremonyModalOpen(false));
     }
   }, [ceremonies, walletAddress, hasSignedCeremony, dispatch]);
 
@@ -374,42 +366,137 @@ function App() {
             {activeView === 'signup' && (
               <div className="signup-view">
                 <Card>
-                  <h2>Sign Up</h2>
-                  <div className="explanation-text">
-                    <p>
-                      Enter a receiving address. Click "Sign Up". You will be prompted to sign a message expressing your intention to participate in a Turn Mixing Ceremony. Once signed you will be added to the queue. After enough participants have joined the queue a transaction will be created and you will be asked to sign it. Once all participants have signed the transaction it will be submitted to the chain.
-                    </p>
-                  </div>
-                  <div className="signup-form">
-                    <div className="mixing-amount-options">
-                      <button className="mixing-amount-button selected">1,000 ADA</button>
-                      <button className="mixing-amount-button" disabled>5,000 ADA</button>
-                      <button className="mixing-amount-button" disabled>10,000 ADA</button>
-                      <button className="mixing-amount-button" disabled>100,000 ADA</button>
-                    </div>
-                    <input
-                      type="text"
-                      value={recipientAddress}
-                      onChange={(e) => dispatch(setRecipientAddress(e.target.value))}
-                      placeholder="Recipient Address"
-                      className="signup-input"
-                    />
-                    {signupError && (
-                      <p className="signup-error">{signupError}</p>
-                    )}
-                    <Button
-                      onClick={handleSignup}
-                      style={{ width: '100%' }}
-                      disabled={queue.some(participant => participant.address === walletAddress)}
-                    >
-                      Sign Up
-                    </Button>
-                    <div className="explanation-text">
-                      <p>
-                        To remain anonymous, please enter a receiving address that is not associated with your wallet and which you have not previously used for any purpose.
-                      </p>
-                    </div>
-                  </div>
+                  {pendingCeremony && pendingCeremony.participants.map((participant: any) => participant.address).includes(walletAddress) ? (
+                    <>
+                      <h2>{hasSignedCeremony ? 'Ceremony Status' : 'Time to Sign!'}</h2>
+                      <div className="ceremony-status-container">
+                        <div className="ceremony-details">
+                          <p><strong>Ceremony ID:</strong> {pendingCeremony.id}</p>
+                          <p><strong>Total Participants:</strong> {pendingCeremony.participants.length}</p>
+                          <p><strong>Signatures Collected:</strong> {pendingCeremony.witnesses.length} of {pendingCeremony.participants.length}</p>
+                        </div>
+                        
+                        {hasSignedCeremony ? (
+                          <div className={`ceremony-status ${ceremonyStatus === 'on-chain' ? 'ceremony-status-success' : ceremonyStatus === 'pending' ? 'ceremony-status-pending' : 'ceremony-status-error'}`}>
+                            {ceremonyStatus === 'pending' && (
+                              <>
+                                <div className="ceremony-status-icon">
+                                  <div className="spinner"></div>
+                                </div>
+                                <div className="ceremony-status-content">
+                                  <h3>Waiting for Other Signatures</h3>
+                                  <p>The ceremony will be submitted once all participants have signed.</p>
+                                </div>
+                              </>
+                            )}
+                            {ceremonyStatus === 'on-chain' && (
+                              <div className="ceremony-status-content">
+                                <h3>Success!</h3>
+                                <p>Transaction successfully submitted to chain!</p>
+                                {pendingCeremony.transactionHash && (
+                                  <a
+                                    href={`https://preview.cardanoscan.io/transaction/${pendingCeremony.transactionHash}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="ceremony-transaction-link"
+                                  >
+                                    View Transaction
+                                  </a>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <>
+                            <div className="ceremony-action">
+                              <div className="explanation-text">
+                                <p>
+                                  A ceremony has been created and is ready for your signature. Please review the details and sign the transaction to proceed with the mixing process.
+                                </p>
+                              </div>
+                              <Button
+                                onClick={() => handleSignCeremony(pendingCeremony.id)}
+                                style={{ width: '100%', marginTop: '1rem', backgroundColor: '#4CAF50', color: 'white' }}
+                              >
+                                Sign Ceremony
+                              </Button>
+                            </div>
+                            <div className="ceremony-participants">
+                              <h4>Participants</h4>
+                              {pendingCeremony.participants.map((participant: any, pIndex: number) => (
+                                <div key={pIndex} className={`ceremony-participant ${participant.address === walletAddress ? 'ceremony-participant-current' : ''}`}>
+                                  <p>{participant.address}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </>
+                  ) : queue.some(participant => participant.address === walletAddress) ? (
+                    <>
+                      <h2>Waiting for Participants</h2>
+                      <div className="queue-status">
+                        <div className="queue-status-icon">
+                          <div className="spinner"></div>
+                        </div>
+                        <div className="queue-status-info">
+                          <p className="queue-position">
+                            Position in Queue: {queue.findIndex(p => p.address === walletAddress) + 1} of {queue.length}
+                          </p>
+                          <p className="queue-target">
+                            Target Pool Size: 3 participants
+                          </p>
+                          <p className="queue-waiting">
+                            Waiting for {Math.max(0, 3 - queue.length)} more {3 - queue.length === 1 ? 'participant' : 'participants'} to join
+                          </p>
+                        </div>
+                      </div>
+                      <div className="explanation-text">
+                        <p>
+                          Once enough participants join the queue, a mixing ceremony will be created automatically. You will be notified when it's time to sign the transaction.
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <h2>Sign Up</h2>
+                      <div className="explanation-text">
+                        <p>
+                          Enter a receiving address. Click "Sign Up". You will be prompted to sign a message expressing your intention to participate in a Turn Mixing Ceremony. Once signed you will be added to the queue. After enough participants have joined the queue a transaction will be created and you will be asked to sign it. Once all participants have signed the transaction it will be submitted to the chain.
+                        </p>
+                      </div>
+                      <div className="signup-form">
+                        <div className="mixing-amount-options">
+                          <button className="mixing-amount-button selected">1,000 ADA</button>
+                          <button className="mixing-amount-button" disabled>5,000 ADA</button>
+                          <button className="mixing-amount-button" disabled>10,000 ADA</button>
+                          <button className="mixing-amount-button" disabled>100,000 ADA</button>
+                        </div>
+                        <input
+                          type="text"
+                          value={recipientAddress}
+                          onChange={(e) => dispatch(setRecipientAddress(e.target.value))}
+                          placeholder="Recipient Address"
+                          className="signup-input"
+                        />
+                        {signupError && (
+                          <p className="signup-error">{signupError}</p>
+                        )}
+                        <Button
+                          onClick={handleSignup}
+                          style={{ width: '100%' }}
+                        >
+                          Sign Up
+                        </Button>
+                        <div className="explanation-text">
+                          <p>
+                            To remain anonymous, please enter a receiving address that is not associated with your wallet and which you have not previously used for any purpose.
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </Card>
               </div>
             )}
@@ -431,8 +518,6 @@ function App() {
                   <h4>Security Features</h4>
                   <ul>
                     <li>Fully decentralized - no custodial risk</li>
-                    <li>Zero-knowledge proofs ensure privacy</li>
-                    <li>Multi-party computation for secure mixing</li>
                   </ul>
                 </Card>
               </div>
@@ -457,122 +542,6 @@ function App() {
               </div>
             )}
           </div>
-        </Modal>
-
-        <Modal isOpen={isCeremoniesModalOpen} onClose={() => dispatch(setCeremoniesModalOpen(false))}>
-          <h2>Active Ceremonies</h2>
-          <div className="signup-form">
-            {ceremoniesError ? (
-              <p className="signup-error">{ceremoniesError}</p>
-            ) : ceremonies.length === 0 ? (
-              <p>No active ceremonies</p>
-            ) : (
-              <div className="ceremonies-list">
-                {ceremonies.map((ceremony, index) => (
-                  <div key={ceremony.id} className="ceremony-item">
-                    {
-                      ceremony.participants.map((participant: any) => participant.address).includes(walletAddress) && (
-                        <Button onClick={() => handleSignCeremony(ceremony.id)}>Sign Ceremony</Button>
-                      )
-                    }
-
-                    <p><strong>Ceremony ID:</strong> {ceremony.id}</p>
-                    <p><strong>Participants:</strong> {ceremony.participants.length}</p>
-                    <p><strong>Witnesses:</strong> {ceremony.witnesses.length}</p>
-                    {ceremony.transactionHash && (
-                      <p>
-                        <strong>Transaction Hash:</strong>{' '}
-                        <a
-                          href={`https://preview.cardanoscan.io/transaction/${ceremony.transactionHash}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="ceremony-transaction-link"
-                        >
-                          {ceremony.transactionHash}
-                        </a>
-                      </p>
-                    )}
-                    {/* <p><strong>Transaction:</strong> <span style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>{ceremony.transaction}</span></p> */}
-                    <p>
-                      <strong>Transaction:</strong> 
-                    {/* <span style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>{ceremony.transaction}</span> */}
-                    <code>
-                      {ceremony.transaction}
-                    </code>
-                    </p>
-                    <div className="ceremony-participants">
-                      <p><strong>Participants:</strong></p>
-                      {ceremony.participants.map((participant: any, pIndex: number) => (
-                        <div key={pIndex} className="ceremony-participant">
-                          <p>{participant.address}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </Modal>
-
-         <Modal isOpen={isPendingCeremonyModalOpen} onClose={() => {
-          dispatch(setPendingCeremonyModalOpen(false));
-          dispatch(resetCeremonyStatus());
-        }}>
-          <h2>{hasSignedCeremony ? 'Ceremony Status' : 'Ceremony Requires Your Signature'}</h2>
-          {pendingCeremony && (
-            <div className="signup-form">
-              <p><strong>Ceremony ID:</strong> {pendingCeremony.id}</p>
-              <p><strong>Total Participants:</strong> {pendingCeremony.participants.length}</p>
-              <p><strong>Signatures Collected:</strong> {pendingCeremony.witnesses.length}</p>
-              {pendingCeremony.transactionHash && (
-                <p>
-                  <strong>Transaction:</strong>{' '}
-                  <a
-                    href={`https://preview.cardanoscan.io/transaction/${pendingCeremony.transactionHash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ceremony-transaction-link"
-                  >
-                    {pendingCeremony.transactionHash}
-                  </a>
-                </p>
-              )}
-              {hasSignedCeremony ? (
-                <div className={`ceremony-status ${ceremonyStatus === 'on-chain' ? 'ceremony-status-success' : ceremonyStatus === 'pending' ? 'ceremony-status-pending' : 'ceremony-status-error'}`}>
-                  {ceremonyStatus === 'pending' && (
-                    <>
-                      <p>Waiting for other participants to sign...</p>
-                      <p>Signatures collected: {pendingCeremony.witnesses.length} of {pendingCeremony.participants.length + 1}</p>
-                    </>
-                  )}
-                  {ceremonyStatus === 'on-chain' && (
-                    <p style={{ color: 'white' }}>Transaction successfully submitted to chain!</p>
-                  )}
-                  {ceremonyStatus === 'could not find' && (
-                    <p className="ceremony-status-error">Error: Ceremony not found</p>
-                  )}
-                </div>
-              ) : (
-                <>
-                  <div className="ceremony-participants">
-                    <p><strong>Participants:</strong></p>
-                    {pendingCeremony.participants.map((participant: any, pIndex: number) => (
-                      <div key={pIndex} className={`ceremony-participant ${participant.address === walletAddress ? 'ceremony-participant-current' : ''}`}>
-                        <p>Address: {participant.address}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    onClick={() => handleSignCeremony(pendingCeremony.id)}
-                    style={{ width: '100%', marginTop: '1rem', backgroundColor: '#4CAF50', color: 'white' }}
-                  >
-                    Sign Ceremony
-                  </Button>
-                </>
-              )}
-            </div>
-          )}
         </Modal>
       </div>
       {/* <Footer /> */}
