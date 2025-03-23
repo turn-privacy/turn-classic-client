@@ -356,33 +356,55 @@ function App() {
         )}
 
         {walletAddress && (
-          <Card>
-            <h3>Connected Wallet</h3>
-            <p>Address: {walletAddress}</p>
-            <p>Balance: {balance ? Number(BigInt(balance)) / 1000000 : 0} ADA</p>
-            <p>Current Queue Size: {queue.length} participant{queue.length !== 1 ? 's' : ''}</p>
-            <div className="wallet-actions">
-              <Button
-                onClick={() => dispatch(setSignupModalOpen(true))}
-                style={{ flex: 1 }}
-                disabled={queue.some(participant => participant.address === walletAddress)}
-              >
-                Sign Up
-              </Button>
-              {/* <Button
-                onClick={() => dispatch(setQueueModalOpen(true))}
-                style={{ flex: 1 }}
-              >
-                View Queue
-              </Button>
-              <Button
-                onClick={() => dispatch(setCeremoniesModalOpen(true))}
-                style={{ flex: 1 }}
-              >
-                View Ceremonies
-              </Button> */}
-            </div>
-          </Card>
+          // <Card>
+          //   <h3>Connected Wallet</h3>
+          //   <p>Address: {walletAddress}</p>
+          //   <p>Balance: {balance ? Number(BigInt(balance)) / 1000000 : 0} ADA</p>
+          //   <p>Current Queue Size: {queue.length} participant{queue.length !== 1 ? 's' : ''}</p>
+          //   <div className="wallet-actions">
+          //     <Button
+          //       onClick={() => dispatch(setSignupModalOpen(true))}
+          //       style={{ flex: 1 }}
+          //       disabled={queue.some(participant => participant.address === walletAddress)}
+          //     >
+          //       Sign Up
+          //     </Button>
+          //     {/* <Button
+          //       onClick={() => dispatch(setQueueModalOpen(true))}
+          //       style={{ flex: 1 }}
+          //     >
+          //       View Queue
+          //     </Button>
+          //     <Button
+          //       onClick={() => dispatch(setCeremoniesModalOpen(true))}
+          //       style={{ flex: 1 }}
+          //     >
+          //       View Ceremonies
+          //     </Button> */}
+
+          //   </div>
+          // </Card>
+
+           <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            minHeight: '50vh',
+            width: '100%'
+          }}>
+            <Button
+              onClick={() => dispatch(setSignupModalOpen(true))}
+              style={{ 
+                padding: '1rem 2rem',
+                fontSize: '1.2rem',
+                maxWidth: '200px'
+              }}
+              disabled={queue.some(participant => participant.address === walletAddress)}
+            >
+              Sign Up
+            </Button>
+          </div>
+          
         )}
 
         <Modal isOpen={isSignupModalOpen} onClose={() => {
