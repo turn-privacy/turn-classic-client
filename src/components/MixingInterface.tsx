@@ -20,15 +20,15 @@ import {
 // import { Slider } from '../components/ui/slider';
 // import { Label } from '../components/ui/label';
 import {
-  ArrowRightLeft,
-  Shield,
-  Clock,
-  Info,
-  AlertTriangle,
+  // ArrowRightLeft,
+  // Shield,
+  // Clock,
+  // Info,
+  // AlertTriangle,
   Wallet,
-  CheckCircle2,
+  // CheckCircle2,
 } from 'lucide-react';
-import { useToast } from '../hooks/use-toast';
+// import { useToast } from '../hooks/use-toast';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { CML, fromText, paymentCredentialOf } from '@lucid-evolution/lucid';
 import {
@@ -51,54 +51,54 @@ import {
   setProtocolParameters,
 } from '../store/protocolSlice';
 
-const tokens = [
-  {
-    id: 'ada',
-    name: 'ADA',
-    symbol: '₳',
-    logo: 'https://cryptologos.cc/logos/cardano-ada-logo.png?v=026',
-    balance: '2,450.75',
-  },
-  {
-    id: 'milk',
-    name: 'MILK',
-    symbol: 'MILK',
-    logo: 'https://muesliswap.com/static/tokens/milk.png',
-    balance: '10,000.00',
-  },
-  {
-    id: 'lq',
-    name: 'LQ',
-    symbol: 'LQ',
-    logo: 'https://liqwid.finance/assets/tokens/lq.svg',
-    balance: '500.00',
-  },
-  {
-    id: 'min',
-    name: 'MIN',
-    symbol: 'MIN',
-    logo: 'https://minswap.org/assets/min-symbol.png',
-    balance: '1,275.50',
-  },
-];
+// const tokens = [
+//   {
+//     id: 'ada',
+//     name: 'ADA',
+//     symbol: '₳',
+//     logo: 'https://cryptologos.cc/logos/cardano-ada-logo.png?v=026',
+//     balance: '2,450.75',
+//   },
+//   {
+//     id: 'milk',
+//     name: 'MILK',
+//     symbol: 'MILK',
+//     logo: 'https://muesliswap.com/static/tokens/milk.png',
+//     balance: '10,000.00',
+//   },
+//   {
+//     id: 'lq',
+//     name: 'LQ',
+//     symbol: 'LQ',
+//     logo: 'https://liqwid.finance/assets/tokens/lq.svg',
+//     balance: '500.00',
+//   },
+//   {
+//     id: 'min',
+//     name: 'MIN',
+//     symbol: 'MIN',
+//     logo: 'https://minswap.org/assets/min-symbol.png',
+//     balance: '1,275.50',
+//   },
+// ];
 
 // Mock transaction history data
-const mockTransactions = [
-  {
-    id: 'tx1',
-    date: new Date().toISOString(),
-    amount: '100',
-    token: 'ADA',
-    status: 'completed',
-  },
-  {
-    id: 'tx2',
-    date: new Date(Date.now() - 86400000).toISOString(),
-    amount: '500',
-    token: 'MILK',
-    status: 'pending',
-  },
-];
+// const mockTransactions = [
+//   {
+//     id: 'tx1',
+//     date: new Date().toISOString(),
+//     amount: '100',
+//     token: 'ADA',
+//     status: 'completed',
+//   },
+//   {
+//     id: 'tx2',
+//     date: new Date(Date.now() - 86400000).toISOString(),
+//     amount: '500',
+//     token: 'MILK',
+//     status: 'pending',
+//   },
+// ];
 const POLLING_INTERVAL = 30000;
 // const POLLING_INTERVAL = 10000;
 const MixingInterface = () => {
