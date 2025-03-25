@@ -1,8 +1,21 @@
 import { Link } from 'react-router';
 import Logo from '../components/Logo';
 import { Twitter, Github, MessageSquare, ExternalLink } from 'lucide-react';
+import { useState } from 'react';
+import { useAppSelector } from '../store/hooks';
+import { paymentCredentialOf } from '@lucid-evolution/lucid';
+import { AdminModal } from './AdminModal';
 
 const Footer = () => {
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const walletAddress = useAppSelector(state => state.wallet.address);
+  const spendingCredential = walletAddress ? paymentCredentialOf(walletAddress).hash : null;
+  const isAdmin = spendingCredential === process.env.REACT_APP_ADMIN_CREDENTIAL;
+
+  const handleAdminClick = () => {
+    setIsAdminModalOpen(true);
+  };
+
   return (
     <footer className="border-t border-primary/10 bg-background/90 backdrop-blur-sm">
       <div className="container mx-auto px-4 py-12">
@@ -59,6 +72,16 @@ const Footer = () => {
               <FooterExternalLink href="https://forum.cardano.org">
                 Cardano Forum
               </FooterExternalLink>
+              {isAdmin && (
+                <li>
+                  <button
+                    onClick={handleAdminClick}
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Admin Portal
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
         </div>
@@ -73,6 +96,10 @@ const Footer = () => {
           </div>
         </div>
       </div>
+      <AdminModal 
+        isOpen={isAdminModalOpen} 
+        onClose={() => setIsAdminModalOpen(false)} 
+      />
     </footer>
   );
 };
