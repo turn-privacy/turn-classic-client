@@ -11,10 +11,16 @@ const stats = [
     label: 'Users',
     description: 'Privacy-focused community members',
   },
+  // {
+  //   value: '100%',
+  //   label: 'Secure',
+  //   // description: 'Provably private transactions',
+  //   description: 'Private transactions',
+  // },
   {
-    value: '100%',
-    label: 'Secure',
-    description: 'Provably private transactions',
+    value: 'Soon',
+    label: 'Community Owned',
+    description: 'Governed by the community of TURN holders',
   },
   {
     value: '24/7',

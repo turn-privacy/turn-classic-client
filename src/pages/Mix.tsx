@@ -300,7 +300,8 @@ const Mix = () => {
                         </CardTitle>
                       </div>
                       <div className="text-xs text-muted-foreground pt-0 p-4">
-                        Provably-secure private transactions directly on-chain.
+                        {/* Provably-secure private transactions directly on-chain. */}
+                        Private transactions directly on-chain.
                       </div>
                     </Card>
 

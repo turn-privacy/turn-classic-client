@@ -99,7 +99,8 @@ const mockTransactions = [
     status: 'pending',
   },
 ];
-const POLLING_INTERVAL = 30000;
+// const POLLING_INTERVAL = 30000;
+const POLLING_INTERVAL = 10000;
 const MixingInterface = () => {
   const [selectedToken, setSelectedToken] = useState('ada');
   const [amount, setAmount] = useState('');

@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import Logo from '../components/Logo';
-import { Twitter, Github, MessageSquare, ExternalLink } from 'lucide-react';
+import { Twitter, Github, MessageSquare, ExternalLink, BookOpen } from 'lucide-react';
 import { useState } from 'react';
 import { useAppSelector } from '../store/hooks';
 import { paymentCredentialOf } from '@lucid-evolution/lucid';
@@ -27,16 +27,20 @@ const Footer = () => {
             </p>
             <div className="flex space-x-4">
               <SocialLink
-                href="https://twitter.com"
+                href="https://x.com/turnprotocol"
                 icon={<Twitter className="h-5 w-5" />}
               />
               <SocialLink
-                href="https://github.com"
+                href="https://github.com/turn-privacy"
                 icon={<Github className="h-5 w-5" />}
               />
               <SocialLink
-                href="https://discord.com"
+                href="https://discord.com/invite/4BTgMb9BBB"
                 icon={<MessageSquare className="h-5 w-5" />}
+              />
+              <SocialLink
+                href="https://medium.com/@networkturn"
+                icon={<BookOpen className="h-5 w-5" />}
               />
             </div>
           </div>
@@ -47,7 +51,7 @@ const Footer = () => {
               <FooterLink to="/">Home</FooterLink>
               <FooterLink to="/mix">Mix</FooterLink>
               {/* <FooterLink to="/pools">Pools</FooterLink> */}
-              <FooterLink to="/docs">Documentation</FooterLink>
+              {/* <FooterLink to="/docs">Documentation</FooterLink> */}
             </ul>
           </div>
 

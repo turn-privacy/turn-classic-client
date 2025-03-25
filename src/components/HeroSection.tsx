@@ -41,8 +41,10 @@ const HeroSection = () => {
             <span className="gradient-text">Cardano</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Turn Network provides uncompromising privacy for ADA and native
-            tokens, ensuring your financial sovereignty on the Cardano
+            {/* Turn Network provides uncompromising privacy for ADA and native */}
+            Turn Network provides privacy for ADA and native
+            {/* tokens, ensuring your financial sovereignty on the Cardano */}
+            tokens, helping to ensure your financial sovereignty on the Cardano
             blockchain.
           </p>
         </div>
@@ -62,12 +64,12 @@ const HeroSection = () => {
               Launch App <ExternalLink className="ml-2 h-4 w-4" />
             </Link>
           </Button>
-          <Button
+          {/* <Button
             variant="outline"
             className="border-primary/30 hover:bg-primary/5 px-8 py-6 text-lg"
           >
             Learn More
-          </Button>
+          </Button> */}
         </div>
       </div>
 

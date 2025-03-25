@@ -295,43 +295,43 @@ const NavLinks = ({ mobile = false }: { mobile?: boolean }) => {
       >
         Pools
       </Link> */}
-      <Link
+      {/* <Link
         to="/docs"
         className={mobile ? `${baseClasses} ${mobileClasses}` : baseClasses}
       >
         Docs
-      </Link>
+      </Link> */}
     </>
   );
 };
 
-const WalletOption = ({
-  name,
-  icon,
-  onClick,
-}: {
-  name: string;
-  icon: string;
-  onClick: () => void;
-}) => {
-  return (
-    <Button
-      variant="outline"
-      className="flex justify-start items-center w-full py-6 hover:bg-primary/5 hover:border-primary/30"
-      onClick={onClick}
-    >
-      <img
-        src={icon}
-        alt={name}
-        className="w-6 h-6 mr-3"
-        onError={(e) => {
-          (e.target as HTMLImageElement).src =
-            'https://via.placeholder.com/24?text=W';
-        }}
-      />
-      <span>{name}</span>
-    </Button>
-  );
-};
+// const WalletOption = ({
+//   name,
+//   icon,
+//   onClick,
+// }: {
+//   name: string;
+//   icon: string;
+//   onClick: () => void;
+// }) => {
+//   return (
+//     <Button
+//       variant="outline"
+//       className="flex justify-start items-center w-full py-6 hover:bg-primary/5 hover:border-primary/30"
+//       onClick={onClick}
+//     >
+//       <img
+//         src={icon}
+//         alt={name}
+//         className="w-6 h-6 mr-3"
+//         onError={(e) => {
+//           (e.target as HTMLImageElement).src =
+//             'https://via.placeholder.com/24?text=W';
+//         }}
+//       />
+//       <span>{name}</span>
+//     </Button>
+//   );
+// };
 
 export default Navbar;

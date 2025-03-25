@@ -45,7 +45,7 @@ const docsCategories = [
     icon: <Code className="h-5 w-5" />,
     items: [
       'Protocol Specifications',
-      'Zero-Knowledge Proofs',
+      // 'Zero-Knowledge Proofs',
       'Security Model',
       'API Reference',
     ],
@@ -57,32 +57,32 @@ const docsCategories = [
   },
 ];
 
-const codeExample = `// Initialize a new mixing transaction
-const tx = await TurnNetwork.createMixingTx({
-  token: "ADA",
-  amount: 1000,
-  privacyLevel: 80,
-  timeDelay: "24h",
-  recipient: "addr1qy2k..."
-});
+// const codeExample = `// Initialize a new mixing transaction
+// const tx = await TurnNetwork.createMixingTx({
+//   token: "ADA",
+//   amount: 1000,
+//   privacyLevel: 80,
+//   timeDelay: "24h",
+//   recipient: "addr1qy2k..."
+// });
 
-// Sign and submit the transaction
-const signedTx = await wallet.signTx(tx);
-const txHash = await TurnNetwork.submitTx(signedTx);
+// // Sign and submit the transaction
+// const signedTx = await wallet.signTx(tx);
+// const txHash = await TurnNetwork.submitTx(signedTx);
 
-// Monitor transaction status
-const status = await TurnNetwork.getTxStatus(txHash);
-console.log(\`Transaction status: \${status}\`);`;
+// // Monitor transaction status
+// const status = await TurnNetwork.getTxStatus(txHash);
+// console.log(\`Transaction status: \${status}\`);`;
 
 const Docs = () => {
-  const [copied, setCopied] = useState(false);
+  // const [copied, setCopied] = useState(false);
   const [activeCategory, setActiveCategory] = useState('Getting Started');
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(codeExample);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  // const copyToClipboard = () => {
+  //   navigator.clipboard.writeText(codeExample);
+  //   setCopied(true);
+  //   setTimeout(() => setCopied(false), 2000);
+  // };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -162,7 +162,7 @@ const Docs = () => {
 
                   <div className="prose prose-invert max-w-none">
                     <p className="text-muted-foreground">
-                      Turn Network is a cutting-edge mixing protocol designed
+                      Turn Network is <del>a cutting-edge</del> mixing protocol designed
                       for the Cardano blockchain, enabling users to conduct
                       private transactions with ADA and native tokens. By
                       breaking the on-chain link between source and destination
@@ -175,12 +175,12 @@ const Docs = () => {
                     </h3>
 
                     <p className="text-muted-foreground">
-                      When you use Turn Network to mix your assets, the protocol
-                      employs advanced cryptographic techniques including
-                      zero-knowledge proofs to ensure that your transaction
-                      history cannot be traced. Your assets are pooled with
-                      those of other users, and through a series of
-                      cryptographic operations, the connection between inputs
+                      When you use Turn Network to mix your assets<del>, the protocol
+                        employs advanced cryptographic techniques including
+                        zero-knowledge proofs to ensure that your transaction
+                        history cannot be traced. </del>Your assets are pooled with
+                      those of other users<del>, and through a series of
+                      cryptographic operations, </del>the connection between inputs
                       and outputs is severed.
                     </p>
 
@@ -191,15 +191,25 @@ const Docs = () => {
                     <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
                       <li>Support for ADA and all Cardano native tokens</li>
                       <li>
-                        Zero-knowledge cryptography for complete transaction
-                        privacy
+                        <del>
+                          Zero-knowledge cryptography for complete transaction
+                          privacy
+                        </del>
                       </li>
-                      <li>Adjustable privacy levels to suit your needs</li>
-                      <li>Time-delayed transactions for enhanced anonymity</li>
+                      <li>
+                        <del>
+                          Adjustable privacy levels to suit your needs
+                        </del>
+                      </li>
+                      <li>
+                        <del>Time-delayed transactions for enhanced anonymity</del>
+                      </li>
                       <li>
                         Non-custodial design - you always control your assets
                       </li>
-                      <li>Open-source and audited codebase</li>
+                      <li>
+                        Open-source <del>and audited</del> codebase
+                      </li>
                     </ul>
                   </div>
                 </CardContent>
@@ -299,7 +309,7 @@ const Docs = () => {
                 </CardContent>
               </Card>
 
-              <Card className="dark-blur border-primary/20">
+              {/* <Card className="dark-blur border-primary/20">
                 <CardContent className="p-6">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold">Code Example</h2>
@@ -327,7 +337,7 @@ const Docs = () => {
                     {codeExample}
                   </pre>
                 </CardContent>
-              </Card>
+              </Card> */}
 
               <div className="flex flex-col sm:flex-row justify-between items-center dark-blur border border-primary/20 rounded-lg p-6">
                 <div className="flex items-center mb-4 sm:mb-0">

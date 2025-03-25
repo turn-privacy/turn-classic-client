@@ -3,19 +3,19 @@ import { Button } from '../components/ui/button';
 import { useToast } from '../hooks/use-toast';
 
 const CTASection = () => {
-  const { toast } = useToast();
+  // const { toast } = useToast();
 
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast({
-      title: 'Subscribed!',
-      description: "You've been added to our newsletter",
-    });
+  // const handleSubscribe = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   toast({
+  //     title: 'Subscribed!',
+  //     description: "You've been added to our newsletter",
+  //   });
 
-    // Reset form
-    const form = e.target as HTMLFormElement;
-    form.reset();
-  };
+  //   // Reset form
+  //   const form = e.target as HTMLFormElement;
+  //   form.reset();
+  // };
 
   return (
     <section className="py-20 relative overflow-hidden">
@@ -36,19 +36,20 @@ const CTASection = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-10">
-              <Button className="gradient-bg text-black hover:opacity-90 transition-opacity font-medium px-8 py-6 text-lg w-full sm:w-auto">
+          
+              <Button onClick={() => window.open('/mix', '_blank')} className="gradient-bg text-black hover:opacity-90 transition-opacity font-medium px-8 py-6 text-lg w-full sm:w-auto">
                 Start Mixing Now
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button
+              {/* <Button
                 variant="outline"
                 className="border-primary/30 hover:bg-primary/5 px-8 py-6 text-lg w-full sm:w-auto"
               >
                 Explore Docs
-              </Button>
+              </Button> */}
             </div>
 
-            <div className="max-w-md mx-auto">
+            {/* <div className="max-w-md mx-auto">
               <h3 className="text-lg font-medium mb-3 text-center">
                 Stay Updated
               </h3>
@@ -70,7 +71,7 @@ const CTASection = () => {
                   Subscribe
                 </Button>
               </form>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

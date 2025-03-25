@@ -63,8 +63,9 @@ const FeaturesSection = () => {
             Why Choose <span className="gradient-text">Turn Network</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Our cutting-edge technology provides unmatched privacy features for
-            Cardano users
+            {/* Our cutting-edge technology provides unmatched privacy features for
+            Cardano users */}
+            Undo KYC, anonymize your assets, and break the link between sender and recipient.
           </p>
         </div>
 
