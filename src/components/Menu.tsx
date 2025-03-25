@@ -27,14 +27,14 @@ export const Menu = () => {
         </button>
         {isOpen && (
           <div className="menu-dropdown">
-            <a
+            {/* <a
               href="https://turn-network.gitbook.io/turn"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsOpen(false)}
             >
               Docs
-            </a>
+            </a> */}
             <a
               href={`${process.env.REACT_APP_BASE_SERVER_URL}/ceremony_history`}
               target="_blank"

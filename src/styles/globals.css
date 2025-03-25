@@ -1,27 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap');
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
   /* Primary Colors */
   --color-primary: #ffa722;
   --color-primary-hover: #e4810f;
-  
+
   /* Background Colors */
   --color-bg-black: #000000;
   --color-bg-dark: #111111;
   --color-bg-gradient-end: #1a1a1a;
   --color-bg-hover: #222222;
-  
+
   /* Border Colors */
   --color-border: #333333;
-  
+
   /* Text Colors */
   --color-text: #ffffff;
   --color-text-muted: #999999;
-  
+
   /* Error Colors */
   --color-error: #ff4444;
-  
+
   /* Overlay Colors */
   --color-overlay: rgba(0, 0, 0, 0.5);
 }
@@ -44,7 +44,13 @@ body {
   max-width: 100%;
 }
 
-p, h1, h2, h3, h4, h5, h6 {
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word;
@@ -59,7 +65,7 @@ p, h1, h2, h3, h4, h5, h6 {
 }
 
 .font-mono {
-  font-family: "JetBrains Mono", monospace;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 dialog::backdrop {
@@ -77,14 +83,14 @@ dialog::backdrop {
 }
 
 /* Socials */
-a[href*="discord.gg"],
-a[href*="github.com"] {
+a[href*='discord.gg'],
+a[href*='github.com'] {
   opacity: 0.8;
   transition: all 0.2s ease;
 }
 
-a[href*="discord.gg"]:hover,
-a[href*="github.com"]:hover {
+a[href*='discord.gg']:hover,
+a[href*='github.com']:hover {
   opacity: 1;
   color: var(--color-error) !important;
   border-color: var(--color-error) !important;
@@ -96,7 +102,7 @@ button,
 input,
 code,
 pre {
-  font-family: "JetBrains Mono", monospace;
+  font-family: 'JetBrains Mono', monospace;
   letter-spacing: -0.025em;
 }
 
@@ -138,7 +144,6 @@ pre {
   text-decoration: none;
 }
 
-
 .head-box-items {
   display: flex;
   align-items: center;
@@ -146,7 +151,7 @@ pre {
 }
 
 .head-box-wallet-badge {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   padding: 4px 8px;
   border-radius: 12px;
@@ -468,12 +473,16 @@ pre {
 
 .queue-item:hover {
   border-color: var(--color-primary);
-  background-color: color-mix(in srgb, var(--color-primary) 5%, var(--color-bg-hover));
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 5%,
+    var(--color-bg-hover)
+  );
 }
 
 .queue-item p {
   margin: 0;
-  font-family: "JetBrains Mono", monospace;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .queue-item strong {
@@ -504,12 +513,16 @@ pre {
 
 .ceremony-item:hover {
   border-color: var(--color-primary);
-  background-color: color-mix(in srgb, var(--color-primary) 5%, var(--color-bg-hover));
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 5%,
+    var(--color-bg-hover)
+  );
 }
 
 .ceremony-item p {
   margin: 0.5rem 0;
-  font-family: "JetBrains Mono", monospace;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .ceremony-item strong {
@@ -602,7 +615,7 @@ pre {
 }
 
 .admin-info {
-  font-family: "JetBrains Mono", monospace;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .admin-info p {
@@ -627,11 +640,13 @@ pre {
 }
 
 /* Typing Animation Styles */
-.animated-text, .animated-text-non-animated {
+.animated-text,
+.animated-text-non-animated {
   margin-bottom: 1.5rem;
 }
 
-.animated-text, .animated-text-non-animated p {
+.animated-text,
+.animated-text-non-animated p {
   margin: 0;
   font-family: monospace;
 }
@@ -640,21 +655,28 @@ pre {
   overflow: hidden;
   border-right: 2px solid var(--color-primary);
   white-space: nowrap;
-  animation: 
-    typing 3.5s steps(40, end),
-    blink-caret .75s step-end 3.5s;
+  animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end 3.5s;
   width: 0;
   animation-fill-mode: forwards;
 }
 
 @keyframes typing {
-  from { width: 0 }
-  to { width: 100% }
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 @keyframes blink-caret {
-  from, to { border-color: transparent }
-  50% { border-color: var(--color-primary) }
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: var(--color-primary);
+  }
 }
 
 .mixing-amount-options {
@@ -670,7 +692,7 @@ pre {
 .form-label {
   color: var(--color-text-muted);
   font-size: 0.9rem;
-  font-family: "JetBrains Mono", monospace;
+  font-family: 'JetBrains Mono', monospace;
   margin-bottom: 0.5rem;
   display: block;
 }
@@ -686,12 +708,12 @@ pre {
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.9rem;
-  font-family: "JetBrains Mono", monospace;
+  font-family: 'JetBrains Mono', monospace;
   margin-bottom: 1rem;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 0.65em auto;
@@ -874,12 +896,34 @@ pre {
 
 .queue-status {
   display: flex;
-  align-items: center;
-  gap: 2rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
   padding: 2rem;
   background-color: var(--color-bg-hover);
   border-radius: 8px;
   margin-bottom: 2rem;
+}
+
+@media (max-width: 767px) {
+  /* Adjust breakpoint as needed for "md" */
+  .queue-status {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 2rem;
+    background-color: var(--color-bg-hover);
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 350px) {
+  .tabs-trigger {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    font-size: 0.65rem;
+  }
 }
 
 .queue-status-icon {
@@ -896,8 +940,12 @@ pre {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .queue-status-info {
@@ -906,7 +954,7 @@ pre {
 
 .queue-status-info p {
   margin: 0.5rem 0;
-  font-family: "JetBrains Mono", monospace;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .queue-position {
@@ -933,7 +981,7 @@ pre {
   background-color: var(--color-bg-hover);
   padding: 1.5rem;
   border-radius: 8px;
-  font-family: "JetBrains Mono", monospace;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .ceremony-details p {
@@ -969,8 +1017,8 @@ pre {
 }
 
 .ceremony-status.ceremony-status-success {
-  background-color: color-mix(in srgb, #4CAF50 10%, var(--color-bg-hover));
-  border: 1px solid #4CAF50;
+  background-color: color-mix(in srgb, #4caf50 10%, var(--color-bg-hover));
+  border: 1px solid #4caf50;
 }
 
 .ceremony-status.ceremony-status-pending {
@@ -978,7 +1026,11 @@ pre {
 }
 
 .ceremony-status.ceremony-status-error {
-  background-color: color-mix(in srgb, var(--color-error) 10%, var(--color-bg-hover));
+  background-color: color-mix(
+    in srgb,
+    var(--color-error) 10%,
+    var(--color-bg-hover)
+  );
   border: 1px solid var(--color-error);
 }
 
@@ -1013,7 +1065,7 @@ pre {
 
 .ceremony-participant p {
   margin: 0;
-  font-family: "JetBrains Mono", monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.9rem;
 }
 
@@ -1027,7 +1079,7 @@ pre {
   margin-top: 1rem;
   color: var(--color-primary);
   text-decoration: none;
-  font-family: "JetBrains Mono", monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.9rem;
   transition: color 0.2s ease;
 }
@@ -1056,6 +1108,5 @@ pre {
 .transaction-hash {
   color: var(--color-text);
   text-decoration: none;
-  font-family: "JetBrains Mono", monospace;
+  font-family: 'JetBrains Mono', monospace;
 }
-
