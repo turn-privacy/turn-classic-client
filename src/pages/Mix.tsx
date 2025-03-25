@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import MixingInterface from '../components/MixingInterface';
@@ -38,7 +38,8 @@ import {
 } from '../components/ui/table';
 import { Progress } from '../components/ui/progress';
 import ConnectWallet from '../components/ConnectWallet';
-import { useAppSelector } from '../store/hooks';
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { setCeremonyHistory, setCeremonyHistoryError } from '../store/ceremonyHistorySlice';
 
 const mockTransactions = [
   {
@@ -121,6 +122,34 @@ const Mix = () => {
   );
   const queue = useAppSelector((state) => state.queue.participants);
   const walletAddress = useAppSelector((state) => state.wallet.address);
+  const ceremonyHistory = useAppSelector((state) => state.ceremonyHistory.records);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    const fetchCeremonyHistory = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_BASE_SERVER_URL}/ceremony_history`
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch ceremony history');
+        }
+        const data = await response.json();
+        dispatch(setCeremonyHistory(data));
+      } catch (error) {
+        console.error('Failed to fetch ceremony history:', error);
+        dispatch(
+          setCeremonyHistoryError(
+            error instanceof Error
+              ? error.message
+              : 'Failed to fetch ceremony history'
+          )
+        );
+      }
+    };
+
+    fetchCeremonyHistory();
+  }, [dispatch]);
 
   const connectWallet = () => {
     toast({
@@ -466,7 +495,7 @@ const Mix = () => {
                     Transaction History
                   </CardTitle>
                   <CardDescription className="text-center">
-                    View your past mixing operations
+                    View past mixing operations
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -481,52 +510,26 @@ const Mix = () => {
                       <Table>
                         <TableHeader>
                           <TableRow className="border-primary/10">
-                            <TableHead>Date</TableHead>
-                            <TableHead>Token</TableHead>
-                            <TableHead>Status</TableHead>
+                            <TableHead>Ceremony ID</TableHead>
                             <TableHead>Transaction Hash</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {mockTransactions.map((tx) => (
+                          {ceremonyHistory.map((record) => (
                             <TableRow
-                              key={tx.id}
+                              key={record.id}
                               className="border-primary/5 hover:bg-primary/5"
                             >
-                              <TableCell>
-                                {new Date(tx.date).toLocaleString()}
-                              </TableCell>
-                              <TableCell>
-                                {tx.tokenAmount} {tx.tokenSymbol}
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center">
-                                  {tx.status === 'completed' ? (
-                                    <>
-                                      <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" />
-                                      <span className="text-green-500">
-                                        Completed
-                                      </span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <AlertTriangle className="h-4 w-4 text-yellow-500 mr-1" />
-                                      <span className="text-yellow-500">
-                                        Pending
-                                      </span>
-                                    </>
-                                  )}
-                                </div>
-                              </TableCell>
+                              <TableCell>{record.id}</TableCell>
                               <TableCell>
                                 <a
-                                  href={`https://cardanoscan.io/transaction/${tx.txHash}`}
+                                  href={`https://preview.cardanoscan.io/transaction/${record.transactionHash}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-primary flex items-center hover:underline"
+                                  className="text-primary flex items-center hover:underline font-mono text-sm"
                                 >
-                                  {tx.txHash}
-                                  <ExternalLink className="h-3 w-3 ml-1" />
+                                  {record.transactionHash}
+                                  <ExternalLink className="h-3 w-3 ml-1 flex-shrink-0" />
                                 </a>
                               </TableCell>
                             </TableRow>

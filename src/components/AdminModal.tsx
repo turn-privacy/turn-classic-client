@@ -78,6 +78,15 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
             <div className="admin-section">
               <h3>Database Management</h3>
               <div className="admin-actions">
+                <a
+                  href={`${process.env.REACT_APP_BASE_SERVER_URL}/ceremony_history`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="button"
+                  style={{ marginRight: '10px' }}
+                >
+                  View History
+                </a>
                 <Button 
                   onClick={handleReset}
                   disabled={isResetting}

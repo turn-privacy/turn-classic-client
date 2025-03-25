@@ -8,6 +8,7 @@ import modalReducer from './modalSlice';
 import signupReducer from './signupSlice';
 import protocolReducer from './protocolSlice';
 import walletConnectedReducer from './isWalletConnectedSlice';
+import ceremonyHistoryReducer from './ceremonyHistorySlice';
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
     signup: signupReducer,
     protocol: protocolReducer,
     walletConnected: walletConnectedReducer,
+    ceremonyHistory: ceremonyHistoryReducer,
   },
 });
 
