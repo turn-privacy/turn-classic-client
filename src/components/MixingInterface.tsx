@@ -4,21 +4,21 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
+  // CardFooter,
   CardHeader,
   CardTitle,
 } from '../components/ui/card';
-import { Input } from '../components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../components/ui/select';
-import { Switch } from '../components/ui/switch';
-import { Slider } from '../components/ui/slider';
-import { Label } from '../components/ui/label';
+// import { Input } from '../components/ui/input';
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from '../components/ui/select';
+// import { Switch } from '../components/ui/switch';
+// import { Slider } from '../components/ui/slider';
+// import { Label } from '../components/ui/label';
 import {
   ArrowRightLeft,
   Shield,
@@ -99,16 +99,16 @@ const mockTransactions = [
     status: 'pending',
   },
 ];
-// const POLLING_INTERVAL = 30000;
-const POLLING_INTERVAL = 10000;
+const POLLING_INTERVAL = 30000;
+// const POLLING_INTERVAL = 10000;
 const MixingInterface = () => {
-  const [selectedToken, setSelectedToken] = useState('ada');
-  const [amount, setAmount] = useState('');
+  // const [selectedToken, setSelectedToken] = useState('ada');
+  // const [amount, setAmount] = useState('');
   const dispatch = useAppDispatch();
-  const [privacyLevel, setPrivacyLevel] = useState([70]);
-  const [advancedPrivacy, setAdvancedPrivacy] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  // const [privacyLevel, setPrivacyLevel] = useState([70]);
+  // const [advancedPrivacy, setAdvancedPrivacy] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
+  // const { toast } = useToast();
   const ceremonyStatus = useAppSelector(
     (state) => state.ceremony.ceremonyStatus
   );
@@ -135,60 +135,60 @@ const MixingInterface = () => {
   const pendingCeremony = useAppSelector(
     (state) => state.ceremony.pendingCeremony
   );
-  const handleMix = () => {
-    if (!isWalletConnected) {
-      toast({
-        title: 'Wallet not connected',
-        description: 'Please connect your wallet first',
-        variant: 'destructive',
-      });
-      return;
-    }
+  // const handleMix = () => {
+  //   if (!isWalletConnected) {
+  //     toast({
+  //       title: 'Wallet not connected',
+  //       description: 'Please connect your wallet first',
+  //       variant: 'destructive',
+  //     });
+  //     return;
+  //   }
 
-    if (!amount || parseFloat(amount) <= 0) {
-      toast({
-        title: 'Invalid amount',
-        description: 'Please enter a valid amount to mix',
-        variant: 'destructive',
-      });
-      return;
-    }
+  //   if (!amount || parseFloat(amount) <= 0) {
+  //     toast({
+  //       title: 'Invalid amount',
+  //       description: 'Please enter a valid amount to mix',
+  //       variant: 'destructive',
+  //     });
+  //     return;
+  //   }
 
-    setIsLoading(true);
-    // Simulate mixing process
-    setTimeout(() => {
-      toast({
-        title: 'Mixing initiated',
-        description: `Your ${amount} ${
-          tokens.find((t) => t.id === selectedToken)?.symbol || selectedToken
-        } is being mixed`,
-      });
-      setIsLoading(false);
-      // Add to transaction history
-      mockTransactions.unshift({
-        id: `tx${mockTransactions.length + 1}`,
-        date: new Date().toISOString(),
-        amount: amount,
-        token:
-          tokens.find((t) => t.id === selectedToken)?.symbol || selectedToken,
-        status: 'pending',
-      });
-    }, 2000);
-  };
+  //   // setIsLoading(true);
+  //   // Simulate mixing process
+  //   setTimeout(() => {
+  //     toast({
+  //       title: 'Mixing initiated',
+  //       description: `Your ${amount} ${
+  //         tokens.find((t) => t.id === selectedToken)?.symbol || selectedToken
+  //       } is being mixed`,
+  //     });
+  //     // setIsLoading(false);
+  //     // Add to transaction history
+  //     mockTransactions.unshift({
+  //       id: `tx${mockTransactions.length + 1}`,
+  //       date: new Date().toISOString(),
+  //       amount: amount,
+  //       token:
+  //         tokens.find((t) => t.id === selectedToken)?.symbol || selectedToken,
+  //       status: 'pending',
+  //     });
+  //   }, 2000);
+  // };
 
-  const connectWallet = () => {
-    toast({
-      title: 'Connecting wallet...',
-      description: 'Attempting to connect to your wallet',
-    });
+  // const connectWallet = () => {
+  //   toast({
+  //     title: 'Connecting wallet...',
+  //     description: 'Attempting to connect to your wallet',
+  //   });
 
-    setTimeout(() => {
-      toast({
-        title: 'Wallet connected',
-        description: 'Successfully connected to your wallet',
-      });
-    }, 1500);
-  };
+  //   setTimeout(() => {
+  //     toast({
+  //       title: 'Wallet connected',
+  //       description: 'Successfully connected to your wallet',
+  //     });
+  //   }, 1500);
+  // };
   const handleSignup = async () => {
     if (!walletAddress || !recipientAddress) {
       dispatch(setSignupError('Please provide both addresses'));
@@ -449,15 +449,15 @@ const MixingInterface = () => {
     return () => clearInterval(intervalId);
   }, [hasSignedCeremony, pendingCeremony, dispatch]);
 
-  const disconnectWallet = () => {
-    // setIsWalletConnected(false);
-    toast({
-      title: 'Wallet disconnected',
-      description: 'Your wallet has been disconnected',
-    });
-  };
+  // const disconnectWallet = () => {
+  //   // setIsWalletConnected(false);
+  //   toast({
+  //     title: 'Wallet disconnected',
+  //     description: 'Your wallet has been disconnected',
+  //   });
+  // };
 
-  const selectedTokenInfo = tokens.find((t) => t.id === selectedToken);
+  // const selectedTokenInfo = tokens.find((t) => t.id === selectedToken);
 
   return (
     <Card className="w-full max-w-md mx-auto dark-blur border-primary/20 relative overflow-hidden">
