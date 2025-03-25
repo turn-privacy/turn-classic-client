@@ -855,11 +855,10 @@ const MixingInterface = () => {
                           </select>
                           <label className="form-label">Select Amount</label>
                           <button className="mixing-amount-button selected">
-                            {/* {(
+                            {(
                               parseInt(uniformOutputValue) / 1_000_000
                             ).toLocaleString()}{' '}
-                            ADA */}
-                            1,000 ADA
+                            ADA
                           </button>
                           <button className="mixing-amount-button" disabled>
                             5,000 ADA
