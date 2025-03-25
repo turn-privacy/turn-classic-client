@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import MixingInterface from '../components/MixingInterface';
-import SigningCeremonyStatus from '../components/SigningCeremonyStatus';
+// import SigningCeremonyStatus from '../components/SigningCeremonyStatus';
 import {
   Tabs,
   TabsContent,
@@ -232,7 +232,7 @@ const Mix = () => {
                 value="status"
                 className="flex-grow data-[state=active]:bg-primary/10 data-[state=active]:text-primary py-1 px-1 md:px-2 text-xs sm:text-sm md:text-base truncate"
               >
-                Transaction Status
+                Queue Status
               </TabsTrigger>
             </TabsList>
             <TabsList className="hidden sm:grid grid-cols-3 gap-1 mb-8">
@@ -252,7 +252,7 @@ const Mix = () => {
                 value="status"
                 className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary py-1 px-1 md:px-2 text-xs sm:text-sm md:text-base truncate"
               >
-                Transaction Status
+                Queue Status
               </TabsTrigger>
             </TabsList>
 
@@ -366,51 +366,70 @@ const Mix = () => {
               <Card className="dark-blur border-primary/20">
                 <CardHeader>
                   <CardTitle className="text-center">
-                    Transaction Status
+                    Queue Status
                   </CardTitle>
                   <CardDescription className="text-center">
-                    Track your mixing transactions
+                    Track your position in the mixing queue
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {walletAddress ? (
-                    <>
-                      <h2 className="font-semibold text-center md:text-left">
-                        Waiting for Participants
-                      </h2>
-                      <div className="queue-status">
-                        <div className="queue-status-icon">
-                          <div className="spinner"></div>
+                    queue.length > 0 ? (
+                      <>
+                        <h2 className="font-semibold text-center md:text-left mb-4">
+                          {queue.some((p) => p.address === walletAddress)
+                            ? "You're in Queue"
+                            : "Current Queue Status"}
+                        </h2>
+                        <div className="queue-status">
+                          <div className="queue-status-icon">
+                            <div className="spinner"></div>
+                          </div>
+                          <div className="queue-status-info">
+                            {queue.some((p) => p.address === walletAddress) ? (
+                              <>
+                                <p className="queue-position">
+                                  Your Position: {queue.findIndex((p) => p.address === walletAddress) + 1} of {queue.length}
+                                </p>
+                                <p className="queue-target">
+                                  Target Pool Size: {minParticipants} participants
+                                </p>
+                                <p className="queue-waiting">
+                                  Waiting for {Math.max(0, minParticipants - queue.length)} more {minParticipants - queue.length === 1 ? 'participant' : 'participants'} to join
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="queue-position">
+                                  Active Participants: {queue.length}
+                                </p>
+                                <p className="queue-target">
+                                  Target Pool Size: {minParticipants} participants
+                                </p>
+                                <p className="queue-waiting">
+                                  Waiting for {Math.max(0, minParticipants - queue.length)} more {minParticipants - queue.length === 1 ? 'participant' : 'participants'} to join
+                                </p>
+                              </>
+                            )}
+                          </div>
                         </div>
-                        <div className="queue-status-info">
-                          <p className="queue-position">
-                            Position in Queue:{' '}
-                            {queue.findIndex(
-                              (p) => p.address === walletAddress
-                            ) + 1}{' '}
-                            of {queue.length}
-                          </p>
-                          <p className="queue-target">
-                            Target Pool Size: {minParticipants} participants
-                          </p>
-                          <p className="queue-waiting">
-                            Waiting for{' '}
-                            {Math.max(0, minParticipants - queue.length)} more{' '}
-                            {minParticipants - queue.length === 1
-                              ? 'participant'
-                              : 'participants'}{' '}
-                            to join
+                        <div className="explanation-text mt-4">
+                          <p>
+                            Once enough participants join the queue, a mixing ceremony will be created automatically. 
+                            {queue.some((p) => p.address === walletAddress) && " You will be notified when it's time to sign the transaction."}
                           </p>
                         </div>
-                      </div>
-                      <div className="explanation-text">
-                        <p>
-                          Once enough participants join the queue, a mixing
-                          ceremony will be created automatically. You will be
-                          notified when it's time to sign the transaction.
+                      </>
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                          <CheckCircle2 className="h-6 w-6 text-primary" />
+                        </div>
+                        <p className="text-muted-foreground">
+                          No participants in queue. Be the first to join!
                         </p>
                       </div>
-                    </>
+                    )
                   ) : (
                     <div className="flex items-center justify-center w-full">
                       <div className="mx-auto">
@@ -418,72 +437,6 @@ const Mix = () => {
                       </div>
                     </div>
                   )}
-                  {/* {!isWalletConnected ? (
-                    <div className="py-8 text-center">
-                      <p className="text-muted-foreground mb-4">
-                        You need to connect your wallet to view transaction
-                        status
-                      </p>
-                      <Button
-                        className="gradient-bg text-black font-medium"
-                        onClick={connectWallet}
-                      >
-                        <Wallet className="mr-2 h-4 w-4" />
-                        Connect Wallet
-                      </Button>
-                    </div>
-                  ) : mockActiveTransactions.length > 0 ? (
-                    <div className="space-y-6">
-                      {mockActiveTransactions.map((tx) => (
-                        <div key={tx.id} className="space-y-4">
-                          <Card className="border-primary/10">
-                            <CardContent className="p-4">
-                              <div className="flex justify-between items-center mb-2">
-                                <div className="flex items-center">
-                                  <ArrowRightLeft className="h-5 w-5 text-primary mr-2" />
-                                  <span className="font-medium">
-                                    Mixing {tx.tokenAmount} {tx.tokenSymbol}
-                                  </span>
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  {new Date(tx.startDate).toLocaleString()}
-                                </div>
-                              </div>
-
-                              <div className="mb-2">
-                                <Progress value={tx.progress} className="h-2" />
-                              </div>
-
-                              <div className="flex justify-between text-sm mb-4">
-                                <span>Progress: {tx.progress}%</span>
-                                <span>Time remaining: {tx.remainingTime}</span>
-                              </div>
-                            </CardContent>
-                          </Card>
-
-                          <SigningCeremonyStatus
-                            requiredSignatures={3}
-                            participants={mockParticipants}
-                            progress={
-                              (mockParticipants.filter((p) => p.hasSigned)
-                                .length /
-                                3) *
-                              100
-                            }
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                        <CheckCircle2 className="h-6 w-6 text-primary" />
-                      </div>
-                      <p className="text-muted-foreground">
-                        No active mixing transactions
-                      </p>
-                    </div>
-                  )} */}
                 </CardContent>
               </Card>
             </TabsContent>
