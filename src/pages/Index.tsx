@@ -21,12 +21,12 @@ const Index = () => {
               With Complete Privacy
             </h2>
             <p className="text-muted-foreground mb-6">
-              <del>
+              {/* <del>
                 Turn Network provides  state-of-the-art  mixing technology, ensuring
                 your transactions remain private and untraceable. Our protocol
                 uses advanced cryptographic techniques to break the on-chain link
                 between source and destination addresses.
-              </del>
+              </del> */}
               Turn Network is a CoinJoin style protocol which allows you to mix your assets with those of other users.
               It takes advantage of the UTxO model employed by Cardano to break the link between inputs and outputs. 
             </p>

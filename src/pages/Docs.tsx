@@ -162,7 +162,8 @@ const Docs = () => {
 
                   <div className="prose prose-invert max-w-none">
                     <p className="text-muted-foreground">
-                      Turn Network is <del>a cutting-edge</del> mixing protocol designed
+                      {/* Turn Network is <del>a cutting-edge</del> mixing protocol designed */}
+                      Turn Network is a mixing protocol designed
                       for the Cardano blockchain, enabling users to conduct
                       private transactions with ADA and native tokens. By
                       breaking the on-chain link between source and destination
@@ -175,13 +176,17 @@ const Docs = () => {
                     </h3>
 
                     <p className="text-muted-foreground">
-                      When you use Turn Network to mix your assets<del>, the protocol
+                      {/* When you use Turn Network to mix your assets<del>, the protocol
                         employs advanced cryptographic techniques including
                         zero-knowledge proofs to ensure that your transaction
                         history cannot be traced. </del>Your assets are pooled with
                       those of other users<del>, and through a series of
                       cryptographic operations, </del>the connection between inputs
-                      and outputs is severed.
+                      and outputs is severed. */}
+
+                         When you use Turn Network to mix your assets they are pooled with
+                      those of other users breaking the connection between inputs
+                      and outputs.
                     </p>
 
                     <h3 className="text-xl font-semibold mt-6 mb-3">
@@ -190,25 +195,26 @@ const Docs = () => {
 
                     <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
                       <li>Support for ADA and all Cardano native tokens</li>
-                      <li>
+                      {/* <li>
                         <del>
                           Zero-knowledge cryptography for complete transaction
                           privacy
                         </del>
-                      </li>
-                      <li>
+                      </li> */}
+                      {/* <li>
                         <del>
                           Adjustable privacy levels to suit your needs
                         </del>
-                      </li>
-                      <li>
+                      </li> */}
+                      {/* <li>
                         <del>Time-delayed transactions for enhanced anonymity</del>
-                      </li>
+                      </li> */}
                       <li>
                         Non-custodial design - you always control your assets
                       </li>
                       <li>
-                        Open-source <del>and audited</del> codebase
+                        {/* Open-source <del>and audited</del> codebase */}
+                        Open-source codebase
                       </li>
                     </ul>
                   </div>
