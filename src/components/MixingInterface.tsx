@@ -236,6 +236,9 @@ const MixingInterface = () => {
 
       // Success! Reset form
       dispatch(resetSignupForm());
+
+      // fetch queue again
+
     } catch (error) {
       console.error('Signup failed:', error);
       dispatch(
@@ -794,13 +797,13 @@ const MixingInterface = () => {
                           <div className="spinner"></div>
                         </div>
                         <div className="queue-status-info">
-                          <p className="queue-position">
+                          {/* <p className="queue-position">
                             Position in Queue:{' '}
                             {queue.findIndex(
                               (p) => p.address === walletAddress
                             ) + 1}{' '}
-                            of {queue.length}
-                          </p>
+                            of {queue.length} 
+                          </p>  */}
                           <p className="queue-target">
                             Target Pool Size: {minParticipants} participants
                           </p>

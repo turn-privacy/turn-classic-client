@@ -954,15 +954,16 @@ pre {
   font-family: 'JetBrains Mono', monospace;
 }
 
-.queue-position {
+.queue-position,
+.queue-target {
   color: var(--color-primary);
   font-size: 1.1rem;
   font-weight: 500;
 }
 
-.queue-target {
+/* .queue-target {
   color: var(--color-text);
-}
+} */
 
 .queue-waiting {
   color: var(--color-text-muted);

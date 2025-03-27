@@ -388,9 +388,9 @@ const Mix = () => {
                           <div className="queue-status-info">
                             {queue.some((p) => p.address === walletAddress) ? (
                               <>
-                                <p className="queue-position">
+                                {/* <p className="queue-position">
                                   Your Position: {queue.findIndex((p) => p.address === walletAddress) + 1} of {queue.length}
-                                </p>
+                                </p> */}
                                 <p className="queue-target">
                                   Target Pool Size: {minParticipants} participants
                                 </p>
