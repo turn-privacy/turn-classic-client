@@ -135,6 +135,9 @@ const MixingInterface = () => {
   const pendingCeremony = useAppSelector(
     (state) => state.ceremony.pendingCeremony
   );
+
+  const [ isLoading, setIsLoading ] = useState(false);
+
   // const handleMix = () => {
   //   if (!isWalletConnected) {
   //     toast({
@@ -197,6 +200,7 @@ const MixingInterface = () => {
 
     try {
       // Create the payload
+      setIsLoading(true);
       const payload = fromText(
         JSON.stringify({
           context:
@@ -246,6 +250,9 @@ const MixingInterface = () => {
           error instanceof Error ? error.message : 'Failed to sign up'
         )
       );
+    }
+    finally {
+      setIsLoading(false);
     }
   };
   const handleSignCeremony = async (ceremonyId: string) => {
@@ -890,8 +897,15 @@ const MixingInterface = () => {
                         <Button
                           onClick={handleSignup}
                           style={{ width: '100%' }}
+                          disabled={isLoading}
                         >
-                          Sign Up
+                          {isLoading ? (
+                            <div className="spinner" style={{ width: '2rem', height: '2rem', margin: '0 auto' }}></div>
+                          ) : (
+                            <span className="flex items-center">
+                              Sign Up
+                            </span>
+                          )}
                         </Button>
                         <div className="explanation-text pt-3">
                           <p>
