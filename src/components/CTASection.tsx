@@ -18,7 +18,7 @@ const CTASection = () => {
   // };
 
   return (
-    <section className="py-20 relative overflow-hidden">
+    <section className="pt-0 pb-20 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary-dark/5 opacity-30" />
 
       <div className="container mx-auto px-4 relative z-10">
@@ -36,8 +36,10 @@ const CTASection = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-10">
-          
-              <Button onClick={() => window.open('/mix', '_blank')} className="gradient-bg text-black hover:opacity-90 transition-opacity font-medium px-8 py-6 text-lg w-full sm:w-auto">
+              <Button
+                onClick={() => window.open('/mix', '_blank')}
+                className="gradient-bg text-black hover:opacity-90 transition-opacity font-medium px-8 py-6 text-lg w-full sm:w-auto"
+              >
                 Start Mixing Now
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

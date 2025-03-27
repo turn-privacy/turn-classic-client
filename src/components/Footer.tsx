@@ -1,6 +1,12 @@
 import { Link } from 'react-router';
 import Logo from '../components/Logo';
-import { Twitter, Github, MessageSquare, ExternalLink, BookOpen } from 'lucide-react';
+import {
+  Twitter,
+  Github,
+  MessageSquare,
+  ExternalLink,
+  BookOpen,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useAppSelector } from '../store/hooks';
 import { paymentCredentialOf } from '@lucid-evolution/lucid';
@@ -8,8 +14,10 @@ import { AdminModal } from './AdminModal';
 
 const Footer = () => {
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
-  const walletAddress = useAppSelector(state => state.wallet.address);
-  const spendingCredential = walletAddress ? paymentCredentialOf(walletAddress).hash : null;
+  const walletAddress = useAppSelector((state) => state.wallet.address);
+  const spendingCredential = walletAddress
+    ? paymentCredentialOf(walletAddress).hash
+    : null;
   const isAdmin = spendingCredential === process.env.REACT_APP_ADMIN_CREDENTIAL;
 
   const handleAdminClick = () => {
@@ -30,18 +38,18 @@ const Footer = () => {
                 href="https://x.com/turnprotocol"
                 icon={<Twitter className="h-5 w-5" />}
               />
-              <SocialLink
+              {/* <SocialLink
                 href="https://github.com/turn-privacy"
                 icon={<Github className="h-5 w-5" />}
-              />
+              /> */}
               <SocialLink
                 href="https://discord.com/invite/4BTgMb9BBB"
                 icon={<MessageSquare className="h-5 w-5" />}
               />
-              <SocialLink
+              {/* <SocialLink
                 href="https://medium.com/@networkturn"
                 icon={<BookOpen className="h-5 w-5" />}
-              />
+              /> */}
             </div>
           </div>
 
@@ -58,24 +66,66 @@ const Footer = () => {
           <div>
             <h3 className="font-medium text-lg mb-4">Resources</h3>
             <ul className="space-y-2">
-              <FooterLink to="/faq">FAQ</FooterLink>
-              <FooterLink to="/tutorials">Tutorials</FooterLink>
-              <FooterLink to="/blog">Blog</FooterLink>
-              <FooterLink to="/privacy">Privacy Policy</FooterLink>
+              <li>
+                <Link
+                  target="_blank"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  to="https://x.com/turnprotocol/status/1902750371447029839?s=46&t=X1sJLYL6zORh4pcBGIlQCw"
+                >
+                  Demo
+                </Link>
+              </li>
+              <li>
+                <Link
+                  target="_blank"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  to="https://drive.google.com/file/d/1-G__NbHL-qyRW9O5pIOj3qKU48AfzKQx/view"
+                >
+                  Presentation
+                </Link>
+              </li>
+              <li>
+                <Link
+                  target="_blank"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  to="https://medium.com/@networkturn/litepaper-n-1f903bda83d3"
+                >
+                  Litepaper
+                </Link>
+              </li>
+              {/* <FooterLink to="/privacy">Privacy Policy</FooterLink> */}
             </ul>
           </div>
 
           <div>
             <h3 className="font-medium text-lg mb-4">Community</h3>
             <ul className="space-y-2">
-              <FooterLink to="/community">Join Community</FooterLink>
+              <li>
+                <Link
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  to="https://x.com/turnprotocol"
+                  target="_blank"
+                >
+                  Twitter
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  to="https://discord.com/invite/4BTgMb9BBB"
+                  target="_blank"
+                >
+                  Discord
+                </Link>
+              </li>
+              {/* <FooterLink to="/community">Join Community</FooterLink>
               <FooterLink to="/governance">Governance</FooterLink>
               <FooterExternalLink href="https://cardano.org">
                 Cardano Foundation
               </FooterExternalLink>
               <FooterExternalLink href="https://forum.cardano.org">
                 Cardano Forum
-              </FooterExternalLink>
+              </FooterExternalLink> */}
               {isAdmin && (
                 <li>
                   <button
@@ -100,9 +150,9 @@ const Footer = () => {
           </div>
         </div>
       </div>
-      <AdminModal 
-        isOpen={isAdminModalOpen} 
-        onClose={() => setIsAdminModalOpen(false)} 
+      <AdminModal
+        isOpen={isAdminModalOpen}
+        onClose={() => setIsAdminModalOpen(false)}
       />
     </footer>
   );

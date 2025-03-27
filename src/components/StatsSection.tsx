@@ -62,7 +62,7 @@ const StatsSection = () => {
     >
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent z-0"></div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      {/* <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {stats.map((stat, index) => (
             <div
@@ -84,7 +84,7 @@ const StatsSection = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
     </section>
   );
 };

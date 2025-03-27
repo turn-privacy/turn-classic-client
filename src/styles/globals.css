@@ -102,7 +102,6 @@ button,
 input,
 code,
 pre {
-  font-family: 'JetBrains Mono', monospace;
   letter-spacing: -0.025em;
 }
 
@@ -322,7 +321,6 @@ pre {
 }
 
 .explanation-text {
-  font-family: monospace;
   margin-bottom: 2rem;
   line-height: 1.6;
 }
@@ -648,7 +646,7 @@ pre {
 .animated-text,
 .animated-text-non-animated p {
   margin: 0;
-  font-family: monospace;
+  font-family: receiving;
 }
 
 .animated-text p {
@@ -708,7 +706,6 @@ pre {
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.9rem;
-  font-family: 'JetBrains Mono', monospace;
   margin-bottom: 1rem;
   appearance: none;
   -webkit-appearance: none;

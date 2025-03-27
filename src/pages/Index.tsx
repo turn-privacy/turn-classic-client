@@ -22,6 +22,7 @@ const Index = () => {
             </h2>
             <p className="text-muted-foreground mb-6">
               {/* <del>
+              {/* <del>
                 Turn Network provides  state-of-the-art  mixing technology, ensuring
                 your transactions remain private and untraceable. Our protocol
                 uses advanced cryptographic techniques to break the on-chain link
@@ -31,8 +32,8 @@ const Index = () => {
               It takes advantage of the UTxO model employed by Cardano to break the link between inputs and outputs. 
             </p>
             <p className="text-muted-foreground">
-              With support for ADA and native tokens on Cardano, Turn
-              Network is your comprehensive privacy solution.
+              With support for ADA and native tokens on Cardano, Turn Network is
+              your comprehensive privacy solution.
             </p>
           </div>
 
