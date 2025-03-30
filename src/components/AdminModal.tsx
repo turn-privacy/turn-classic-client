@@ -24,6 +24,32 @@ interface CancelledCeremony {
   ceremonyId: string;
 }
 
+interface CeremonyDetailsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  ceremony: any; // Using any since we don't have the full type
+}
+
+const CeremonyDetailsModal: React.FC<CeremonyDetailsModalProps> = ({ isOpen, onClose, ceremony }) => {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <h3>Ceremony Details</h3>
+      <pre style={{ 
+        whiteSpace: 'pre-wrap',
+        wordWrap: 'break-word',
+        maxHeight: '70vh',
+        overflow: 'auto',
+        padding: '1rem',
+        backgroundColor: '#f5f5f5',
+        borderRadius: '4px',
+        color: '#000000'
+      }}>
+        {JSON.stringify(ceremony, null, 2)}
+      </pre>
+    </Modal>
+  );
+};
+
 export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
   const walletAddress = useAppSelector(state => state.wallet.address);
   const lucid = useAppSelector(state => state.wallet.lucid);
@@ -34,7 +60,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
   const [cancelledCeremonies, setCancelledCeremonies] = useState<CancelledCeremony[]>([]);
   const [isBlacklistExpanded, setIsBlacklistExpanded] = useState(false);
   const [isCancelledExpanded, setIsCancelledExpanded] = useState(false);
+  const [isCeremoniesExpanded, setIsCeremoniesExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedCeremony, setSelectedCeremony] = useState<any>(null);
   const ceremonies = useAppSelector((state) => state.ceremony.ceremonies);
 
   useEffect(() => {
@@ -194,6 +222,38 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
               </div>
             </div>
             <div className="admin-section">
+              <h3>Active Ceremonies</h3>
+              <Button 
+                onClick={() => setIsCeremoniesExpanded(!isCeremoniesExpanded)}
+                style={{ marginBottom: '10px' }}
+              >
+                {isCeremoniesExpanded ? 'Hide Ceremonies' : 'Show Ceremonies'}
+              </Button>
+              {isCeremoniesExpanded && (
+                <div className="admin-list">
+                  {ceremonies.length === 0 ? (
+                    <p>No active ceremonies</p>
+                  ) : (
+                    <ul>
+                      {ceremonies.map((ceremony) => (
+                        <li key={ceremony.id} style={{ marginBottom: '1rem' }}>
+                          <strong>Ceremony ID:</strong> {ceremony.id}
+                          <br />
+                          <Button
+                            onClick={() => setSelectedCeremony(ceremony)}
+                            style={{ marginTop: '0.5rem' }}
+                          >
+                            View Details
+                          </Button>
+                          <hr />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="admin-section">
               <h3>Blacklist</h3>
               <Button 
                 onClick={() => setIsBlacklistExpanded(!isBlacklistExpanded)}
@@ -260,7 +320,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
                           <br />
                           <strong>Timestamp:</strong> {new Date(ceremony.timestamp).toLocaleString()}
                           {/* visual separator */}
+                          <br />
                           <hr />
+                          <br />
                         </li>
                       ))}
                     </ul>
@@ -268,6 +330,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
                 </div>
               )}
             </div>
+            {selectedCeremony && (
+              <CeremonyDetailsModal
+                isOpen={!!selectedCeremony}
+                onClose={() => setSelectedCeremony(null)}
+                ceremony={selectedCeremony}
+              />
+            )}
           </>
         ) : (
           <p>Please connect your wallet to view admin information.</p>
