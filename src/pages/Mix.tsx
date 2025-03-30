@@ -40,7 +40,6 @@ import { Progress } from '../components/ui/progress';
 import ConnectWallet from '../components/ConnectWallet';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { setCeremonyHistory, setCeremonyHistoryError } from '../store/ceremonyHistorySlice';
-
 const mockTransactions = [
   {
     id: 'tx1',
@@ -465,10 +464,11 @@ const Mix = () => {
                           <TableRow className="border-primary/10">
                             <TableHead>Ceremony ID</TableHead>
                             <TableHead>Transaction Hash</TableHead>
+                            <TableHead>Expiration Time</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {ceremonyHistory.map((record) => (
+                          {ceremonyHistory.map((record ) => (
                             <TableRow
                               key={record.id}
                               className="border-primary/5 hover:bg-primary/5"
@@ -484,6 +484,9 @@ const Mix = () => {
                                   {record.transactionHash}
                                   <ExternalLink className="h-3 w-3 ml-1 flex-shrink-0" />
                                 </a>
+                              </TableCell>
+                              <TableCell>
+                                {record?.expirationTime ? new Date(record?.expirationTime * 1000).toLocaleString() : 'N/A'}
                               </TableCell>
                             </TableRow>
                           ))}

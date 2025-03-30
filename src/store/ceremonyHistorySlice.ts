@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface CeremonyRecord {
+  expirationTime: number | null;
   id: string;
   transactionHash: string;
 }

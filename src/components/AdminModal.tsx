@@ -11,13 +11,17 @@ interface AdminModalProps {
 }
 
 interface BlacklistEntry {
-  address: string;
+  cred: string;
   reason: string;
+  timestamp: number;
+  id: string;
 }
 
 interface CancelledCeremony {
-  id: string;
   reason: string;
+  timestamp: number;
+  transactionHash: string;
+  ceremonyId: string;
 }
 
 export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
@@ -31,6 +35,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
   const [isBlacklistExpanded, setIsBlacklistExpanded] = useState(false);
   const [isCancelledExpanded, setIsCancelledExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const ceremonies = useAppSelector((state) => state.ceremony.ceremonies);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,6 +66,10 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
 
     fetchData();
   }, [isOpen]);
+
+  useEffect(() => {
+    console.log("ceremonies", ceremonies);
+  }, [ceremonies]);
 
   const handleReset = async () => {
     if (!walletAddress || !lucid) return;
@@ -106,6 +115,46 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
       setIsResetting(false);
     }
   };
+
+  const handleRemoveBlacklistEntry = async (cred: string) => {
+    if (!walletAddress || !lucid) return;
+
+    try {
+      // Create the message to sign
+      const payload = fromText(JSON.stringify({
+        context: "By signing this message, you confirm that you are the admin and intend to remove a blacklist entry.",
+        adminAddress: walletAddress,
+        cred,
+        signupTimestamp: new Date()
+      }));
+
+      // Get the signed message from the wallet
+      const signedMessage = await lucid.wallet().signMessage(walletAddress, payload);
+
+      // Send to API
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_SERVER_URL}/admin/remove_blacklist_entry`, 
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            signedMessage,
+            payload
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+    } catch {
+      console.error("Failed to remove blacklist entry");
+    }
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -162,9 +211,22 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
                     <ul>
                       {blacklist.map((entry, index) => (
                         <li key={index}>
-                          <strong>Address:</strong> {entry.address}
+                         <strong>Credential:</strong> {entry?.cred}
                           <br />
                           <strong>Reason:</strong> {entry.reason}
+                          <br />
+                          <strong>Timestamp:</strong> {new Date(entry.timestamp).toLocaleString()}
+                          <br />
+                          <Button
+                            onClick={() => handleRemoveBlacklistEntry(entry.cred)}
+                          >
+                            Remove
+                          </Button>
+                          <br />
+                     
+                          {/* visual separator */}
+                          <hr />
+                          <br />
                         </li>
                       ))}
                     </ul>
@@ -189,10 +251,16 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
                   ) : (
                     <ul>
                       {cancelledCeremonies.map((ceremony) => (
-                        <li key={ceremony.id}>
-                          <strong>Ceremony ID:</strong> {ceremony.id}
+                        <li key={ceremony.ceremonyId}>
+                          <strong>Ceremony ID:</strong> {ceremony.ceremonyId}
                           <br />
                           <strong>Reason:</strong> {ceremony.reason}
+                          <br />
+                          <strong>Transaction Hash:</strong> {ceremony.transactionHash}
+                          <br />
+                          <strong>Timestamp:</strong> {new Date(ceremony.timestamp).toLocaleString()}
+                          {/* visual separator */}
+                          <hr />
                         </li>
                       ))}
                     </ul>
