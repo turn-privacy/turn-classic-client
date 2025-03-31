@@ -283,8 +283,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
                             Remove
                           </Button>
                           <br />
-                     
-                          {/* visual separator */}
                           <hr />
                           <br />
                         </li>
@@ -319,7 +317,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
                           <strong>Transaction Hash:</strong> {ceremony.transactionHash}
                           <br />
                           <strong>Timestamp:</strong> {new Date(ceremony.timestamp).toLocaleString()}
-                          {/* visual separator */}
                           <br />
                           <hr />
                           <br />
