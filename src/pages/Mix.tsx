@@ -38,8 +38,13 @@ import {
 } from '../components/ui/table';
 import { Progress } from '../components/ui/progress';
 import ConnectWallet from '../components/ConnectWallet';
+<<<<<<< Updated upstream
 import { useAppSelector } from '../store/hooks';
 
+=======
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { setCeremonyHistory, setCeremonyHistoryError } from '../store/ceremonyHistorySlice';
+>>>>>>> Stashed changes
 const mockTransactions = [
   {
     id: 'tx1',
@@ -344,6 +349,7 @@ const Mix = () => {
                 </CardHeader>
                 <CardContent>
                   {walletAddress ? (
+<<<<<<< Updated upstream
                     <>
                       <h2 className="font-semibold text-center md:text-left">
                         Waiting for Participants
@@ -351,6 +357,46 @@ const Mix = () => {
                       <div className="queue-status">
                         <div className="queue-status-icon">
                           <div className="spinner"></div>
+=======
+                    queue.length > 0 ? (
+                      <>
+                        <h2 className="font-semibold text-center md:text-left mb-4">
+                          {queue.some((p) => p.address === walletAddress)
+                            ? "You're in Queue"
+                            : "Current Queue Status"}
+                        </h2>
+                        <div className="queue-status">
+                          <div className="queue-status-icon">
+                            <div className="spinner"></div>
+                          </div>
+                          <div className="queue-status-info">
+                            {queue.some((p) => p.address === walletAddress) ? (
+                              <>
+                                {/* <p className="queue-position">
+                                  Your Position: {queue.findIndex((p) => p.address === walletAddress) + 1} of {queue.length}
+                                </p> */}
+                                <p className="queue-target">
+                                  Target Pool Size: {minParticipants} participants
+                                </p>
+                                <p className="queue-waiting">
+                                  Waiting for {Math.max(0, minParticipants - queue.length)} more {minParticipants - queue.length === 1 ? 'participant' : 'participants'} to join
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="queue-position">
+                                  Active Participants: {queue.length}
+                                </p>
+                                <p className="queue-target">
+                                  Target Pool Size: {minParticipants} participants
+                                </p>
+                                <p className="queue-waiting">
+                                  Waiting for {Math.max(0, minParticipants - queue.length)} more {minParticipants - queue.length === 1 ? 'participant' : 'participants'} to join
+                                </p>
+                              </>
+                            )}
+                          </div>
+>>>>>>> Stashed changes
                         </div>
                         <div className="queue-status-info">
                           <p className="queue-position">
@@ -484,10 +530,15 @@ const Mix = () => {
                             <TableHead>Token</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Transaction Hash</TableHead>
+                            <TableHead>Expiration Time</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
+<<<<<<< Updated upstream
                           {mockTransactions.map((tx) => (
+=======
+                          {ceremonyHistory.map((record ) => (
+>>>>>>> Stashed changes
                             <TableRow
                               key={tx.id}
                               className="border-primary/5 hover:bg-primary/5"
@@ -527,6 +578,9 @@ const Mix = () => {
                                   {tx.txHash}
                                   <ExternalLink className="h-3 w-3 ml-1" />
                                 </a>
+                              </TableCell>
+                              <TableCell>
+                                {record?.expirationTime ? new Date(record?.expirationTime * 1000).toLocaleString() : 'N/A'}
                               </TableCell>
                             </TableRow>
                           ))}

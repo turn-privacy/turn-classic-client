@@ -143,6 +143,38 @@ function App() {
     }
   };
 
+  const fetchData = async () => {
+    console.log('fetching data');
+    try {
+      // Fetch queue
+      const queueResponse = await fetch(
+        `${process.env.REACT_APP_BASE_SERVER_URL}/queue`
+      );
+      if (queueResponse.ok) {
+        const queueData = await queueResponse.json();
+        dispatch(setQueue(queueData));
+        dispatch(setQueueError(null));
+      }
+
+      // Fetch ceremonies
+      const ceremoniesResponse = await fetch(
+        `${process.env.REACT_APP_BASE_SERVER_URL}/list_active_ceremonies`
+      );
+      if (ceremoniesResponse.ok) {
+        const ceremoniesData = await ceremoniesResponse.json();
+        dispatch(setCeremonies(ceremoniesData));
+        dispatch(setCeremonyError(null));
+      }
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+      if (error instanceof Error) {
+        dispatch(setQueueError(error.message));
+        dispatch(setCeremonyError(error.message));
+      }
+    }
+  };
+
+
   const handleSignup = async () => {
     if (!walletAddress || !recipientAddress) {
       dispatch(setSignupError('Please provide both addresses'));
@@ -190,6 +222,9 @@ function App() {
 
       // Success! Reset form
       dispatch(resetSignupForm());
+
+      // fetch queue again ---------------------------------------------------------------------------------------------
+      fetchData();
     } catch (error) {
       console.error('Signup failed:', error);
       dispatch(
@@ -203,35 +238,35 @@ function App() {
   // Effect to poll for queue and ceremonies data
   useEffect(() => {
     // Initial fetch
-    const fetchData = async () => {
-      try {
-        // Fetch queue
-        const queueResponse = await fetch(
-          `${process.env.REACT_APP_BASE_SERVER_URL}/queue`
-        );
-        if (queueResponse.ok) {
-          const queueData = await queueResponse.json();
-          dispatch(setQueue(queueData));
-          dispatch(setQueueError(null));
-        }
+    // const fetchData = async () => {
+    //   try {
+    //     // Fetch queue
+    //     const queueResponse = await fetch(
+    //       `${process.env.REACT_APP_BASE_SERVER_URL}/queue`
+    //     );
+    //     if (queueResponse.ok) {
+    //       const queueData = await queueResponse.json();
+    //       dispatch(setQueue(queueData));
+    //       dispatch(setQueueError(null));
+    //     }
 
-        // Fetch ceremonies
-        const ceremoniesResponse = await fetch(
-          `${process.env.REACT_APP_BASE_SERVER_URL}/list_active_ceremonies`
-        );
-        if (ceremoniesResponse.ok) {
-          const ceremoniesData = await ceremoniesResponse.json();
-          dispatch(setCeremonies(ceremoniesData));
-          dispatch(setCeremonyError(null));
-        }
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-        if (error instanceof Error) {
-          dispatch(setQueueError(error.message));
-          dispatch(setCeremonyError(error.message));
-        }
-      }
-    };
+    //     // Fetch ceremonies
+    //     const ceremoniesResponse = await fetch(
+    //       `${process.env.REACT_APP_BASE_SERVER_URL}/list_active_ceremonies`
+    //     );
+    //     if (ceremoniesResponse.ok) {
+    //       const ceremoniesData = await ceremoniesResponse.json();
+    //       dispatch(setCeremonies(ceremoniesData));
+    //       dispatch(setCeremonyError(null));
+    //     }
+    //   } catch (error) {
+    //     console.error('Failed to fetch data:', error);
+    //     if (error instanceof Error) {
+    //       dispatch(setQueueError(error.message));
+    //       dispatch(setCeremonyError(error.message));
+    //     }
+    //   }
+    // };
 
     // Fetch immediately
     fetchData();
@@ -412,9 +447,8 @@ function App() {
                   <button
                     key={index}
                     onClick={() => handleWalletSelect(wallet)}
-                    className={`wallet-select-button ${
-                      selectedWallet === wallet ? 'selected' : ''
-                    }`}
+                    className={`wallet-select-button ${selectedWallet === wallet ? 'selected' : ''
+                      }`}
                   >
                     {wallet}
                   </button>
@@ -428,17 +462,15 @@ function App() {
           <div className="post-wallet-container">
             <div className="nav-bar">
               <button
-                className={`nav-button ${
-                  activeView === 'signup' ? 'active' : ''
-                }`}
+                className={`nav-button ${activeView === 'signup' ? 'active' : ''
+                  }`}
                 onClick={() => dispatch(setActiveView('signup'))}
               >
                 Sign Up
               </button>
               <button
-                className={`nav-button ${
-                  activeView === 'info' ? 'active' : ''
-                }`}
+                className={`nav-button ${activeView === 'info' ? 'active' : ''
+                  }`}
                 onClick={() => dispatch(setActiveView('info'))}
               >
                 Info
@@ -449,9 +481,9 @@ function App() {
               <div className="signup-view">
                 <Card>
                   {pendingCeremony &&
-                  pendingCeremony.participants
-                    .map((participant: any) => participant.address)
-                    .includes(walletAddress) ? (
+                    pendingCeremony.participants
+                      .map((participant: any) => participant.address)
+                      .includes(walletAddress) ? (
                     <>
                       <h2>
                         {hasSignedCeremony
@@ -487,13 +519,12 @@ function App() {
 
                         {hasSignedCeremony ? (
                           <div
-                            className={`ceremony-status ${
-                              ceremonyStatus === 'on-chain'
+                            className={`ceremony-status ${ceremonyStatus === 'on-chain'
                                 ? 'ceremony-status-success'
                                 : ceremonyStatus === 'pending'
-                                ? 'ceremony-status-pending'
-                                : 'ceremony-status-error'
-                            }`}
+                                  ? 'ceremony-status-pending'
+                                  : 'ceremony-status-error'
+                              }`}
                           >
                             {ceremonyStatus === 'pending' && (
                               <>
@@ -559,11 +590,10 @@ function App() {
                                 (participant: any, pIndex: number) => (
                                   <div
                                     key={pIndex}
-                                    className={`ceremony-participant ${
-                                      participant.address === walletAddress
+                                    className={`ceremony-participant ${participant.address === walletAddress
                                         ? 'ceremony-participant-current'
                                         : ''
-                                    }`}
+                                      }`}
                                   >
                                     <p>{participant.address}</p>
                                   </div>
@@ -575,8 +605,8 @@ function App() {
                       </div>
                     </>
                   ) : queue.some(
-                      (participant) => participant.address === walletAddress
-                    ) ? (
+                    (participant) => participant.address === walletAddress
+                  ) ? (
                     <>
                       <h2>Waiting for Participants</h2>
                       <div className="queue-status">
@@ -584,13 +614,13 @@ function App() {
                           <div className="spinner"></div>
                         </div>
                         <div className="queue-status-info">
-                          <p className="queue-position">
+                          {/* <p className="queue-position">
                             Position in Queue:{' '}
                             {queue.findIndex(
                               (p) => p.address === walletAddress
                             ) + 1}{' '}
                             of {queue.length}
-                          </p>
+                          </p> */}
                           <p className="queue-target">
                             Target Pool Size: {minParticipants} participants
                           </p>
@@ -614,7 +644,7 @@ function App() {
                     </>
                   ) : (
                     <>
-                      <h2>Sign Up</h2>
+                      <h2></h2>
                       <div className="explanation-text">
                         <p>
                           Enter a receiving address. Click "Sign Up". You will

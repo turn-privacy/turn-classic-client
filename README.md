@@ -1,10 +1,5 @@
 # Turn Classic Client
 
-## TODO
-- [ ] remove blockfrost api key from dotenv
-- [ ] reformate component system to do less passing values (it will help to make the PreviewNetwork component more hierarchical)
-
-
 ## dotenv
 
 ```ini
@@ -59,7 +54,8 @@ A minimal `Create React App` template for Cardano dApps using Lucid Evolution.
 ## Prerequisites
 
 1. Get Blockfrost API key from [blockfrost.io](https://blockfrost.io)
-2. Create a `.env` file in the project root (`.env.example` file provided for you as a reference):
+2. Create a `.env` file in the project root (`.env.example` file provided for
+   you as a reference):
 
 ```bash
 REACT_APP_BLOCKFROST_API_KEY=your_blockfrost_api_key_here
@@ -105,11 +101,13 @@ yarn install
 yarn start
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+5. Open [http://localhost:3000](http://localhost:3000) to view it in the
+   browser.
 
 ## Quick Customization
 
-This template is designed to be easily customizable. All app-wide settings are in a single configuration file, modify it to your needs:
+This template is designed to be easily customizable. All app-wide settings are
+in a single configuration file, modify it to your needs:
 
 ```typescript
 // src/config/app.config.ts
@@ -151,16 +149,20 @@ src/
 
 ## Network Support
 
-Currently configured for Preprod testnet. To use on other networks, modify the `NetworkType` in `useWallet.ts` and update the Blockfrost endpoint accordingly.
+Currently configured for Preprod testnet. To use on other networks, modify the
+`NetworkType` in `useWallet.ts` and update the Blockfrost endpoint accordingly.
 
 ## Transaction Example & Security
 
-Includes a dummy button that demonstrates transaction handling using a secure approach:
+Includes a dummy button that demonstrates transaction handling using a secure
+approach:
 
 - Transaction Building (Client-Side):
 
-  - Creates an unsigned transaction with specified parameters (amount, addresses)
-  - Converts the transaction to CBOR (Concise Binary Object Representation) format
+  - Creates an unsigned transaction with specified parameters (amount,
+    addresses)
+  - Converts the transaction to CBOR (Concise Binary Object Representation)
+    format
 
 - Wallet Interaction:
 

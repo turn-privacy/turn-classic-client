@@ -65,7 +65,7 @@ h6 {
 }
 
 .font-mono {
-  font-family: 'JetBrains Mono', monospace;
+  
 }
 
 dialog::backdrop {
@@ -482,7 +482,7 @@ pre {
 
 .queue-item p {
   margin: 0;
-  font-family: 'JetBrains Mono', monospace;
+  
 }
 
 .queue-item strong {
@@ -522,7 +522,7 @@ pre {
 
 .ceremony-item p {
   margin: 0.5rem 0;
-  font-family: 'JetBrains Mono', monospace;
+  
 }
 
 .ceremony-item strong {
@@ -615,7 +615,7 @@ pre {
 }
 
 .admin-info {
-  font-family: 'JetBrains Mono', monospace;
+  
 }
 
 .admin-info p {
@@ -692,7 +692,7 @@ pre {
 .form-label {
   color: var(--color-text-muted);
   font-size: 0.9rem;
-  font-family: 'JetBrains Mono', monospace;
+  
   margin-bottom: 0.5rem;
   display: block;
 }
@@ -954,18 +954,18 @@ pre {
 
 .queue-status-info p {
   margin: 0.5rem 0;
-  font-family: 'JetBrains Mono', monospace;
 }
 
-.queue-position {
+.queue-position,
+.queue-target {
   color: var(--color-primary);
   font-size: 1.1rem;
   font-weight: 500;
 }
 
-.queue-target {
+/* .queue-target {
   color: var(--color-text);
-}
+} */
 
 .queue-waiting {
   color: var(--color-text-muted);
@@ -981,7 +981,7 @@ pre {
   background-color: var(--color-bg-hover);
   padding: 1.5rem;
   border-radius: 8px;
-  font-family: 'JetBrains Mono', monospace;
+  
 }
 
 .ceremony-details p {
@@ -1065,7 +1065,7 @@ pre {
 
 .ceremony-participant p {
   margin: 0;
-  font-family: 'JetBrains Mono', monospace;
+  
   font-size: 0.9rem;
 }
 
@@ -1079,7 +1079,7 @@ pre {
   margin-top: 1rem;
   color: var(--color-primary);
   text-decoration: none;
-  font-family: 'JetBrains Mono', monospace;
+  
   font-size: 0.9rem;
   transition: color 0.2s ease;
 }
@@ -1108,5 +1108,5 @@ pre {
 .transaction-hash {
   color: var(--color-text);
   text-decoration: none;
-  font-family: 'JetBrains Mono', monospace;
+  
 }

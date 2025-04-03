@@ -134,6 +134,7 @@ const MixingInterface = () => {
   const pendingCeremony = useAppSelector(
     (state) => state.ceremony.pendingCeremony
   );
+<<<<<<< Updated upstream
   const handleMix = () => {
     if (!isWalletConnected) {
       toast({
@@ -143,6 +144,20 @@ const MixingInterface = () => {
       });
       return;
     }
+=======
+
+  const [ isLoading, setIsLoading ] = useState(false);
+
+  // const handleMix = () => {
+  //   if (!isWalletConnected) {
+  //     toast({
+  //       title: 'Wallet not connected',
+  //       description: 'Please connect your wallet first',
+  //       variant: 'destructive',
+  //     });
+  //     return;
+  //   }
+>>>>>>> Stashed changes
 
     if (!amount || parseFloat(amount) <= 0) {
       toast({
@@ -196,6 +211,7 @@ const MixingInterface = () => {
 
     try {
       // Create the payload
+      setIsLoading(true);
       const payload = fromText(
         JSON.stringify({
           context:
@@ -235,6 +251,9 @@ const MixingInterface = () => {
 
       // Success! Reset form
       dispatch(resetSignupForm());
+
+      // fetch queue again
+
     } catch (error) {
       console.error('Signup failed:', error);
       dispatch(
@@ -242,6 +261,9 @@ const MixingInterface = () => {
           error instanceof Error ? error.message : 'Failed to sign up'
         )
       );
+    }
+    finally {
+      setIsLoading(false);
     }
   };
   const handleSignCeremony = async (ceremonyId: string) => {
@@ -793,13 +815,13 @@ const MixingInterface = () => {
                           <div className="spinner"></div>
                         </div>
                         <div className="queue-status-info">
-                          <p className="queue-position">
+                          {/* <p className="queue-position">
                             Position in Queue:{' '}
                             {queue.findIndex(
                               (p) => p.address === walletAddress
                             ) + 1}{' '}
-                            of {queue.length}
-                          </p>
+                            of {queue.length} 
+                          </p>  */}
                           <p className="queue-target">
                             Target Pool Size: {minParticipants} participants
                           </p>
@@ -887,8 +909,15 @@ const MixingInterface = () => {
                         <Button
                           onClick={handleSignup}
                           style={{ width: '100%' }}
+                          disabled={isLoading}
                         >
-                          Sign Up
+                          {isLoading ? (
+                            <div className="spinner" style={{ width: '2rem', height: '2rem', margin: '0 auto' }}></div>
+                          ) : (
+                            <span className="flex items-center">
+                              Sign Up
+                            </span>
+                          )}
                         </Button>
                         <div className="explanation-text pt-3">
                           <p>
